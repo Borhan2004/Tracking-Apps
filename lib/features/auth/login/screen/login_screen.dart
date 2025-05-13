@@ -7,6 +7,7 @@ import 'package:chrismiche/features/auth/forget_password/screen/forget_password_
 import 'package:chrismiche/features/auth/login/controller/login_screen_controller.dart';
 import 'package:chrismiche/features/auth/login/widget/signin_method.dart';
 import 'package:chrismiche/features/auth/signup/screen/sign_up_screen.dart';
+import 'package:chrismiche/features/bottom_navbar/screen/bottom_navbar_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -118,7 +119,9 @@ class LoginScreen extends StatelessWidget {
 
                 SizedBox(height: 20),
 
-                CustomButton(onTap: () {}, text: "Log In"),
+                CustomButton(onTap: () {
+                  Get.offAll(() => BottomNavbarScreen());
+                }, text: "Log In"),
                 SizedBox(height: 30),
                 Row(
                   children: [
