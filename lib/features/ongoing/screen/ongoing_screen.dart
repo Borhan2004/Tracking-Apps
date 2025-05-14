@@ -1,5 +1,7 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/ongoing/controller/ongoing_controller.dart';
+import 'package:chrismiche/features/ongoing/widgets/counters.dart'
+    show Counters;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,6 +31,7 @@ class OngoingScreen extends StatelessWidget {
                         Image.asset(
                           ImagePath.runBackground,
                           width: controller.imageWidth,
+                          height: MediaQuery.of(context).size.height * 0.4,
                           fit: BoxFit.cover,
                         ),
                       ],
@@ -39,28 +42,16 @@ class OngoingScreen extends StatelessWidget {
 
               // Static center image
               Positioned(
-                top: 110,
-                child: Image.asset(ImagePath.boyRun, height: 50, width: 50),
+                top: MediaQuery.of(context).size.height * 0.25,
+                child: Image.asset(ImagePath.boyRun, height: 80, width: 80),
               ),
             ],
           ),
 
           SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: controller.startAnimation,
-                child: const Text('Start'),
-              ),
-              const SizedBox(width: 20),
-              ElevatedButton(
-                onPressed: controller.stopAnimation,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text('Stop'),
-              ),
-            ],
-          ),
+
+          Counters(),
+          SizedBox(height: 40),
         ],
       ),
     );
