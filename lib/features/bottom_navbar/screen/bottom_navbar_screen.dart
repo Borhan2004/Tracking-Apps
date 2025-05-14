@@ -1,5 +1,6 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/bottom_navbar/controller/bottom_navbar_controller.dart';
+import 'package:chrismiche/features/ongoing/screen/ongoing_screen.dart' show OngoingScreen;
 import 'package:chrismiche/features/profile/screen/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,12 +17,7 @@ class BottomNavbarScreen extends StatelessWidget {
       color: Colors.white,
       child: Center(child: Text('Home', style: TextStyle(fontSize: 30))),
     ),
-    Container(
-      height: double.infinity,
-      width: double.infinity,
-      color: Colors.white,
-      child: Center(child: Text('Tracking', style: TextStyle(fontSize: 30))),
-    ),
+    OngoingScreen(), 
     Container(
       height: double.infinity,
       width: double.infinity,
