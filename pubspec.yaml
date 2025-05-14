@@ -36,6 +36,7 @@ dependencies:
   flutter_screenutil: ^5.9.3
   get: ^4.7.2
   google_fonts: ^6.2.1
+  horizontal_week_calendar: ^0.0.7
   intl: ^0.20.2
   intl_phone_field: ^3.2.0
   logger: ^2.5.0
