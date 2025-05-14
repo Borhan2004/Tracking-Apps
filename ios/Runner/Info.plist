@@ -48,5 +48,15 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 <string>We need access to your photo library to pick images</string>
 
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs access to your location to track distance and floors climbed.</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>This app needs access to your location even when in the background.</string>
+<key>UIBackgroundModes</key>
+<array>
+    <string>location</string>
+</array>
+
+
 </dict>
 </plist>
