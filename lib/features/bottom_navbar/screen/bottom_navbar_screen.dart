@@ -2,6 +2,7 @@ import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/bottom_navbar/controller/bottom_navbar_controller.dart';
 
 import 'package:chrismiche/features/chart/screen/chart_screen.dart';
+import 'package:chrismiche/features/home/screen/home_screen.dart' show HomeScreen;
 
 import 'package:chrismiche/features/ongoing/screen/ongoing_screen.dart'
     show OngoingScreen;
@@ -16,12 +17,7 @@ class BottomNavbarScreen extends StatelessWidget {
   final BottomNavbarController controller = Get.put(BottomNavbarController());
 
   final List<Widget> screens = [
-    Container(
-      height: double.infinity,
-      width: double.infinity,
-      color: Colors.white,
-      child: Center(child: Text('Home', style: TextStyle(fontSize: 30))),
-    ),
+    HomeScreen(), 
 
     OngoingScreen(),
     ChartScreen(),
