@@ -10,7 +10,6 @@ class PersonalInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
 
-    // Get the controller
     final controller = Get.put(PersonalInfoController());
 
     return Container(
