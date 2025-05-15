@@ -3,7 +3,8 @@ import 'package:chrismiche/features/bottom_navbar/controller/bottom_navbar_contr
 
 import 'package:chrismiche/features/chart/screen/chart_screen.dart';
 
-import 'package:chrismiche/features/ongoing/screen/ongoing_screen.dart' show OngoingScreen;
+import 'package:chrismiche/features/ongoing/screen/ongoing_screen.dart'
+    show OngoingScreen;
 
 import 'package:chrismiche/features/profile/screen/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class BottomNavbarScreen extends StatelessWidget {
       child: Center(child: Text('Home', style: TextStyle(fontSize: 30))),
     ),
 
-    OngoingScreen(), 
+    OngoingScreen(),
     ChartScreen(),
     ProfileScreen(),
   ];
@@ -48,17 +49,7 @@ class BottomNavbarScreen extends StatelessWidget {
       body: Obx(() => screens[controller.selectedIndex.value]),
       bottomNavigationBar: Obx(
         () => Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color.fromARGB(255, 0, 123, 255),
-                Color.fromARGB(255, 24, 93, 203),
-                Color.fromARGB(255, 0, 98, 202),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          decoration: BoxDecoration(color: Colors.white),
           child: BottomAppBar(
             color: Colors.transparent,
             child: Padding(
