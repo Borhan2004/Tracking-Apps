@@ -53,11 +53,36 @@ class ProfilePageContainer extends StatelessWidget {
               ),
             ),
             PersonalInfo(),
+            Material(
+              elevation: 3.0,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                height: 90,
+                width: 90,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white54,
+                ),
+                child: Center(
+                  child: Image.asset(
+                    ImagePath.gitlCharacter,
+                    height: 80,
+                    width: 80,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
             ChangeCharacterButton(),
-            CustomButton(label: 'Log Out', buttonColor: Color(0xFFFF394F), onTap: () {  },),
+            CustomButton(
+              label: 'Log Out',
+              buttonColor: Color(0xFFFF394F),
+              onTap: () {},
+            ),
             CustomButton(
               label: 'Delete My Account',
-              buttonColor: Color(0xFF5A5C5F), onTap: () {  },
+              buttonColor: Color(0xFF5A5C5F),
+              onTap: () {},
             ),
           ],
         ),
