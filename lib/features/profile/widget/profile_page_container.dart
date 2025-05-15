@@ -1,4 +1,5 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
+import 'package:chrismiche/features/profile/widget/change_character_button.dart';
 import 'package:chrismiche/features/profile/widget/custom_button.dart';
 import 'package:chrismiche/features/profile/widget/personal_info.dart';
 import 'package:flutter/material.dart';
@@ -52,10 +53,11 @@ class ProfilePageContainer extends StatelessWidget {
               ),
             ),
             PersonalInfo(),
-            CustomButton(label: 'Log Out', buttonColor: Color(0xFFFF394F)),
+            ChangeCharacterButton(),
+            CustomButton(label: 'Log Out', buttonColor: Color(0xFFFF394F), onTap: () {  },),
             CustomButton(
               label: 'Delete My Account',
-              buttonColor: Color(0xFF5A5C5F),
+              buttonColor: Color(0xFF5A5C5F), onTap: () {  },
             ),
           ],
         ),
