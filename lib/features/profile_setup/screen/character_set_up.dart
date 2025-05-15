@@ -3,6 +3,7 @@ import 'package:chrismiche/core/common/styles/global_text_style.dart'
 import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/core/utils/constants/colors.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart';
+import 'package:chrismiche/features/bottom_navbar/screen/bottom_navbar_screen.dart' show BottomNavbarScreen;
 import 'package:chrismiche/features/profile_setup/controller/profile_setup_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -90,7 +91,10 @@ class CharacterSetUp extends StatelessWidget {
             SizedBox(
               height: 40,
             ), 
-            CustomButton(onTap: (){}, text: "Continue")
+            CustomButton(onTap: (){
+
+              Get.offAll(BottomNavbarScreen()); 
+            }, text: "Continue")
           ],
         ),
       ),
