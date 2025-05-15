@@ -73,15 +73,15 @@ class PersonalInfo extends StatelessWidget {
                   }),
                   Obx(() {
                     return CustomTextField(
-                      label: "Height:",
-                      controller: controller.heightController,
+                      label: "Email:",
+                      controller: controller.emailController,
                       isEditable: controller.isEditing.value,
                     );
                   }),
                   Obx(() {
                     return CustomTextField(
-                      label: "Weight:",
-                      controller: controller.weightController,
+                      label: "PhoneNumber:",
+                      controller: controller.phoneNumberController,
                       isEditable: controller.isEditing.value,
                     );
                   }),
