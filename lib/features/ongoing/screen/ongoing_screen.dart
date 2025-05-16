@@ -13,45 +13,55 @@ class OngoingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              AnimatedBuilder(
-                animation: controller.animationController,
-                builder: (context, child) {
-                  return SingleChildScrollView(
-                    controller: controller.scrollController,
-                    scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: Row(
-                      children: [
-                        Image.asset(
-                          ImagePath.runBackground,
-                          width: controller.imageWidth,
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          fit: BoxFit.cover,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+    final Size screenSize = MediaQuery.of(context).size;
 
-              // Static center image
-              Positioned(
-                top: MediaQuery.of(context).size.height * 0.25,
-                child: Image.asset(ImagePath.boyRun, height: 80, width: 80),
-              ),
-            ],
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Animated background that covers full height and width
+          AnimatedBuilder(
+            animation: controller.animationController,
+            builder: (context, child) {
+              return SingleChildScrollView(
+                controller: controller.scrollController,
+                scrollDirection: Axis.horizontal,
+                physics: const NeverScrollableScrollPhysics(),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      ImagePath.runBackground,
+                      width: controller.imageWidth,
+                      height: screenSize.height,
+                      fit: BoxFit.cover,
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
 
-          SizedBox(height: 40),
+          // Center running boy image
+          Positioned(
+            top: screenSize.height * 0.47,
+            left: 10,
+            right: 0,
+            child: Center(
+              child: Image.asset(ImagePath.boyRun, height: 250, width: 250),
+            ),
+          ),
 
-          Counters(),
-          SizedBox(height: 40),
+          // Positioned counters and spacing below
+          Positioned(
+            top: screenSize.height * 0.6,
+            left: 0,
+            right: 0,
+            child: Column(
+              children: [
+                Counters(),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -56,7 +56,9 @@ class Counters extends StatelessWidget {
                     child: Text(
                       '📏 Distance:\n${controller.totalDistance.value.toStringAsFixed(2)} meters',
                       textAlign: TextAlign.center,
-                      style: getTextStyle(fontSize: 16),
+                      style: getTextStyle(
+                        
+                        fontSize: 16,),
                     ),
                   ),
                 ),
@@ -65,26 +67,26 @@ class Counters extends StatelessWidget {
 
             SizedBox(height: 30),
 
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Color(0xFFD4D4D4)
-                ), 
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 10,
-                ),
-                child: Text(
-                  '🏢 Floors Climbed: ${controller.totalClimbed.value.toStringAsFixed(2)} meters',
-                  style:  getTextStyle(fontSize: 16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 40),
+            // Container(
+            //   width: double.infinity,
+            //   decoration: BoxDecoration(
+            //     border: Border.all(
+            //       color: Color(0xFFD4D4D4)
+            //     ), 
+            //     borderRadius: BorderRadius.circular(10),
+            //   ),
+            //   child: Padding(
+            //     padding: const EdgeInsets.symmetric(
+            //       horizontal: 8,
+            //       vertical: 10,
+            //     ),
+            //     child: Text(
+            //       '🏢 Floors Climbed: ${controller.totalClimbed.value.toStringAsFixed(2)} meters',
+            //       style:  getTextStyle(fontSize: 16),
+            //     ),
+            //   ),
+            // ),
+             SizedBox(height: 40),
             if (!controller.isTracking.value)
               SizedBox(
                 width: double.infinity,
