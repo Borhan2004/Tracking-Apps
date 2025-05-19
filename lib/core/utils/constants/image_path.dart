@@ -21,4 +21,7 @@ class ImagePath {
   static const String boyRun = 'assets/images/boyRun.png';
   static const String runBackground = 'assets/images/runBackground.png';
   static const String runBackground2 = 'assets/images/running.png';
+  static const String liftCharacterGirl = 'assets/images/liftCharacterGirl.png';
+  static const String liftCharacterBoy = 'assets/images/liftCharacterBoy.png';
+  static const String upCover = 'assets/images/upCover.png';
 }
