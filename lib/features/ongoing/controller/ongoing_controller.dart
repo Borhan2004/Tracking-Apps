@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 
 class OngoingController extends GetxController with GetTickerProviderStateMixin {
@@ -189,6 +190,7 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
   @override
   void onInit() {
     _checkAndRequestLocationPermission(); 
+    updateCurrentDate(); 
     super.onInit();
     scrollController = ScrollController();
     animationController = AnimationController(
@@ -209,5 +211,16 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
         animationController.forward(); 
       }
     });
+  }
+
+
+
+
+
+  RxString currentDate = ''.obs;
+
+  void updateCurrentDate() {
+    final now = DateTime.now();
+    currentDate.value = DateFormat("d, MMMM, y").format(now);
   }
 }
