@@ -39,11 +39,11 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
   RxBool isPaused = false.obs;
   RxDouble totalDistance = 0.0.obs;
   RxDouble totalClimbed = 0.0.obs;
-  RxString formattedTime = '00:00:00'.obs;
+
 
   Position? _lastPosition;
   Timer? _timer;
-  int _elapsedSeconds = 0;
+
   StreamSubscription<Position>? _positionStream;
   Future<bool> _checkAndRequestLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -68,64 +68,68 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
   }
 
   void startTracking() async {
-    if (!await _checkAndRequestLocationPermission()) return;
+  if (!await _checkAndRequestLocationPermission()) return;
 
-    isTracking.value = true;
-    isPaused.value = false;
-    _lastPosition = null;
+  isTracking.value = true;
+  isPaused.value = false;
+  _lastPosition = null;
 
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.best, distanceFilter: 1),
-    ).listen((Position position) {
-      if (_lastPosition != null) {
-        double distance = Geolocator.distanceBetween(
-          _lastPosition!.latitude,
-          _lastPosition!.longitude,
-          position.latitude,
-          position.longitude,
-        );
-        totalDistance.value += distance;
+  bool isAnimating = false;
+  double lastDistance = totalDistance.value;
+  int unchangedCount = 0;
 
-        double elevationGain = position.altitude - _lastPosition!.altitude;
-        if (elevationGain > 0) {
-          totalClimbed.value += elevationGain;
-        }
+  // Start listening to position updates
+  _positionStream = Geolocator.getPositionStream(
+    locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.best,
+      distanceFilter: 1,
+    ),
+  ).listen((Position position) {
+    if (_lastPosition != null) {
+      double distance = Geolocator.distanceBetween(
+        _lastPosition!.latitude,
+        _lastPosition!.longitude,
+        position.latitude,
+        position.longitude,
+      );
+      totalDistance.value += distance;
+
+      double elevationGain = position.altitude - _lastPosition!.altitude;
+      if (elevationGain > 0) {
+        totalClimbed.value += elevationGain;
       }
-      _lastPosition = position;
-    });
+    }
+    _lastPosition = position;
+  });
 
-    _startTimer();
-
-  
-  double lastCheckedDistance = totalDistance.value;
-
-  Timer.periodic(const Duration(seconds: 2), (timer) {
-    // Stop checking if tracking is paused or stopped
+  // Real-time 1-second interval checking
+  Timer.periodic(const Duration(seconds: 1), (timer) {
     if (!isTracking.value || isPaused.value) {
       timer.cancel();
       return;
     }
 
-    if (totalDistance.value != lastCheckedDistance) {
-      startAnimation();
+    if (totalDistance.value != lastDistance) {
+      unchangedCount = 0;
+      if (!isAnimating) {
+        startAnimation();
+        isAnimating = true;
+      }
     } else {
-      stopAnimation();
+      unchangedCount++;
+      if (unchangedCount >= 2 && isAnimating) {
+        // If distance hasn't changed for 2 consecutive checks (2s), stop animation
+        stopAnimation();
+        isAnimating = false;
+      }
     }
 
-    lastCheckedDistance = totalDistance.value;
+    lastDistance = totalDistance.value;
   });
-  
+}
 
-  
 
-  }
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _elapsedSeconds++;
-      formattedTime.value = _formatDuration(Duration(seconds: _elapsedSeconds));
-    });
-  }
 
   void pauseTracking() {
     isPaused.value = true;
@@ -137,7 +141,6 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
   void resumeTracking() {
     isPaused.value = false;
     _positionStream?.resume();
-    _startTimer();
   }
 
   void stopTracking() {
@@ -154,8 +157,7 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Time: ${formattedTime.value}'),
+          children: [   
             Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
             Text('Floors Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
           ],
@@ -176,14 +178,7 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
   void _reset() {
     totalDistance.value = 0.0;
     totalClimbed.value = 0.0;
-    formattedTime.value = '00:00:00';
-    _elapsedSeconds = 0;
     _lastPosition = null;
-  }
-
-  String _formatDuration(Duration d) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    return '${twoDigits(d.inHours)}:${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}';
   }
 
 
@@ -195,7 +190,7 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
     scrollController = ScrollController();
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 1),
     );
 
     animationController.addListener(() {
@@ -211,6 +206,18 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
         animationController.forward(); 
       }
     });
+
+      // Automatically start tracking on launch
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    startTracking();
+  });
+
+  // Reset tracking every 1 minute
+  Timer.periodic(const Duration(minutes: 1), (timer) {
+    if (isTracking.value && !isPaused.value) {
+      _reset();
+    }
+  });
   }
 
 

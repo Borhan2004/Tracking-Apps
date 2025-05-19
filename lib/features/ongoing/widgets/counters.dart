@@ -35,7 +35,7 @@ class Counters extends StatelessWidget {
                       vertical: 10,
                     ),
                     child: Text(
-                      '⏱️ Time:\n${controller.currentDate.value}',
+                      '⏱️ ${controller.currentDate.value}',
                       textAlign: TextAlign.center,
                       style: getTextStyle(fontSize: 16),
                     ),
@@ -54,7 +54,7 @@ class Counters extends StatelessWidget {
                       vertical: 10,
                     ),
                     child: Text(
-                      '📏 Distance:\n${controller.totalDistance.value.toStringAsFixed(2)} meters',
+                      '📏 ${controller.totalDistance.value.toStringAsFixed(2)} meters',
                       textAlign: TextAlign.center,
                       style: getTextStyle(
                         
@@ -86,48 +86,48 @@ class Counters extends StatelessWidget {
             //     ),
             //   ),
             // ),
-             SizedBox(height: 40),
-            if (!controller.isTracking.value)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: controller.startTracking,
-                  child: const Text('Start'),
-                ),
-              )
-            else if (controller.isPaused.value)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: controller.resumeTracking,
-                    child: const Text('Resume'),
-                  ),
-                  const SizedBox(width: 20),
-                  ElevatedButton(
-                    onPressed: controller.stopTracking,
-                    child: const Text('Stop'),
-                  ),
-                ],
-              )
-            else
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: controller.pauseTracking,
-                    child: const Text('Pause'),
-                  ),
-                  const SizedBox(width: 20),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                    ),
-                    onPressed: controller.stopTracking,
-                    child: const Text('Stop'),
-                  ),
-                ],
-              ),
+            //  SizedBox(height: 40),
+            // if (!controller.isTracking.value)
+            //   SizedBox(
+            //     width: double.infinity,
+            //     child: ElevatedButton(
+            //       onPressed: controller.startTracking,
+            //       child: const Text('Start'),
+            //     ),
+            //   )
+            // else if (controller.isPaused.value)
+            //   Row(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       ElevatedButton(
+            //         onPressed: controller.resumeTracking,
+            //         child: const Text('Resume'),
+            //       ),
+            //       const SizedBox(width: 20),
+            //       ElevatedButton(
+            //         onPressed: controller.stopTracking,
+            //         child: const Text('Stop'),
+            //       ),
+            //     ],
+            //   )
+            // else
+            //   Row(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       ElevatedButton(
+            //         onPressed: controller.pauseTracking,
+            //         child: const Text('Pause'),
+            //       ),
+            //       const SizedBox(width: 20),
+            //       ElevatedButton(
+            //         style: ElevatedButton.styleFrom(
+            //           backgroundColor: Colors.red,
+            //         ),
+            //         onPressed: controller.stopTracking,
+            //         child: const Text('Stop'),
+            //       ),
+            //     ],
+            //   ),
           ],
         ),
       ),
