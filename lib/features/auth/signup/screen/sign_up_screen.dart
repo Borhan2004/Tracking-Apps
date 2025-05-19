@@ -5,7 +5,7 @@ import 'package:chrismiche/core/utils/constants/colors.dart' show AppColors;
 import 'package:chrismiche/core/utils/constants/image_path.dart' show ImagePath;
 import 'package:chrismiche/features/auth/login/screen/login_screen.dart';
 import 'package:chrismiche/features/auth/signup/controller/sign_up_controller.dart';
-import 'package:chrismiche/features/profile_setup/screen/profile_setup_screen.dart' show ProfileSetupScreen;
+import 'package:chrismiche/features/profile_setup/screen/personal_details_screen.dart';
 import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -133,7 +133,7 @@ class SignUpScreen extends StatelessWidget {
                 SizedBox(height: 20),
 
                 CustomButton(onTap: () {
-                  Get.offAll(ProfileSetupScreen()); 
+                  Get.offAll(PersonalDetailsScreen()); 
                 }, text: "Sign Up"),
                
               

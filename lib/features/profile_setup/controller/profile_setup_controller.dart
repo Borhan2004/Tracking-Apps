@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:chrismiche/features/profile_setup/screen/character_set_up.dart' show CharacterSetUp;
+import 'package:chrismiche/features/bottom_navbar/screen/bottom_navbar_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +28,7 @@ class ProfileSetupController extends GetxController {
     if (kDebugMode) {
       print("The phone number is ${phoneNumber.value}");
     } 
-    Get.to(CharacterSetUp()); 
+    Get.to(BottomNavbarScreen()); 
   }
 
 
