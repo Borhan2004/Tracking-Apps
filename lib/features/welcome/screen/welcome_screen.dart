@@ -2,6 +2,7 @@ import 'package:chrismiche/core/common/styles/global_text_style.dart';
 import 'package:chrismiche/core/utils/constants/colors.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/auth/login/screen/login_screen.dart';
+import 'package:chrismiche/features/auth/signup/screen/sign_up_screen.dart';
 import 'package:chrismiche/features/welcome/controller/welcome_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -55,7 +56,7 @@ class WelcomeScreen extends StatelessWidget {
               SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
-                  Get.offAll(LoginScreen());
+                  Get.offAll(SignUpScreen());
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),

@@ -4,6 +4,7 @@ import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/core/common/widgets/custom_textfield.dart'
     show CustomTextfield;
 import 'package:chrismiche/features/profile_setup/controller/profile_setup_controller.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl_phone_field/intl_phone_field.dart' show IntlPhoneField;
@@ -66,7 +67,9 @@ class PersonalDetailsScreen extends StatelessWidget {
               ),
               initialCountryCode: 'US',
               onChanged: (phone) {
-                print('Full number: ${phone.completeNumber}');
+                if (kDebugMode) {
+                  print('Full number: ${phone.completeNumber}');
+                }
                 controller.phoneNumber.value = phone.completeNumber;
               },
             ),
