@@ -42,17 +42,17 @@ class OngoingScreen extends StatelessWidget {
 
           // Center running boy image
           Positioned(
-            top: screenSize.height * 0.47,
+            top: screenSize.height * 0.15,
             left: 10,
             right: 0,
             child: Center(
-              child: Image.asset(ImagePath.boyRun, height: 250, width: 250),
+              child: Image.asset(ImagePath.boyRun, height: screenSize.height * 0.8, width: screenSize.width * 0.8),
             ),
           ),
 
           // Positioned counters and spacing below
           Positioned(
-            top: screenSize.height * 0.6,
+            top: 65,
             left: 0,
             right: 0,
             child: Column(
