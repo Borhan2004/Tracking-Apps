@@ -35,7 +35,7 @@ class Counters extends StatelessWidget {
                       vertical: 10,
                     ),
                     child: Text(
-                      '⏱️ Time:\n${controller.formattedTime.value}',
+                      '⏱️ Time:\n${controller.currentDate.value}',
                       textAlign: TextAlign.center,
                       style: getTextStyle(fontSize: 16),
                     ),

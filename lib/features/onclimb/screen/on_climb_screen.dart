@@ -1,5 +1,6 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/onclimb/controller/on_climb_controller.dart';
+import 'package:chrismiche/features/onclimb/widgets/floor_and_height_stats.dart' show FloorAndHeightStats;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -44,32 +45,40 @@ class OnClimbScreen extends StatelessWidget {
 
           // Static character image
           Positioned(
+            top: MediaQuery.of(context).size.height * 0.13,
             child: Image.asset(
               ImagePath.liftCharacterBoy,
-              height: 200,
-              width: 200,
+              height: MediaQuery.of(context).size.height * 0.7,        
+              width: MediaQuery.of(context).size.height * 0.7,
             ),
           ),
 
-          // Start & Stop buttons
+          //////Floor and Height stats///////
+          
           Positioned(
-            bottom: 40,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () => controller.startAnimation(screenHeight),
-                  child: const Text('Start'),
-                ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: controller.stopAnimation,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  child: const Text('Stop'),
-                ),
-              ],
-            ),
+            top: 65,
+            child: FloorAndHeightStats(),
           ),
+
+          // Start & Stop buttons
+          // Positioned(
+          //   bottom: 40,
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: [
+          //       ElevatedButton(
+          //         onPressed: () => controller.startTracking(screenHeight),
+          //         child: const Text('Start'),
+          //       ),
+          //       const SizedBox(width: 20),
+          //       ElevatedButton(
+          //         onPressed: controller.stopTracking,
+          //         style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          //         child: const Text('Stop'),
+          //       ),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );
