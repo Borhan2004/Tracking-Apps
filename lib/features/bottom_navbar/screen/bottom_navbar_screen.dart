@@ -2,6 +2,7 @@ import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/bottom_navbar/controller/bottom_navbar_controller.dart';
 import 'package:chrismiche/features/chart/screen/chart_screen.dart';
 import 'package:chrismiche/features/home/screen/home_screen.dart';
+import 'package:chrismiche/features/onclimb/screen/on_climb_screen.dart';
 import 'package:chrismiche/features/ongoing/screen/ongoing_screen.dart'
     show OngoingScreen;
 import 'package:chrismiche/features/profile/screen/login_alert.dart';
@@ -20,14 +21,7 @@ class BottomNavbarScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> screens = [
       OngoingScreen(),
-      Container(
-        color: Colors.white,
-        height: double.infinity,
-        width: double.infinity,
-        child: Center(
-          child: Text('Floor Climb Page', style: TextStyle(fontSize: 25)),
-        ),
-      ),
+      OnClimbScreen(),
       HomeScreen(),
       ChartScreen(),
       isLoggedIn ? ProfileScreen() : LoginAlert(),
