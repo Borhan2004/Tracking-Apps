@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class OnClimbController extends GetxController
-    with GetTickerProviderStateMixin {
+class OnClimbController extends GetxController with GetTickerProviderStateMixin {
   late ScrollController scrollController;
   late AnimationController animationController;
 
-  final double imageHeight = 1000;
-  final double viewportHeight = 300;
+  final double imageHeight = 2000; // taller than screen for scroll effect
   double maxScrollExtent = 0;
 
   @override
   void onInit() {
     super.onInit();
     scrollController = ScrollController();
+
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
@@ -29,22 +28,17 @@ class OnClimbController extends GetxController
     animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         animationController.reset();
-        animationController.forward();
-      }
-    });
-    scrollController.addListener(() {
-      if (scrollController.offset >= maxScrollExtent) {
-        scrollController.jumpTo(0);
+        animationController.forward(); // loop
       }
     });
   }
 
-  void startAnimation() {
+  void startAnimation(double viewportHeight) {
     maxScrollExtent = imageHeight - viewportHeight;
     if (maxScrollExtent <= 0) return;
 
-    scrollController.jumpTo(maxScrollExtent);
-    animationController.forward();
+    scrollController.jumpTo(maxScrollExtent); // start from bottom
+    animationController.forward(); // animate upward
   }
 
   void stopAnimation() {

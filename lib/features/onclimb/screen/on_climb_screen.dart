@@ -10,33 +10,39 @@ class OnClimbScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: Stack(
         alignment: Alignment.center,
         children: [
-          // Vertical scrolling image
-          AnimatedBuilder(
-            animation: controller.animationController,
-            builder: (context, child) {
-              return SingleChildScrollView(
-                controller: controller.scrollController,
-                scrollDirection: Axis.vertical,
-                physics: const NeverScrollableScrollPhysics(),
-                child: Column(
-                  children: [
-                    Image.asset(
-                      ImagePath.upCover,
-                      height: controller.imageHeight,
-                      width: MediaQuery.of(context).size.width,
-                      fit: BoxFit.cover,
-                    ),
-                  ],
-                ),
-              );
-            },
+          // Vertical scrolling image background
+          SizedBox(
+            height: screenHeight,
+            child: AnimatedBuilder(
+              animation: controller.animationController,
+              builder: (context, child) {
+                return SingleChildScrollView(
+                  controller: controller.scrollController,
+                  scrollDirection: Axis.vertical,
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        ImagePath.upCover,
+                        height: controller.imageHeight,
+                        width: screenWidth,
+                        fit: BoxFit.cover,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
 
-          // Static center image
+          // Static character image
           Positioned(
             child: Image.asset(
               ImagePath.liftCharacterBoy,
@@ -52,17 +58,15 @@ class OnClimbScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: controller.startAnimation,
+                  onPressed: () => controller.startAnimation(screenHeight),
                   child: const Text('Start'),
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
                   onPressed: controller.stopAnimation,
-                  child: const Text('Stop'),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: const Text('Stop'),
                 ),
-
-                SizedBox(height: 40),
               ],
             ),
           ),
