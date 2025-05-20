@@ -1,6 +1,8 @@
 import 'package:chrismiche/features/home/controller/home_controller.dart';
 import 'package:chrismiche/features/home/widgets/home_nav_tile.dart'
     show HomeNavTile;
+import 'package:chrismiche/features/marathon/screen/marathon_screen.dart';
+import 'package:chrismiche/features/marathon_climbed/screen/marathon_climbed_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,41 +23,27 @@ class QuickNavigationTiles extends StatelessWidget {
       children: [
         HomeNavTile(
           title: "Ongoing",
-          icon: Icons.directions_run,
-          route: '/ongoing',
-          controller: controller,
+          icon: Icons.directions_run,       
           onTap: () {
-            Container(
-              height: double.infinity,
-              width: double.infinity,
-              child: Text('Ongoing Page'),
-            );
+            Get.to(() => MarathonScreen());
           },
         ),
         HomeNavTile(
           title: "Statistics",
           icon: Icons.bar_chart,
-          route: '/statistics',
-          controller: controller,
+         
+         
           onTap: () {
-            Container(
-              height: double.infinity,
-              width: double.infinity,
-              child: Text('Ongoing Page'),
-            );
+            
           },
         ),
         HomeNavTile(
           title: "Floor Climb",
           icon: Icons.stairs,
-          route: '/statistics',
-          controller: controller,
+      
+        
           onTap: () {
-            Container(
-              height: double.infinity,
-              width: double.infinity,
-              child: Text('Ongoing Page'),
-            );
+            Get.to(() => MarathonClimbedScreen());
           },
         ),
       ],
