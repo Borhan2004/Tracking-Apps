@@ -1,3 +1,4 @@
+import 'package:chrismiche/core/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 class LoginButton extends StatelessWidget {
@@ -40,13 +41,13 @@ class LoginButton extends StatelessWidget {
               width: 35,
               height: 35,
               decoration: BoxDecoration(
-                color: const Color.fromARGB(96, 71, 62, 62),
+                color: AppColors.appPrimaryColor,
                 borderRadius: BorderRadius.circular(44),
               ),
               alignment: Alignment.center,
               child: IconButton(
                 onPressed: onPressed,
-                icon: Icon(Icons.arrow_forward_ios, color: Colors.black),
+                icon: Icon(Icons.arrow_forward_ios, color: Colors.white),
               ),
             ),
           ],

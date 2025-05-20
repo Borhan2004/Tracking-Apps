@@ -1,11 +1,16 @@
 import 'package:chrismiche/core/common/styles/global_text_style.dart'
     show getTextStyle;
+import 'package:chrismiche/core/utils/constants/colors.dart';
 
-import 'package:chrismiche/features/home/widgets/character_preview.dart' show CharacterPreview;
+import 'package:chrismiche/features/home/widgets/character_preview.dart'
+    show CharacterPreview;
 
-import 'package:chrismiche/features/home/widgets/quick_navigation_tiles.dart' show QuickNavigationTiles;
-import 'package:chrismiche/features/home/widgets/quick_stats_overview.dart' show QuickStatsOverview;
-import 'package:chrismiche/features/home/widgets/recent_activity_snapshot.dart' show RecentActivitySnapshot;
+import 'package:chrismiche/features/home/widgets/quick_navigation_tiles.dart'
+    show QuickNavigationTiles;
+import 'package:chrismiche/features/home/widgets/quick_stats_overview.dart'
+    show QuickStatsOverview;
+import 'package:chrismiche/features/home/widgets/recent_activity_snapshot.dart'
+    show RecentActivitySnapshot;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chrismiche/features/home/controller/home_controller.dart';
@@ -26,11 +31,17 @@ class HomeScreen extends StatelessWidget {
             SizedBox(width: 8),
             Text(
               "Activity Tracker",
-              style: getTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: getTextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ],
         ),
         elevation: 2,
+        backgroundColor: Colors.teal,
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -57,7 +68,7 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 24),
 
             // Quick Stats Overview
-            QuickStatsOverview(), 
+            QuickStatsOverview(),
             SizedBox(height: 24),
 
             // Start Activity Button
@@ -68,7 +79,7 @@ class HomeScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: controller.startNewRun,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: AppColors.appPrimaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -87,15 +98,15 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 24),
 
             // Recent Activity Snapshot
-            RecentActivitySnapshot(), 
+            RecentActivitySnapshot(),
             SizedBox(height: 24),
 
             // Character Preview
-            CharacterPreview(), 
+            CharacterPreview(),
             SizedBox(height: 24),
 
             // Quick Navigation Tiles
-            QuickNavigationTiles(), 
+            QuickNavigationTiles(),
           ],
         ),
       ),

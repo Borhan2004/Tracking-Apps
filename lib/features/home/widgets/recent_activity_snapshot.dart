@@ -1,5 +1,6 @@
 import 'package:chrismiche/core/common/styles/global_text_style.dart'
     show getTextStyle;
+import 'package:chrismiche/core/utils/constants/colors.dart';
 import 'package:chrismiche/features/home/controller/home_controller.dart';
 import 'package:chrismiche/features/view_history/screen/history_screen.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,7 @@ class RecentActivitySnapshot extends StatelessWidget {
           style: TextButton.styleFrom(padding: EdgeInsets.zero),
           child: Text(
             "View History 📊",
-            style: getTextStyle(fontSize: 12, color: Colors.blue),
+            style: getTextStyle(fontSize: 12, color: AppColors.appPrimaryColor),
           ),
         ),
       ),

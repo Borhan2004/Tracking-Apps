@@ -1,3 +1,4 @@
+import 'package:chrismiche/core/common/styles/global_text_style.dart';
 import 'package:chrismiche/features/auth/login/screen/login_screen.dart';
 import 'package:chrismiche/features/profile/widget/login_button.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,26 @@ class LoginAlert extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.run_circle, color: Colors.blue, size: 24),
+            SizedBox(width: 8),
+            Text(
+              "Login Alert",
+              style: getTextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        elevation: 2,
+        backgroundColor: Colors.teal,
+        automaticallyImplyLeading: false,
+      ),
       backgroundColor: const Color.fromARGB(230, 255, 253, 253),
       body: Container(
         padding: EdgeInsets.only(top: 112, left: 15, right: 15),

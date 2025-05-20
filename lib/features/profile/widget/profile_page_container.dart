@@ -1,3 +1,4 @@
+import 'package:chrismiche/core/utils/constants/colors.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/profile/widget/custom_button.dart';
 import 'package:chrismiche/features/profile/widget/personal_info.dart';
@@ -14,33 +15,6 @@ class ProfilePageContainer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Center(
-              child: Image.asset(ImagePath.appLogo, height: 50, width: 50),
-            ),
-            SizedBox(height: 20),
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: <TextSpan>[
-                  TextSpan(
-                    text: 'Profile ',
-                    style: TextStyle(
-                      color: Color(0xFF333333),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  TextSpan(
-                    text: '(Admin)',
-                    style: TextStyle(
-                      color: Color(0xFF333333),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
             SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(84),
@@ -55,7 +29,7 @@ class ProfilePageContainer extends StatelessWidget {
             SizedBox(height: 10),
             CustomButton(
               label: 'Log Out',
-              buttonColor: Color(0xFFFF394F),
+              buttonColor: AppColors.appPrimaryColor,
               onTap: () {},
             ),
             CustomButton(

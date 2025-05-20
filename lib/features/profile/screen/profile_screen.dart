@@ -6,6 +6,43 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: ProfilePageContainer());
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.run_circle, color: Colors.blue, size: 24),
+            SizedBox(width: 8),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                children: <TextSpan>[
+                  TextSpan(
+                    text: 'Profile ',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '(Admin)',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        elevation: 2,
+        backgroundColor: Colors.teal,
+        automaticallyImplyLeading: false,
+      ),
+      body: ProfilePageContainer(),
+    );
   }
 }
