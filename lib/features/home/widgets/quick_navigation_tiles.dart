@@ -24,18 +24,39 @@ class QuickNavigationTiles extends StatelessWidget {
           icon: Icons.directions_run,
           route: '/ongoing',
           controller: controller,
+          onTap: () {
+            Container(
+              height: double.infinity,
+              width: double.infinity,
+              child: Text('Ongoing Page'),
+            );
+          },
         ),
         HomeNavTile(
           title: "Statistics",
           icon: Icons.bar_chart,
           route: '/statistics',
           controller: controller,
+          onTap: () {
+            Container(
+              height: double.infinity,
+              width: double.infinity,
+              child: Text('Ongoing Page'),
+            );
+          },
         ),
         HomeNavTile(
           title: "Floor Climb",
           icon: Icons.stairs,
           route: '/statistics',
           controller: controller,
+          onTap: () {
+            Container(
+              height: double.infinity,
+              width: double.infinity,
+              child: Text('Ongoing Page'),
+            );
+          },
         ),
       ],
     );

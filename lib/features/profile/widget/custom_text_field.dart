@@ -1,3 +1,4 @@
+import 'package:chrismiche/core/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -33,7 +34,8 @@ class CustomTextField extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: TextField(
                   controller: controller,
-                  enabled: isEditable,  // Enable/disable text field based on edit mode
+                  enabled:
+                      isEditable, // Enable/disable text field based on edit mode
                   decoration: InputDecoration(
                     hintStyle: TextStyle(color: Colors.grey),
                     border: InputBorder.none,
@@ -42,7 +44,7 @@ class CustomTextField extends StatelessWidget {
                   ),
                   textAlign: TextAlign.end,
                   style: TextStyle(
-                    color: Color(0xFF0057FF),
+                    color: AppColors.appPrimaryColor,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
@@ -51,7 +53,7 @@ class CustomTextField extends StatelessWidget {
             ),
           ],
         ),
-        Divider(color: Color(0xFF3B7EFC)),
+        Divider(color: AppColors.appPrimaryColor),
       ],
     );
   }
