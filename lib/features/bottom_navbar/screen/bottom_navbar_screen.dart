@@ -1,6 +1,6 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/bottom_navbar/controller/bottom_navbar_controller.dart';
-import 'package:chrismiche/features/chart/screen/chart_screen.dart';
+import 'package:chrismiche/features/details/screen/details_screen.dart';
 import 'package:chrismiche/features/home/screen/home_screen.dart';
 import 'package:chrismiche/features/onclimb/screen/on_climb_screen.dart';
 import 'package:chrismiche/features/ongoing/screen/ongoing_screen.dart'
@@ -23,7 +23,7 @@ class BottomNavbarScreen extends StatelessWidget {
       OngoingScreen(),
       OnClimbScreen(),
       HomeScreen(),
-      ChartScreen(),
+      DetailsScreen(),
       isLoggedIn ? ProfileScreen() : LoginAlert(),
     ];
 
