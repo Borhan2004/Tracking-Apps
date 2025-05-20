@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-class CalendarController extends GetxController {
+class HistoryController extends GetxController {
   var selectedMonthYear = DateTime(2025, 1, 1).obs;
   var markedDays = <DateTime>[].obs;
   var selectedDays = <DateTime>{}.obs;

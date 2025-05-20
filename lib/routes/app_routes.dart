@@ -22,7 +22,6 @@ class AppRoute {
 
   static List<GetPage> routes = [
     GetPage(name: splashScreen, page: () =>  SplashScreen()),
-    
     // GetPage(name: signinScreen, page: () =>  LoginView()),
     // GetPage(name: forgetPasswordScreen, page: () =>  ForgetPasswordView()),
   

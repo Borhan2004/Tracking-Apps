@@ -1,12 +1,12 @@
-import 'package:chrismiche/features/chart/controller/calendar_controller.dart';
+import 'package:chrismiche/features/view_history/controller/history_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-class CalendarStrip extends GetView<CalendarController> {
+class CalendarStrip extends GetView<HistoryController> {
   CalendarStrip({super.key});
   @override
-  final CalendarController controller = Get.put(CalendarController());
+  final HistoryController controller = Get.put(HistoryController());
 
   @override
   Widget build(BuildContext context) {

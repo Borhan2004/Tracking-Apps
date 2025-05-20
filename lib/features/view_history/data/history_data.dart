@@ -1,16 +1,12 @@
-import 'package:chrismiche/features/chart/widget/custom_line_chart.dart';
+import 'package:chrismiche/features/view_history/widget/custom_line_chart.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-class CharData extends StatelessWidget {
+class HistoryData extends StatelessWidget {
   final List<double> x;
   final List<double> y;
 
-  const CharData({
-    super.key,
-    required this.x,
-    required this.y,
-  });
+  const HistoryData({super.key, required this.x, required this.y});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +20,7 @@ class CharData extends StatelessWidget {
     return SizedBox(
       height: 150,
       width: MediaQuery.of(context).size.width / 2.3,
-      child: CustomLineChart(
-        data: spots,
-      ),
+      child: CustomLineChart(data: spots),
     );
   }
 }

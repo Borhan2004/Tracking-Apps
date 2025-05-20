@@ -1,11 +1,11 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
-import 'package:chrismiche/features/chart/data/char_data.dart';
-import 'package:chrismiche/features/chart/widget/calendar_strip.dart';
-import 'package:chrismiche/features/chart/widget/history_list.dart';
+import 'package:chrismiche/features/view_history/data/history_data.dart';
+import 'package:chrismiche/features/view_history/widget/calendar_strip.dart';
+import 'package:chrismiche/features/view_history/widget/history_list.dart';
 import 'package:flutter/material.dart';
 
-class ChartScreen extends StatelessWidget {
-  ChartScreen({super.key});
+class HistoryScreen extends StatelessWidget {
+  HistoryScreen({super.key});
 
   final List<Map<String, dynamic>> history = [
     {
@@ -85,9 +85,9 @@ class ChartScreen extends StatelessWidget {
                   padding: EdgeInsets.only(top: 10, right: 10),
                   child: Row(
                     children: [
-                      CharData(x: x1, y: y1),
+                      HistoryData(x: x1, y: y1),
                       Spacer(),
-                      CharData(x: x2, y: y2),
+                      HistoryData(x: x2, y: y2),
                     ],
                   ),
                 ),
