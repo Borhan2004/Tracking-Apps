@@ -53,7 +53,7 @@ class AuthenticationScreen extends StatelessWidget {
               SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
-                  Get.to(BottomNavbarScreen());
+                  Get.to(BottomNavbarScreen(isLoggedIn: false));
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),

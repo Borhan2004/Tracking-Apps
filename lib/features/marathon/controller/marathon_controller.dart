@@ -34,7 +34,6 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
   }
 
   void startAnimation() {
-    // Calculate max scrollable distance only once
     maxScrollExtent = imageWidth - viewportWidth;
     if (maxScrollExtent <= 0) return;
     animationController.forward();

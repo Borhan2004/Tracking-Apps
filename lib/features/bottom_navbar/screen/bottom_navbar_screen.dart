@@ -11,11 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BottomNavbarScreen extends StatelessWidget {
-  BottomNavbarScreen({super.key});
+  BottomNavbarScreen({super.key, this.isLoggedIn = true});
 
   final BottomNavbarController controller = Get.put(BottomNavbarController());
-
-  final bool isLoggedIn = true;
+  final bool isLoggedIn;
 
   @override
   Widget build(BuildContext context) {
