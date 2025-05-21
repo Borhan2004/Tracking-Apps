@@ -2,14 +2,12 @@ import 'package:chrismiche/core/common/styles/global_text_style.dart'
     show getTextStyle;
 import 'package:chrismiche/core/utils/constants/colors.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart' show ImagePath;
-import 'package:chrismiche/features/home/controller/home_controller.dart';
+import 'package:chrismiche/features/home/widgets/change_character.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CharacterPreview extends StatelessWidget {
-  CharacterPreview({super.key});
-
-  final HomeController controller = Get.find<HomeController>();
+  const CharacterPreview({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +27,9 @@ class CharacterPreview extends StatelessWidget {
           color: AppColors.appPrimaryColor,
           size: 16,
         ),
-        onTap: controller.changeCharacter,
+        onTap: () {
+          Get.to(() => ChangeCharacter());
+        },
       ),
     );
   }

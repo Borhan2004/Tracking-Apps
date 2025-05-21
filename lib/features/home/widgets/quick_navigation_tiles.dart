@@ -1,3 +1,4 @@
+import 'package:chrismiche/features/bottom_navbar/controller/bottom_navbar_controller.dart';
 import 'package:chrismiche/features/home/controller/home_controller.dart';
 import 'package:chrismiche/features/home/widgets/home_nav_tile.dart'
     show HomeNavTile;
@@ -23,7 +24,7 @@ class QuickNavigationTiles extends StatelessWidget {
       children: [
         HomeNavTile(
           title: "Ongoing",
-          icon: Icons.directions_run,       
+          icon: Icons.directions_run,
           onTap: () {
             Get.to(() => MarathonScreen());
           },
@@ -31,17 +32,16 @@ class QuickNavigationTiles extends StatelessWidget {
         HomeNavTile(
           title: "Statistics",
           icon: Icons.bar_chart,
-         
-         
+
           onTap: () {
-            
+            final controller = Get.find<BottomNavbarController>();
+            controller.changeIndex(3);
           },
         ),
         HomeNavTile(
           title: "Floor Climb",
           icon: Icons.stairs,
-      
-        
+
           onTap: () {
             Get.to(() => MarathonClimbedScreen());
           },

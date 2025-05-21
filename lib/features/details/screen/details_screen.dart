@@ -1,42 +1,45 @@
 import 'package:chrismiche/core/common/styles/global_text_style.dart';
+import 'package:chrismiche/features/details/controller/details_controller.dart';
 import 'package:chrismiche/features/details/widget/stat_card.dart';
+import 'package:chrismiche/features/details/widget/task_indicator.dart';
 import 'package:flutter/material.dart';
-
-const double meters = 45720.0;
+import 'package:get/get.dart';
 
 class DetailsScreen extends StatelessWidget {
-  const DetailsScreen({super.key});
+  DetailsScreen({super.key});
+
+  final DetailsController detailsController = Get.put(DetailsController());
 
   double get caloriesPerDay {
-    return (meters / 0.762) * 0.035;
+    return (detailsController.meters.value / 0.762) * 0.035;
   }
 
   int get totalCalories {
-    return ((meters / 0.762) * 0.035).round();
+    return ((detailsController.meters.value / 0.762) * 0.035).round();
   }
 
   double get footballFields {
-    return meters / 109.7;
+    return detailsController.meters.value / 109.7;
   }
 
   double get marathons {
-    return meters / 42200;
+    return detailsController.meters.value / 42200;
   }
 
   double get earthCircuits {
-    return meters / 40075000;
+    return detailsController.meters.value / 40075000;
   }
 
   double get eiffelTowers {
-    return (meters / 10) / 330;
+    return (detailsController.meters.value / 10) / 330;
   }
 
   double get burjKhalifas {
-    return (meters / 10) / 828;
+    return (detailsController.meters.value / 10) / 828;
   }
 
   double get spaceStations {
-    return (meters / 10) / 400000;
+    return (detailsController.meters.value / 10) / 400000;
   }
 
   @override
@@ -46,11 +49,15 @@ class DetailsScreen extends StatelessWidget {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.run_circle, color: Colors.blue, size: 24),
+            Image.asset('assets/icons/training.png', height: 30, width: 30),
             SizedBox(width: 8),
             Text(
               "Fitness Journey Stats",
-              style: getTextStyle(fontSize: 20, fontWeight: FontWeight.bold,color: Colors.white),
+              style: getTextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ],
         ),
@@ -62,6 +69,10 @@ class DetailsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            const SizedBox(height: 10),
+            TaskIndicator(),
+            const SizedBox(height: 20),
+
             const Text(
               'Fitness Achievements',
               style: TextStyle(
@@ -70,7 +81,7 @@ class DetailsScreen extends StatelessWidget {
                 color: Colors.teal,
               ),
             ),
-            const SizedBox(height: 20),
+
             const SizedBox(height: 20),
             GridView.count(
               crossAxisCount: 2,
