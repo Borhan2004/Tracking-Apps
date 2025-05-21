@@ -11,58 +11,31 @@ class Counters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var width = MediaQuery.of(context).size.width * 0.40;
-
     return Obx(
       () => Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: width,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Color(0xFFD4D4D4)
-                    ), 
-                    borderRadius: BorderRadius.circular(10)
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                    ),
-                    child: Text(
-                      '⏱️ ${controller.currentDate.value}',
-                      textAlign: TextAlign.center,
-                      style: getTextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: width,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Color(0xFFD4D4D4)
-                    ), 
-                    borderRadius: BorderRadius.circular(10)
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                    ),
-                    child: Text(
-                      '📏 ${controller.totalDistance.value.toStringAsFixed(2)} meters',
-                      textAlign: TextAlign.center,
-                      style: getTextStyle(
-                        
-                        fontSize: 16,),
-                    ),
-                  ),
-                ),
-              ],
+            Text(
+              '⏱️ ${controller.currentDate.value}',
+              textAlign: TextAlign.center,
+              style: getTextStyle(fontSize: 16),
+            ),
+
+            Text(
+              '${(controller.totalDistance.value / 0.762).toStringAsFixed(2)} Steps',
+              style: TextStyle(
+                fontSize: 25,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              '${controller.totalDistance.value.toStringAsFixed(2)} meters',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
             SizedBox(height: 30),

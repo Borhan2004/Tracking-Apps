@@ -1,11 +1,7 @@
 import 'package:chrismiche/core/common/styles/global_text_style.dart'
     show getTextStyle;
-import 'package:chrismiche/core/common/widgets/custom_button.dart';
-import 'package:chrismiche/core/utils/constants/colors.dart';
-import 'package:chrismiche/core/utils/constants/image_path.dart';
-import 'package:chrismiche/features/bottom_navbar/screen/bottom_navbar_screen.dart'
-    show BottomNavbarScreen;
-import 'package:chrismiche/features/profile/controller/change_character_controller.dart';
+import 'package:chrismiche/features/home/controller/change_character_controller.dart';
+import 'package:chrismiche/features/home/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -35,68 +31,43 @@ class ChangeCharacter extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 30),
+            Obx(
+              () => Text(
+                _controller.characterName,
+                style: TextStyle(
+                  color: Colors.purpleAccent,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
+            Obx(
+              () => Image.asset(
+                _controller.characterImagePath,
+                fit: BoxFit.cover,
+                height: 500,
+                width: double.infinity,
+              ),
+            ),
+            Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Obx(() {
-                  final isSelected = _controller.selectedGame.value == "girl";
-                  return GestureDetector(
-                    onTap: () => _controller.toggleGameSelection("girl"),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected
-                                ? AppColors.appPrimaryColor
-                                : Color.fromARGB(255, 210, 221, 241),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Center(
-                          child: Image.asset(
-                            ImagePath.gitlCharacter,
-                            height: 80,
-                            width: 80,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-                Obx(() {
-                  final isSelected = _controller.selectedGame.value == "boy";
-                  return GestureDetector(
-                    onTap: () => _controller.toggleGameSelection("boy"),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected
-                                ? AppColors.appPrimaryColor
-                                : Color.fromARGB(255, 210, 221, 241),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Center(
-                          child: Image.asset(
-                            ImagePath.boyCharacter,
-                            height: 80,
-                            width: 80,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
+                CustomIconButton(
+                  icon: Icons.arrow_back,
+                  onPressed: _controller.toggleCharacter,
+                ),
+                CustomIconButton(
+                  icon: Icons.check,
+                  onPressed: _controller.confirmSelection,
+                ),
+                CustomIconButton(
+                  icon: Icons.arrow_forward,
+                  onPressed: _controller.toggleCharacter,
+                ),
               ],
-            ),
-            SizedBox(height: 40),
-            CustomButton(
-              onTap: () {
-                Get.offAll(BottomNavbarScreen());
-              },
-              text: "Change",
             ),
           ],
         ),
