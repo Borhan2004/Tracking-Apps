@@ -17,7 +17,7 @@ class ImagePath {
   static const String inactiveChart = 'assets/images/inactiveChart.png';
   static const String inactiveUser = 'assets/images/inactiveUser.png';
   static const String inactiveDashboard = 'assets/images/inactiveDashboard.png';
-  static const String userPerson = 'assets/images/user.jpg';
+  static const String userPerson = 'assets/images/girlUser.png';
   static const String boyRun = 'assets/images/boyRun.png';
   static const String runBackground = 'assets/images/runBackground.png';
   static const String runBackground2 = 'assets/images/running.png';

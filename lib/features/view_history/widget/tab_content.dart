@@ -10,6 +10,7 @@ class TabContent extends StatelessWidget {
   final List<Map<String, dynamic>> achieveHistory;
 
   const TabContent({
+    super.key,
     required this.controller,
     required this.runHistory,
     required this.climbHistory,
@@ -33,67 +34,65 @@ class TabContent extends StatelessWidget {
         ],
       ),
       child: Obx(
-        () => controller.activeTab.value == 'Run'
-            ? ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: runHistory.length,
-                itemBuilder: (context, index) {
-                  final his = runHistory[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0),
-                    child: HistoryList(
-                      date: his['date'],
-                      time: his['time'],
-                      walk: his['walk'],
-                      floor: his['floor'],
-                    ),
-                  );
-                },
-              )
-            : controller.activeTab.value == 'Climb'
+        () =>
+            controller.activeTab.value == 'Run'
                 ? ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: climbHistory.length,
-                    itemBuilder: (context, index) {
-                      final his = climbHistory[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 20.0),
-                        child: HistoryList(
-                          date: his['date'],
-                          time: his['time'],
-                          walk: his['walk'],
-                          floor: his['floor'],
-                        ),
-                      );
-                    },
-                  )
-                : controller.activeTab.value == 'Achieve'
-                    ? ListView.builder(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: achieveHistory.length,
-                        itemBuilder: (context, index) {
-                          final his = achieveHistory[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 20.0),
-                            child: HistoryList(
-                              date: his['date'],
-                              time: his['time'],
-                              walk: his['walk'],
-                              floor: his['floor'],
-                            ),
-                          );
-                        },
-                      )
-                    : Container(
-                        height: 200,
-                        color: Colors.white,
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: runHistory.length,
+                  itemBuilder: (context, index) {
+                    final his = runHistory[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: HistoryList(
+                        date: his['date'],
+                        time: his['time'],
+                        walk: his['walk'],
+                        floor: his['floor'],
                       ),
+                    );
+                  },
+                )
+                : controller.activeTab.value == 'Climb'
+                ? ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: climbHistory.length,
+                  itemBuilder: (context, index) {
+                    final his = climbHistory[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: HistoryList(
+                        date: his['date'],
+                        time: his['time'],
+                        walk: his['walk'],
+                        floor: his['floor'],
+                      ),
+                    );
+                  },
+                )
+                : controller.activeTab.value == 'Achieve'
+                ? ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: achieveHistory.length,
+                  itemBuilder: (context, index) {
+                    final his = achieveHistory[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: HistoryList(
+                        date: his['date'],
+                        time: his['time'],
+                        walk: his['walk'],
+                        floor: his['floor'],
+                      ),
+                    );
+                  },
+                )
+                : Container(height: 200, color: Colors.white),
       ),
     );
   }

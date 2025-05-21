@@ -44,91 +44,99 @@ class AllDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            TaskIndicator(),
-            const SizedBox(height: 20),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+          TaskIndicator(),
+          const SizedBox(height: 20),
 
-            const Text(
-              'Fitness Achievements',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal,
+          const Text(
+            'Fitness Achievements',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.teal,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            children: [
+              StatCard(
+                title: 'Avg Calories/Day',
+                value: '${caloriesPerDay.toStringAsFixed(1)} kcal',
+                meters: detailsController.meters.value,
+                image: 'assets/images/calories.png',
+                progress: caloriesPerDay / 100,
+                isNetworkImage: false,
               ),
-            ),
-
-            const SizedBox(height: 20),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: [
-                StatCard(
-                  title: 'Avg Calories/Day',
-                  value: '${caloriesPerDay.toStringAsFixed(1)} kcal',
-                  image: 'assets/images/calories.png',
-                  progress: caloriesPerDay / 100,
-                  isNetworkImage: false,
-                ),
-                StatCard(
-                  title: 'Total Calories',
-                  value: '$totalCalories kcal',
-                  image: 'assets/images/reduce.png',
-                  progress: totalCalories / 10000,
-                  isNetworkImage: false,
-                ),
-                StatCard(
-                  title: 'Football Fields',
-                  value: '${footballFields.toInt()} fields',
-                  image: 'assets/images/football.png',
-                  progress: footballFields / 10,
-                  isNetworkImage: false,
-                ),
-                StatCard(
-                  title: 'Marathons',
-                  value: '${marathons.toStringAsFixed(2)} marathons',
-                  image: 'https://img.icons8.com/color/96/000000/running.png',
-                  progress: marathons / 1,
-                  isNetworkImage: true,
-                ),
-                StatCard(
-                  title: 'Earth Circuits',
-                  value: '${earthCircuits.toStringAsFixed(4)} circuits',
-                  image: 'https://img.icons8.com/color/96/000000/globe.png',
-                  progress: earthCircuits / 0.01,
-                  isNetworkImage: true,
-                ),
-                StatCard(
-                  title: 'Eiffel Towers',
-                  value: '${eiffelTowers.toStringAsFixed(2)} towers',
-                  image:
-                      'https://img.icons8.com/color/96/000000/eiffel-tower.png',
-                  progress: eiffelTowers / 5,
-                  isNetworkImage: true,
-                ),
-                StatCard(
-                  title: 'Burj Khalifas',
-                  value: '${burjKhalifas.toStringAsFixed(2)} buildings',
-                  image: 'assets/images/burjKhalifa.png',
-                  progress: burjKhalifas / 2,
-                  isNetworkImage: false,
-                ),
-                StatCard(
-                  title: 'Space Station',
-                  value: '${spaceStations.toStringAsFixed(4)} trips',
-                  image: 'https://img.icons8.com/color/96/000000/satellite.png',
-                  progress: spaceStations / 0.01,
-                  isNetworkImage: true,
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
+              StatCard(
+                title: 'Total Calories',
+                value: '$totalCalories kcal',
+                meters: detailsController.meters.value,
+                image: 'assets/images/reduce.png',
+                progress: totalCalories / 10000,
+                isNetworkImage: false,
+              ),
+              StatCard(
+                title: 'Football Fields',
+                value: '${footballFields.toInt()} times',
+                meters: detailsController.meters.value,
+                image: 'assets/images/football.png',
+                progress: footballFields / 10,
+                isNetworkImage: false,
+              ),
+              StatCard(
+                title: 'Marathons',
+                value: '${marathons.toStringAsFixed(2)} times',
+                meters: detailsController.meters.value,
+                image: 'https://img.icons8.com/color/96/000000/running.png',
+                progress: marathons / 1,
+                isNetworkImage: true,
+              ),
+              StatCard(
+                title: 'Earth Circuits',
+                value: '${earthCircuits.toStringAsFixed(4)} times',
+                meters: detailsController.meters.value,
+                image: 'https://img.icons8.com/color/96/000000/globe.png',
+                progress: earthCircuits / 0.01,
+                isNetworkImage: true,
+              ),
+              StatCard(
+                title: 'Eiffel Towers',
+                value: '${eiffelTowers.toStringAsFixed(2)} times',
+                meters: detailsController.meters.value,
+                image:
+                    'https://img.icons8.com/color/96/000000/eiffel-tower.png',
+                progress: eiffelTowers / 5,
+                isNetworkImage: true,
+              ),
+              StatCard(
+                title: 'Burj Khalifa',
+                value: '${burjKhalifas.toStringAsFixed(2)} times',
+                meters: detailsController.meters.value,
+                image: 'assets/images/burjKhalifa.png',
+                progress: burjKhalifas / 2,
+                isNetworkImage: false,
+              ),
+              StatCard(
+                title: 'Space Station',
+                value: '${spaceStations.toStringAsFixed(4)} times',
+                meters: detailsController.meters.value,
+                image: 'https://img.icons8.com/color/96/000000/satellite.png',
+                progress: spaceStations / 0.01,
+                isNetworkImage: true,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -18,7 +18,6 @@ class OnClimbScreen extends StatelessWidget {
       body: Stack(
         alignment: Alignment.center,
         children: [
-          // Vertical scrolling image background
           SizedBox(
             height: screenHeight,
             child: AnimatedBuilder(
@@ -42,8 +41,6 @@ class OnClimbScreen extends StatelessWidget {
               },
             ),
           ),
-
-          // Static character image
           Positioned(
             top: MediaQuery.of(context).size.height * 0.13,
             child: Image.asset(
@@ -53,32 +50,11 @@ class OnClimbScreen extends StatelessWidget {
             ),
           ),
 
-          //////Floor and Height stats///////
           
           Positioned(
             top: 65,
             child: FloorAndHeightStats(),
           ),
-
-          // Start & Stop buttons
-          // Positioned(
-          //   bottom: 40,
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.center,
-          //     children: [
-          //       ElevatedButton(
-          //         onPressed: () => controller.startTracking(screenHeight),
-          //         child: const Text('Start'),
-          //       ),
-          //       const SizedBox(width: 20),
-          //       ElevatedButton(
-          //         onPressed: controller.stopTracking,
-          //         style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-          //         child: const Text('Stop'),
-          //       ),
-          //     ],
-          //   ),
-          // ),
         ],
       ),
     );

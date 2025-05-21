@@ -7,4 +7,3 @@ class DetailsController extends GetxController {
     meters.value = newValue;
   }
 }
-

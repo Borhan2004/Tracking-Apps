@@ -23,10 +23,8 @@ class CircleProgressPainter extends CustomPainter {
           ..strokeWidth = 8
           ..strokeCap = StrokeCap.round;
 
-    // Draw background circle
     canvas.drawCircle(center, radius, paint);
 
-    // Draw progress arc
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -pi / 2,
