@@ -70,7 +70,7 @@ class AuthenticationScreen extends StatelessWidget {
                       Icon(Icons.person, color: Colors.white),
                       SizedBox(width: 10),
                       Text(
-                        'Create a guest account',
+                        'Use as a guest',
                         style: getTextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
