@@ -48,7 +48,6 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Greeting Section
             Text(
               "Welcome, John Doe! 🚀",
               style: getTextStyle(
@@ -66,12 +65,8 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24),
-
-            // Quick Stats Overview
             QuickStatsOverview(),
             SizedBox(height: 24),
-
-            // Start Activity Button
             Center(
               child: SizedBox(
                 width: double.infinity,
@@ -96,16 +91,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24),
-
-            // Recent Activity Snapshot
             RecentActivitySnapshot(),
             SizedBox(height: 24),
-
-            // Character Preview
             CharacterPreview(),
             SizedBox(height: 24),
-
-            // Quick Navigation Tiles
             QuickNavigationTiles(),
           ],
         ),

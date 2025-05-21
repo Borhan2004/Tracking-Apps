@@ -43,16 +43,6 @@ class QuickStatsOverview extends StatelessWidget {
                           ),
                         ),
                       ),
-                      //  SizedBox(height: 16),
-                      // Obx(() => SizedBox(
-
-                      //       child: CircularProgressIndicator(
-                      //         value: controller.progressPercentage.value / 100,
-                      //         backgroundColor: Colors.grey[300],
-                      //         color: Colors.blue,
-                      //         strokeWidth: 4,
-                      //       ),
-                      //     )),
                     ],
                   ),
                 ),

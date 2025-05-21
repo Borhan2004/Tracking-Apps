@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 
 class OngoingController extends GetxController with GetTickerProviderStateMixin {
 
-  ////////////Run Animation///////////
   late ScrollController scrollController;
   late AnimationController animationController;
   final double imageWidth = 1000;  
@@ -32,9 +31,6 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
     super.onClose();
   }
 
-  
-
-  /////// Tracking///////////
   RxBool isTracking = false.obs;
   RxBool isPaused = false.obs;
   RxDouble totalDistance = 0.0.obs;
@@ -78,7 +74,6 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
   double lastDistance = totalDistance.value;
   int unchangedCount = 0;
 
-  // Start listening to position updates
   _positionStream = Geolocator.getPositionStream(
     locationSettings: const LocationSettings(
       accuracy: LocationAccuracy.best,
@@ -102,7 +97,6 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
     _lastPosition = position;
   });
 
-  // Real-time 1-second interval checking
   Timer.periodic(const Duration(seconds: 1), (timer) {
     if (!isTracking.value || isPaused.value) {
       timer.cancel();
@@ -118,7 +112,6 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
     } else {
       unchangedCount++;
       if (unchangedCount >= 2 && isAnimating) {
-        // If distance hasn't changed for 2 consecutive checks (2s), stop animation
         stopAnimation();
         isAnimating = false;
       }
@@ -207,23 +200,15 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
       }
     });
 
-      // Automatically start tracking on launch
   WidgetsBinding.instance.addPostFrameCallback((_) {
     startTracking();
   });
-
-  // Reset tracking every 1 minute
   Timer.periodic(const Duration(minutes: 1), (timer) {
     if (isTracking.value && !isPaused.value) {
       _reset();
     }
   });
   }
-
-
-
-
-
   RxString currentDate = ''.obs;
 
   void updateCurrentDate() {

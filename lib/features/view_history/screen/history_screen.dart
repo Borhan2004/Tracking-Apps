@@ -1,8 +1,10 @@
-import 'package:chrismiche/core/common/styles/global_text_style.dart';
 import 'package:chrismiche/features/view_history/controller/history_controller.dart';
-import 'package:chrismiche/features/view_history/data/history_data.dart';
 import 'package:chrismiche/features/view_history/widget/calendar_strip.dart';
-import 'package:chrismiche/features/view_history/widget/history_list.dart';
+import 'package:chrismiche/features/view_history/widget/chart_section.dart';
+import 'package:chrismiche/features/view_history/widget/history_app_bar.dart';
+import 'package:chrismiche/features/view_history/widget/section_title.dart';
+import 'package:chrismiche/features/view_history/widget/tab_buttons.dart';
+import 'package:chrismiche/features/view_history/widget/tab_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -110,7 +112,6 @@ class HistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize the controller
     final HistoryController controller = Get.put(HistoryController());
 
     final List<double> x1 = [1, 2, 3, 4, 5, 6];
@@ -119,222 +120,30 @@ class HistoryScreen extends StatelessWidget {
     final List<double> y2 = [2, 3, 4, 5, 1, 4];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/icons/training.png', height: 30, width: 30),
-            SizedBox(width: 8),
-            Text(
-              "Statistic",
-              style: getTextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-        elevation: 2,
-        backgroundColor: Colors.teal,
-        automaticallyImplyLeading: false,
-      ),
+      appBar: HistoryAppBar(),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.only(left: 15, right: 15, bottom: 30),
+          padding: const EdgeInsets.only(left: 15, right: 15, bottom: 30),
           child: Column(
             children: [
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               CalendarStrip(),
-              SizedBox(height: 25),
-              Text(
-                'Statistic',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                  color: Color(0xFF333333),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 15),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 4),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.only(top: 10, right: 10),
-                  child: Row(
-                    children: [
-                      HistoryData(x: x1, y: y1),
-                      Spacer(),
-                      HistoryData(x: x2, y: y2),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 25),
-              Text(
-                'History',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                  color: Color(0xFF333333),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 15),
-              // Tab Buttons
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.teal.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Obx(
-                  () => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildTabButton(context, 'Run', controller),
-                      _buildTabButton(context, 'Climb', controller),
-                      
-                      _buildTabButton(context, 'Achieve', controller),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
-              // Tab Content
-              Container(
-                padding: EdgeInsets.all(10),
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 4),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Obx(
-                  () => controller.activeTab.value == 'Run'
-                      ? ListView.builder(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: runHistory.length,
-                          itemBuilder: (context, index) {
-                            final his = runHistory[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 20.0),
-                              child: HistoryList(
-                                date: his['date'],
-                                time: his['time'],
-                                walk: his['walk'],
-                                floor: his['floor'],
-                              ),
-                            );
-                          },
-                        )
-                      : controller.activeTab.value == 'Climb'
-                          ? ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: climbHistory.length,
-                              itemBuilder: (context, index) {
-                                final his = climbHistory[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 20.0),
-                                  child: HistoryList(
-                                    date: his['date'],
-                                    time: his['time'],
-                                    walk: his['walk'],
-                                    floor: his['floor'],
-                                  ),
-                                );
-                              },
-                            )
-                          : controller.activeTab.value == 'Achieve'
-                              ? ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: achieveHistory.length,
-                                  itemBuilder: (context, index) {
-                                    final his = achieveHistory[index];
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 20.0),
-                                      child: HistoryList(
-                                        date: his['date'],
-                                        time: his['time'],
-                                        walk: his['walk'],
-                                        floor: his['floor'],
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Container(
-                                  height: 200, // Fallback for unexpected tab
-                                  color: Colors.white,
-                                ),
-                ),
+              const SizedBox(height: 25),
+              const SectionTitle('Statistic'),
+              const SizedBox(height: 15),
+              ChartSection(x1: x1, y1: y1, x2: x2, y2: y2),
+              const SizedBox(height: 25),
+              const SectionTitle('History'),
+              const SizedBox(height: 15),
+              TabButtons(controller: controller),
+              const SizedBox(height: 15),
+              TabContent(
+                controller: controller,
+                runHistory: runHistory,
+                climbHistory: climbHistory,
+                achieveHistory: achieveHistory,
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabButton(
-    BuildContext context,
-    String title,
-    HistoryController controller,
-  ) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => controller.changeTab(title),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 10),
-          margin: EdgeInsets.symmetric(horizontal: 5),
-          decoration: BoxDecoration(
-            color:
-                controller.activeTab.value == title
-                    ? Colors.teal
-                    : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color:
-                  controller.activeTab.value == title
-                      ? Colors.teal
-                      : Colors.teal.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color:
-                  controller.activeTab.value == title
-                      ? Colors.white
-                      : Colors.teal,
-            ),
           ),
         ),
       ),

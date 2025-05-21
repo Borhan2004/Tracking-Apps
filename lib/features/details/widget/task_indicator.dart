@@ -18,8 +18,7 @@ class TaskIndicator extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.5),
             blurRadius: 8,
             offset: Offset(0, 4),
           ),
@@ -55,24 +54,6 @@ class TaskIndicator extends StatelessWidget {
               ],
             ),
           ),
-          // Row(
-          //   crossAxisAlignment: CrossAxisAlignment.end,
-          //   children: List.generate(8, (index) {
-          //     List<double> height = [55, 43, 57, 33, 37, 55, 43, 57];
-          //     return Container(
-          //       margin: EdgeInsets.only(right: 3),
-          //       height: height[index],
-          //       width: 15,
-          //       decoration: BoxDecoration(
-          //         color: Colors.teal, // Assign a different color based on index
-          //         borderRadius: BorderRadius.only(
-          //           topLeft: Radius.circular(6),
-          //           topRight: Radius.circular(6),
-          //         ),
-          //       ),
-          //     );
-          //   }),
-          // ),
           Image.asset('assets/images/state.png', height: 70, width: 70),
           SizedBox(width: 20),
         ],
