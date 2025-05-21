@@ -5,6 +5,7 @@ class HistoryController extends GetxController {
   var selectedMonthYear = DateTime(2025, 1, 1).obs;
   var markedDays = <DateTime>[].obs;
   var selectedDays = <DateTime>{}.obs;
+  var activeTab = 'Run'.obs;
   DateTime? startRange;
 
   @override
@@ -18,6 +19,10 @@ class HistoryController extends GetxController {
     final days = getDaysInWeek();
     if (days.isNotEmpty) markedDays.add(days[1]);
     if (days.length > 3) markedDays.add(days[6]);
+  }
+
+  void changeTab(String tab) {
+    activeTab.value = tab;
   }
 
   void previousMonth() {

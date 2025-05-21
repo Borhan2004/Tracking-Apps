@@ -61,21 +61,19 @@ class AuthenticationScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     gradient: LinearGradient(
-                      colors: [
-                        AppColors.primaryColor,
-                        AppColors.secondaryColor,
-                      ],
+                      colors: [AppColors.appPrimaryColor, Colors.tealAccent],
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.person, color: Colors.white),
+                      SizedBox(width: 10),
                       Text(
                         'Create a guest account',
                         style: getTextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),

@@ -37,22 +37,27 @@ class StatCard extends StatelessWidget {
         children: [
           CustomPaint(
             size: const Size(80, 80),
-            painter: CircleProgressPainter(progress: progress.clamp(0, 1)),
+            painter: CircleProgressPainter(progress: progress),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: isNetworkImage
-                  ? Image.network(
-                      image,
-                      width: 40,
-                      height: 40,
-                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.red),
-                    )
-                  : Image.asset(
-                      image,
-                      width: 40,
-                      height: 40,
-                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.red),
-                    ),
+              child:
+                  isNetworkImage
+                      ? Image.network(
+                        image,
+                        width: 40,
+                        height: 40,
+                        errorBuilder:
+                            (context, error, stackTrace) =>
+                                const Icon(Icons.error, color: Colors.red),
+                      )
+                      : Image.asset(
+                        image,
+                        width: 40,
+                        height: 40,
+                        errorBuilder:
+                            (context, error, stackTrace) =>
+                                const Icon(Icons.error, color: Colors.red),
+                      ),
             ),
           ),
           const SizedBox(height: 8),
@@ -75,4 +80,3 @@ class StatCard extends StatelessWidget {
     );
   }
 }
-

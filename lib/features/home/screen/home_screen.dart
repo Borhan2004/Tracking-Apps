@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.run_circle, color: Colors.blue, size: 24),
+            Image.asset('assets/icons/training.png', height: 30, width: 30),
             SizedBox(width: 8),
             Text(
               "Activity Tracker",

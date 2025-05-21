@@ -11,7 +11,6 @@ class CalendarStrip extends GetView<HistoryController> {
   @override
   Widget build(BuildContext context) {
     double alphaNotSelect = 0.7;
-    double alphaIsSelect = 1.0;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -34,7 +33,7 @@ class CalendarStrip extends GetView<HistoryController> {
                   Text(
                     controller.getMonthYear(),
                     style: const TextStyle(
-                      color: Colors.blue,
+                      color: Colors.teal,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -75,24 +74,19 @@ class CalendarStrip extends GetView<HistoryController> {
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                         colors: [
-                                          Color.fromARGB(
+                                          Colors.teal,
+                                          const Color.fromARGB(
                                             255,
-                                            59,
-                                            100,
-                                            176,
-                                          ).withOpacity(alphaIsSelect),
-                                          Color.fromARGB(
+                                            17,
+                                            149,
+                                            118,
+                                          ),
+                                          const Color.fromARGB(
                                             255,
-                                            60,
-                                            125,
-                                            236,
-                                          ).withOpacity(alphaIsSelect),
-                                          Color.fromARGB(
-                                            255,
-                                            40,
-                                            140,
-                                            255,
-                                          ).withOpacity(alphaIsSelect),
+                                            4,
+                                            173,
+                                            156,
+                                          ),
                                         ],
                                       )
                                       : LinearGradient(
