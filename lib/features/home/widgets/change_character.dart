@@ -42,7 +42,25 @@ class ChangeCharacter extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 15),
+            Obx(
+              () => Text(
+                _controller.selectedCharacter.value == 'girl'
+                    ? (_controller.isSuperDress.value
+                        ? 'Violetina in her dazzling super outfit, ready for adventure!'
+                        : 'Violetina, the brave explorer in her classic style!')
+                    : (_controller.isSuperDress.value
+                        ? 'Avijit in his epic super gear, set to conquer challenges!'
+                        : 'Avijit, the bold adventurer in his signature look!'),
+                textAlign: TextAlign.center,
+                style: getTextStyle(
+                  color: Color(0xFF555555),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+            SizedBox(height: 15),
             Obx(
               () => Image.asset(
                 _controller.characterImagePath,
@@ -60,8 +78,16 @@ class ChangeCharacter extends StatelessWidget {
                   onPressed: _controller.toggleCharacter,
                 ),
                 CustomIconButton(
+                  icon: Icons.arrow_downward,
+                  onPressed: _controller.toggleCharacterDressDown,
+                ),
+                CustomIconButton(
                   icon: Icons.check,
                   onPressed: _controller.confirmSelection,
+                ),
+                CustomIconButton(
+                  icon: Icons.arrow_upward,
+                  onPressed: _controller.toggleCharacterDressUp,
                 ),
                 CustomIconButton(
                   icon: Icons.arrow_forward,

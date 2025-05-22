@@ -27,7 +27,7 @@ class Counters extends StatelessWidget {
             Text(
               '${(controller.totalDistance.value / 0.762).toStringAsFixed(2)} Steps',
               style: TextStyle(
-                fontSize: 25,
+                fontSize: 30,
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),

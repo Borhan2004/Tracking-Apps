@@ -7,16 +7,16 @@ class StatCard extends StatelessWidget {
   final String title;
   final String value;
   final String image;
-  final bool isNetworkImage;
   final double progress;
+  final double starValue;
 
   const StatCard({
     super.key,
     required this.title,
     required this.value,
     required this.image,
-    required this.isNetworkImage,
     required this.progress,
+    required this.starValue,
   });
 
   @override
@@ -48,31 +48,17 @@ class StatCard extends StatelessWidget {
                   painter: CircleProgressPainter(progress: progress),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child:
-                        isNetworkImage
-                            ? Image.network(
-                              image,
-                              width: 40,
-                              height: 40,
-                              errorBuilder:
-                                  (context, error, stackTrace) => const Icon(
-                                    Icons.error,
-                                    color: Colors.red,
-                                  ),
-                            )
-                            : Image.asset(
-                              image,
-                              width: 40,
-                              height: 40,
-                              errorBuilder:
-                                  (context, error, stackTrace) => const Icon(
-                                    Icons.error,
-                                    color: Colors.red,
-                                  ),
-                            ),
+                    child: Image.asset(
+                      image,
+                      width: 40,
+                      height: 40,
+                      errorBuilder:
+                          (context, error, stackTrace) =>
+                              const Icon(Icons.error, color: Colors.red),
+                    ),
                   ),
                 ),
-                if (progress >= 1.0)
+                if (starValue >= 1.0)
                   Positioned(
                     right: -10,
                     top: -10,
