@@ -72,7 +72,7 @@ class FloorAndHeightStats extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Height Climbed: ",
+                "Height: ",
                 style: getTextStyle(
                   color: Colors.white,
                   fontSize: headSize,

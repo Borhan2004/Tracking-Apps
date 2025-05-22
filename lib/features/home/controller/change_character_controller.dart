@@ -3,6 +3,7 @@ import 'package:chrismiche/core/utils/constants/image_path.dart';
 
 class ChangeCharacterController extends GetxController {
   final RxString selectedCharacter = 'girl'.obs;
+  final RxBool isSuperDress = false.obs; 
 
   String get characterImagePath {
     return selectedCharacter.value == 'girl'
@@ -11,12 +12,24 @@ class ChangeCharacterController extends GetxController {
   }
 
   String get characterName {
-    return selectedCharacter.value == 'girl' ? 'Violetina' : 'Avijit';
+    if (selectedCharacter.value == 'girl') {
+      return isSuperDress.value ? 'Violetina Super' : 'Violetina';
+    } else {
+      return isSuperDress.value ? 'Avijit Super' : 'Avijit';
+    }
   }
 
   void toggleCharacter() {
     selectedCharacter.value =
         selectedCharacter.value == 'girl' ? 'boy' : 'girl';
+  }
+
+  void toggleCharacterDressUp() {
+    isSuperDress.value = true; 
+  }
+
+  void toggleCharacterDressDown() {
+    isSuperDress.value = false; 
   }
 
   void confirmSelection() {
