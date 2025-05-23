@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chrismiche/core/services/shared_preferences_data_helper.dart' show SharedPreferencesDataHelper;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -200,10 +201,12 @@ class OngoingController extends GetxController
       startTracking();
     });
     Timer.periodic(const Duration(minutes: 1), (timer) {
-      if (isTracking.value && !isPaused.value) {
-        _reset();
-      }
-    });
+  if (isTracking.value && !isPaused.value) {
+    _checkDateChangeAndStore();
+    _reset(); 
+  }
+});
+
   }
 
   RxString currentDate = ''.obs;
@@ -212,4 +215,27 @@ class OngoingController extends GetxController
     final now = DateTime.now();
     currentDate.value = DateFormat("d, MMMM, y").format(now);
   }
+
+  final RxString _lastSavedDate = ''.obs;
+
+void _checkDateChangeAndStore() async {
+  final now = DateTime.now();
+  final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+
+  if (_lastSavedDate.value.isEmpty) {
+    _lastSavedDate.value = currentFormattedDate;
+    return;
+  }
+
+  if (_lastSavedDate.value != currentFormattedDate) {
+    // Save data of the previous date
+    await SharedPreferencesDataHelper.saveDailyTracking(
+      totalDistance.value,
+      _lastSavedDate.value,
+    );
+    _reset(); // Reset distance for new day
+    _lastSavedDate.value = currentFormattedDate;
+  }
+}
+
 }
