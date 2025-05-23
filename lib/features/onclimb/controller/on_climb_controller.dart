@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chrismiche/core/services/shared_preferences_data_helper.dart' show SharedPreferencesDataHelper;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -39,17 +40,14 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
 
 
     // Automatically start tracking on launch
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    final screenHeight = Get.context!.mediaQuery.size.height;
-    startTracking(screenHeight);
-  });
-
-  // Reset tracking every 1 minute
-  Timer.periodic(const Duration(minutes: 1), (timer) {
-    if (isTracking.value && !isPaused.value) {
-      _reset();
-    }
-  });
+   WidgetsBinding.instance.addPostFrameCallback((_) {
+      startTracking(imageHeight);
+    });
+    Timer.periodic(const Duration(minutes: 1), (timer) {
+  if (isTracking.value && !isPaused.value) {
+    _checkDateChangeAndStore();
+  }
+});
   }
 
   void startAnimation(double viewportHeight) {
@@ -84,8 +82,7 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
   RxBool isPaused = false.obs;
   RxDouble totalDistance = 0.0.obs;
   RxDouble totalClimbed = 0.0.obs;
-  RxInt floorCount = 0.obs; 
-  
+  RxInt floorCount = 0.obs;
 
   Position? _lastPosition;
   Timer? _timer;
@@ -218,5 +215,30 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     final now = DateTime.now();
     currentDate.value = DateFormat("d, MMMM, y").format(now);
   }
+
+
+
+   final RxString _lastSavedDate = ''.obs;
+
+void _checkDateChangeAndStore() async {
+  final now = DateTime.now();
+  final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+
+  if (_lastSavedDate.value.isEmpty) {
+    _lastSavedDate.value = currentFormattedDate;
+    return;
+  }
+
+  if (_lastSavedDate.value != currentFormattedDate) {
+    // Save data of the previous date
+    await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+      totalDistance.value,
+      floorCount.value,
+      _lastSavedDate.value,
+    );
+    _reset(); // Reset distance for new day
+    _lastSavedDate.value = currentFormattedDate;
+  }
+}
 
 }
