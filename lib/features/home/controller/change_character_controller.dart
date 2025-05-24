@@ -1,16 +1,12 @@
 import 'package:get/get.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Add this import
 
 class ChangeCharacterController extends GetxController {
   final RxString selectedCharacter = 'Elk'.obs;
   final RxBool isSuperDress = false.obs;
 
-  static const List<String> mainCharacters = [
-    'Elk',
-    'Ninja',
-    'Robo',
-    'Skate',
-  ];
+  static const List<String> mainCharacters = ['Elk', 'Ninja', 'Robo', 'Skate'];
 
   static const Map<String, String> altCharacterMap = {
     'Elk': 'elkAlt',
@@ -22,6 +18,31 @@ class ChangeCharacterController extends GetxController {
     'Skate': 'skateAlt',
     'skateAlt': 'Skate',
   };
+
+  static const String _characterKey =
+      'selectedCharacter'; // Add key for character
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadSavedCharacter(); // Load saved character on initialization
+  }
+
+  // Load the saved character from SharedPreferences
+  Future<void> _loadSavedCharacter() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final savedCharacter = prefs.getString(_characterKey);
+    if (savedCharacter != null) {
+      selectedCharacter.value = savedCharacter;
+      isSuperDress.value = savedCharacter.contains('Alt');
+    }
+  }
+
+  // Save the selected character to SharedPreferences
+  Future<void> _saveCharacter() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_characterKey, selectedCharacter.value);
+  }
 
   String get characterImagePath {
     switch (selectedCharacter.value) {
@@ -93,18 +114,19 @@ class ChangeCharacterController extends GetxController {
   }
 
   void toggleCharacter({required bool forward}) {
-    String currentMainCharacter = selectedCharacter.value.contains('Alt')
-        ? altCharacterMap[selectedCharacter.value]!
-        : selectedCharacter.value;
+    String currentMainCharacter =
+        selectedCharacter.value.contains('Alt')
+            ? altCharacterMap[selectedCharacter.value]!
+            : selectedCharacter.value;
 
     final currentIndex = mainCharacters.indexOf(currentMainCharacter);
     int newIndex;
     if (forward) {
       newIndex = (currentIndex + 1) % mainCharacters.length;
     } else {
-      newIndex = (currentIndex - 1 + mainCharacters.length) % mainCharacters.length;
+      newIndex =
+          (currentIndex - 1 + mainCharacters.length) % mainCharacters.length;
     }
-    
 
     selectedCharacter.value = mainCharacters[newIndex];
     isSuperDress.value = false;
@@ -112,7 +134,8 @@ class ChangeCharacterController extends GetxController {
   }
 
   void toggleCharacterDressUp() {
-    if (!isSuperDress.value && altCharacterMap.containsKey(selectedCharacter.value)) {
+    if (!isSuperDress.value &&
+        altCharacterMap.containsKey(selectedCharacter.value)) {
       selectedCharacter.value = altCharacterMap[selectedCharacter.value]!;
       isSuperDress.value = true;
     }
@@ -120,7 +143,8 @@ class ChangeCharacterController extends GetxController {
   }
 
   void toggleCharacterDressDown() {
-    if (isSuperDress.value && altCharacterMap.containsKey(selectedCharacter.value)) {
+    if (isSuperDress.value &&
+        altCharacterMap.containsKey(selectedCharacter.value)) {
       selectedCharacter.value = altCharacterMap[selectedCharacter.value]!;
       isSuperDress.value = false;
     }
@@ -128,6 +152,7 @@ class ChangeCharacterController extends GetxController {
   }
 
   void confirmSelection() {
+    _saveCharacter(); // Save character when confirming selection
     Get.back(result: selectedCharacter.value);
   }
 }
