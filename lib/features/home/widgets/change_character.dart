@@ -16,69 +16,71 @@ class ChangeCharacter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.only(top: 65, left: 16, right: 16, bottom: 30),
+        padding: const EdgeInsets.only(
+          top: 65,
+          left: 16,
+          right: 16,
+          bottom: 30,
+        ),
         child: Column(
           children: [
-            Align(
+            const Align(
               alignment: Alignment.center,
               child: Text(
                 "Choose your character",
                 textAlign: TextAlign.center,
-                style: getTextStyle(
+                style: TextStyle(
                   color: Color(0xFF333333),
                   fontSize: 24,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Obx(
               () => Text(
                 _controller.characterName,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.purpleAccent,
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             Obx(
               () => Text(
-                _controller.selectedCharacter.value == 'girl'
-                    ? (_controller.isSuperDress.value
-                        ? 'Violetina in her dazzling super outfit, ready for adventure!'
-                        : 'Violetina, the brave explorer in her classic style!')
-                    : (_controller.isSuperDress.value
-                        ? 'Avijit in his epic super gear, set to conquer challenges!'
-                        : 'Avijit, the bold adventurer in his signature look!'),
+                _controller.characterDescription,
                 textAlign: TextAlign.center,
                 style: getTextStyle(
-                  color: Color(0xFF555555),
+                  color: const Color(0xFF555555),
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             Obx(
               () => Image.asset(
                 _controller.characterImagePath,
                 fit: BoxFit.cover,
                 height: 500,
                 width: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Text('Error loading image');
+                },
               ),
             ),
-            Spacer(),
+            const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 CustomIconButton(
                   icon: Icons.arrow_back,
-                  onPressed: _controller.toggleCharacter,
+                  onPressed: () => _controller.toggleCharacter(forward: false),
                 ),
                 CustomIconButton(
-                  icon: Icons.arrow_downward,
+                  icon: Icons.arrow_upward,
                   onPressed: _controller.toggleCharacterDressDown,
                 ),
                 CustomIconButton(
@@ -86,12 +88,12 @@ class ChangeCharacter extends StatelessWidget {
                   onPressed: _controller.confirmSelection,
                 ),
                 CustomIconButton(
-                  icon: Icons.arrow_upward,
+                  icon: Icons.arrow_downward,
                   onPressed: _controller.toggleCharacterDressUp,
                 ),
                 CustomIconButton(
                   icon: Icons.arrow_forward,
-                  onPressed: _controller.toggleCharacter,
+                  onPressed: () => _controller.toggleCharacter(forward: true),
                 ),
               ],
             ),

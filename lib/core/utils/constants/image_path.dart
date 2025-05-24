@@ -25,4 +25,12 @@ class ImagePath {
   static const String liftCharacterBoy = 'assets/images/liftCharacterBoy.png';
   static const String upCover = 'assets/images/upCover.png';
   static const String girlRun = 'assets/images/runGirlCharacter.png';
+  static const String elk = 'assets/characters/Elk.png';
+  static const String elkAlt = 'assets/characters/elkAlt.png';
+  static const String ninja = 'assets/characters/Ninja.png';
+  static const String ninjaAlt = 'assets/characters/ninjaAlt.png';
+  static const String robo = 'assets/characters/Robo.png';
+  static const String roboAlt = 'assets/characters/roboAlt.png';
+  static const String skate = 'assets/characters/Skate.png';
+  static const String skateAlt = 'assets/characters/skateAlt.png';
 }
