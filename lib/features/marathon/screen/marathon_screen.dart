@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MarathonScreen extends StatelessWidget {
-   MarathonScreen({super.key});
+  MarathonScreen({super.key});
 
-  final MarathonController controller = Get.put(MarathonController()); 
+  final MarathonController controller = Get.put(MarathonController());
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,6 @@ class MarathonScreen extends StatelessWidget {
       body: Stack(
         alignment: Alignment.center,
         children: [
-         
           AnimatedBuilder(
             animation: controller.animationController,
             builder: (context, child) {
@@ -37,7 +36,6 @@ class MarathonScreen extends StatelessWidget {
             },
           ),
 
-          // Static center image
           Positioned(
             top: MediaQuery.of(context).size.height * 0.3,
             child: Image.asset(
@@ -47,27 +45,37 @@ class MarathonScreen extends StatelessWidget {
             ),
           ),
 
-          
-
-          // Buttons
           Positioned(
             bottom: 40,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: controller.startAnimation,
-                  child: const Text('Start'),
-                ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: controller.stopAnimation,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+            child: Obx(
+              () => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (!controller.isRunning.value)
+                    ElevatedButton(
+                      onPressed: () {
+                        controller.startAnimation();
+                        controller.isRunning.value = true;
+                      },
+                      child: const Text('Start'),
+                    ),
+                  if (!controller.isRunning.value) const SizedBox(width: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      controller.stopAnimation();
+                      controller.isRunning.value = false;
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize:
+                          controller.isRunning.value
+                              ? const Size(250, 60)
+                              : const Size(80, 40),
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text('Stop'),
                   ),
-                  child:  Text('Stop'),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

@@ -9,7 +9,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
   late ScrollController scrollController;
   late AnimationController animationController;
 
-  final double imageHeight = 2000; // taller than screen for scroll effect
+  final double imageHeight = 2000; 
   double maxScrollExtent = 0;
 
   @override
@@ -56,16 +56,6 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     animationController.dispose();
     super.onClose();
   }
-
-
-
-
-
-
-  /////////Tracking///////////////
-  ///
-  ///
-  /////// Tracking///////////
   RxBool isTracking = false.obs;
   RxBool isPaused = false.obs;
   RxDouble totalDistance = 0.0.obs;
@@ -128,7 +118,6 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
 
   double lastTotalClimbed = totalClimbed.value;
   Timer.periodic(const Duration(seconds: 2), (timer) {
-    // Stop checking if tracking is paused or stopped
     if (!isTracking.value || isPaused.value) {
       timer.cancel();
       return;
