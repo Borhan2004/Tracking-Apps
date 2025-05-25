@@ -1,4 +1,4 @@
-import 'package:chrismiche/core/common/styles/global_text_style.dart';
+import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/auth/login/screen/login_screen.dart';
 import 'package:chrismiche/features/profile/widget/login_button.dart';
 import 'package:flutter/material.dart';
@@ -11,21 +11,7 @@ class LoginAlert extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/icons/training.png', height: 30, width: 30),
-            SizedBox(width: 8),
-            Text(
-              "Login Alert",
-              style: getTextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
+        title: Image.asset(ImagePath.appBarLogo, height: 50),
         elevation: 2,
         backgroundColor: Colors.teal,
         automaticallyImplyLeading: false,

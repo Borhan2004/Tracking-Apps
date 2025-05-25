@@ -1,34 +1,32 @@
 import 'package:get/get.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Add this import
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChangeCharacterController extends GetxController {
-  final RxString selectedCharacter = 'Elk'.obs;
+  final RxString selectedCharacter = 'velza'.obs;
   final RxBool isSuperDress = false.obs;
 
-  static const List<String> mainCharacters = ['Elk', 'Ninja', 'Robo', 'Skate'];
+  static const List<String> mainCharacters = ['velza', 'kaia', 'ryker', 'juno'];
 
   static const Map<String, String> altCharacterMap = {
-    'Elk': 'elkAlt',
-    'elkAlt': 'Elk',
-    'Ninja': 'ninjaAlt',
-    'ninjaAlt': 'Ninja',
-    'Robo': 'roboAlt',
-    'roboAlt': 'Robo',
-    'Skate': 'skateAlt',
-    'skateAlt': 'Skate',
+    'velza': 'velzaHeatwave',
+    'velzaHeatwave': 'velza',
+    'kaia': 'kaiaCloaked',
+    'kaiaCloaked': 'kaia',
+    'ryker': 'rykerHyperstream',
+    'rykerHyperstream': 'ryker',
+    'juno': 'grooveJuno',
+    'grooveJuno': 'juno',
   };
 
-  static const String _characterKey =
-      'selectedCharacter'; // Add key for character
+  static const String _characterKey = 'selectedCharacter';
 
   @override
   void onInit() {
     super.onInit();
-    _loadSavedCharacter(); // Load saved character on initialization
+    _loadSavedCharacter();
   }
 
-  // Load the saved character from SharedPreferences
   Future<void> _loadSavedCharacter() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final savedCharacter = prefs.getString(_characterKey);
@@ -38,7 +36,6 @@ class ChangeCharacterController extends GetxController {
     }
   }
 
-  // Save the selected character to SharedPreferences
   Future<void> _saveCharacter() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(_characterKey, selectedCharacter.value);
@@ -46,70 +43,70 @@ class ChangeCharacterController extends GetxController {
 
   String get characterImagePath {
     switch (selectedCharacter.value) {
-      case 'Elk':
-        return ImagePath.elk;
-      case 'elkAlt':
-        return ImagePath.elkAlt;
-      case 'Ninja':
-        return ImagePath.ninja;
-      case 'ninjaAlt':
-        return ImagePath.ninjaAlt;
-      case 'Robo':
-        return ImagePath.robo;
-      case 'roboAlt':
-        return ImagePath.roboAlt;
-      case 'Skate':
-        return ImagePath.skate;
-      case 'skateAlt':
-        return ImagePath.skateAlt;
+      case 'velza':
+        return ImagePath.velza;
+      case 'velzaHeatwave':
+        return ImagePath.velzaHeatwave;
+      case 'kaia':
+        return ImagePath.kaia;
+      case 'kaiaCloaked':
+        return ImagePath.kaiaCloaked;
+      case 'ryker':
+        return ImagePath.ryker;
+      case 'rykerHyperstream':
+        return ImagePath.rykerHyperstream;
+      case 'juno':
+        return ImagePath.juno;
+      case 'grooveJuno':
+        return ImagePath.grooveJuno;
       default:
-        return ImagePath.elk;
+        return ImagePath.velza;
     }
   }
 
   String get characterName {
     switch (selectedCharacter.value) {
-      case 'Elk':
-        return 'Elk';
-      case 'elkAlt':
-        return 'Elk Super';
-      case 'Ninja':
-        return 'Ninja';
-      case 'ninjaAlt':
-        return 'Ninja Super';
-      case 'Robo':
-        return 'Robo';
-      case 'roboAlt':
-        return 'Robo Super';
-      case 'Skate':
-        return 'Skate';
-      case 'skateAlt':
-        return 'Skate Super';
+      case 'velza':
+        return 'Velza';
+      case 'velzaHeatwave':
+        return 'Velza Heatwave';
+      case 'kaia':
+        return 'Kaia';
+      case 'kaiaCloaked':
+        return 'Kaia Cloaked';
+      case 'ryker':
+        return 'Ryker';
+      case 'rykerHyperstream':
+        return 'Ryker Hyperstream';
+      case 'juno':
+        return 'Juno';
+      case 'grooveJuno':
+        return 'Groove Juno';
       default:
-        return 'Elk';
+        return 'Velza';
     }
   }
 
   String get characterDescription {
     switch (selectedCharacter.value) {
-      case 'Elk':
-        return 'Elk, the brave explorer in classic style!';
-      case 'elkAlt':
-        return 'Elk in a dazzling super outfit, ready for adventure!';
-      case 'Ninja':
-        return 'Ninja, the stealthy warrior in signature look!';
-      case 'ninjaAlt':
-        return 'Ninja in epic super gear, set to conquer challenges!';
-      case 'Robo':
-        return 'Robo, the high-tech hero in standard mode!';
-      case 'roboAlt':
-        return 'Robo in futuristic super armor, ready to dominate!';
-      case 'Skate':
-        return 'Skate, the cool skater in classic gear!';
-      case 'skateAlt':
-        return 'Skate in a radical super outfit, shredding the challenges!';
+      case 'velza':
+        return 'Velza, the brave explorer in classic style!';
+      case 'velzaHeatwave':
+        return 'Velza Heatwave in a dazzling super outfit, ready for adventure!';
+      case 'kaia':
+        return 'Kaia, the stealthy warrior in signature look!';
+      case 'kaiaCloaked':
+        return 'Kaia Cloaked in epic super gear, set to conquer challenges!';
+      case 'ryker':
+        return 'Ryker, the high-tech hero in standard mode!';
+      case 'rykerHyperstream':
+        return 'Rryker Hyperstream in futuristic super armor, ready to dominate!';
+      case 'juno':
+        return 'Juno, the cool skater in classic gear!';
+      case 'grooveJuno':
+        return 'Groove Juno in a radical super outfit, shredding the challenges!';
       default:
-        return 'Elk, the brave explorer in classic style!';
+        return 'Velza, the brave explorer in classic style!';
     }
   }
 
@@ -152,7 +149,7 @@ class ChangeCharacterController extends GetxController {
   }
 
   void confirmSelection() {
-    _saveCharacter(); // Save character when confirming selection
+    _saveCharacter();
     Get.back(result: selectedCharacter.value);
   }
 }
