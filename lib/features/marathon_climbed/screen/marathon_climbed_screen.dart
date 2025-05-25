@@ -1,14 +1,16 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart' show ImagePath;
 import 'package:chrismiche/features/marathon_climbed/controller/marathon_climbed_controller.dart';
-import 'package:chrismiche/features/onclimb/widgets/floor_and_height_stats.dart' show FloorAndHeightStats;
+import 'package:chrismiche/features/onclimb/widgets/floor_and_height_stats.dart'
+    show FloorAndHeightStats;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MarathonClimbedScreen extends StatelessWidget {
-   MarathonClimbedScreen({super.key});
+  MarathonClimbedScreen({super.key});
 
-
-  final MarathonClimbedController controller = Get.put(MarathonClimbedController());
+  final MarathonClimbedController controller = Get.put(
+    MarathonClimbedController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,6 @@ class MarathonClimbedScreen extends StatelessWidget {
       body: Stack(
         alignment: Alignment.center,
         children: [
-          // Vertical scrolling image background
           SizedBox(
             height: screenHeight,
             child: AnimatedBuilder(
@@ -49,35 +50,53 @@ class MarathonClimbedScreen extends StatelessWidget {
             top: MediaQuery.of(context).size.height * 0.13,
             child: Image.asset(
               ImagePath.liftCharacterBoy,
-              height: MediaQuery.of(context).size.height * 0.7,        
+              height: MediaQuery.of(context).size.height * 0.7,
               width: MediaQuery.of(context).size.height * 0.7,
             ),
           ),
 
-          //////Floor and Height stats///////
-          
-          Positioned(
-            top: 65,
-            child: FloorAndHeightStats(),
-          ),
+          // Floor and Height stats
+          Positioned(top: 65, child: FloorAndHeightStats()),
 
-         // Start & Stop buttons
+          // Start & Stop buttons
           Positioned(
             bottom: 40,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () => controller.startTracking(screenHeight),
-                  child: const Text('Start'),
-                ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: controller.stopTracking,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  child: const Text('Stop'),
-                ),
-              ],
+            child: Obx(
+              () => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (!controller.isTracking.value) ...[
+                    ElevatedButton(
+                      onPressed: () => controller.startTracking(screenHeight),
+                      child: const Text('Start'),
+                    ),
+                    const SizedBox(width: 20),
+                  ],
+                  SizedBox(
+                    width: controller.isTracking.value ? 250 : null,
+                    height: controller.isTracking.value ? 60 : null,
+                    child: ElevatedButton(
+                      onPressed: controller.stopTracking,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding:
+                            controller.isTracking.value
+                                ? const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 15,
+                                )
+                                : null,
+                      ),
+                      child: Text(
+                        'Stop',
+                        style: TextStyle(
+                          fontSize: controller.isTracking.value ? 18 : 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

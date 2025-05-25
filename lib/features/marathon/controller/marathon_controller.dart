@@ -5,9 +5,10 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
   late ScrollController scrollController;
   late AnimationController animationController;
 
-  final double imageWidth = 1000; // width of the image
-  final double viewportWidth = 400; // screen width approximation
+  final double imageWidth = 1000;
+  final double viewportWidth = 400;
   double maxScrollExtent = 0;
+  final RxBool isRunning = false.obs;
 
   @override
   void onInit() {
@@ -28,7 +29,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         animationController.reset();
-        animationController.forward(); // Continue from where left off
+        animationController.forward();
       }
     });
   }
@@ -37,10 +38,12 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     maxScrollExtent = imageWidth - viewportWidth;
     if (maxScrollExtent <= 0) return;
     animationController.forward();
+    isRunning.value = true; 
   }
 
   void stopAnimation() {
     animationController.stop();
+    isRunning.value = false; 
   }
 
   @override
