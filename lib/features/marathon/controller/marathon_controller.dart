@@ -1,9 +1,11 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MarathonController extends GetxController with GetTickerProviderStateMixin {
   late ScrollController scrollController;
   late AnimationController animationController;
+  late AudioPlayer audioPlayer;
 
   final double imageWidth = 1000;
   final double viewportWidth = 400;
@@ -18,6 +20,8 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
       vsync: this,
       duration: const Duration(seconds: 1),
     );
+    audioPlayer = AudioPlayer();
+    audioPlayer.setSource(AssetSource('music/Running.wav'));
 
     animationController.addListener(() {
       if (scrollController.hasClients) {
@@ -34,22 +38,26 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     });
   }
 
-  void startAnimation() {
+  void startAnimation() async {
     maxScrollExtent = imageWidth - viewportWidth;
     if (maxScrollExtent <= 0) return;
     animationController.forward();
-    isRunning.value = true; 
+    isRunning.value = true;
+    await audioPlayer.setSource(AssetSource('music/Running.wav')); 
+    await audioPlayer.resume(); 
   }
 
-  void stopAnimation() {
+  void stopAnimation() async {
     animationController.stop();
-    isRunning.value = false; 
+    isRunning.value = false;
+    await audioPlayer.stop(); 
   }
 
   @override
   void onClose() {
     scrollController.dispose();
     animationController.dispose();
+    audioPlayer.dispose();
     super.onClose();
   }
 }
