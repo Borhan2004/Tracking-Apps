@@ -1,13 +1,13 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:flutter/foundation.dart'; 
 
 class TrackingDataStorage {
-  // Save the distance for a given date
+
   static Future<void> saveDailyTracking(double distance, String date) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble('distance_$date', distance);
-      await prefs.setString('last_saved_date', date); // Store last saved date
+      await prefs.setString('last_saved_date', date);
       debugPrint('Saved distance: $distance meters for date: $date');
     } catch (e) {
       debugPrint('Error saving distance for $date: $e');
@@ -15,7 +15,6 @@ class TrackingDataStorage {
     }
   }
 
-  // Retrieve the distance for a given date
   static Future<double> getDailyTracking(String date) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -28,7 +27,6 @@ class TrackingDataStorage {
     }
   }
 
-  // Retrieve the most recent saved distance and its date
   static Future<Map<String, dynamic>> getLastSavedDistance() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -38,9 +36,7 @@ class TrackingDataStorage {
         return {'distance': 0.0, 'date': ''};
       }
       final distance = prefs.getDouble('distance_$lastDate') ?? 0.0;
-      debugPrint(
-        'Retrieved last saved distance: $distance meters for date: $lastDate',
-      );
+      debugPrint('Retrieved last saved distance: $distance meters for date: $lastDate');
       return {'distance': distance, 'date': lastDate};
     } catch (e) {
       debugPrint('Error retrieving last saved distance: $e');

@@ -1,10 +1,9 @@
 import 'package:chrismiche/core/common/styles/global_text_style.dart';
 import 'package:chrismiche/features/details/widget/all_details.dart';
 import 'package:flutter/material.dart';
-class DetailsScreen extends StatelessWidget {
-  DetailsScreen({super.key});
 
-  
+class DetailsScreen extends StatelessWidget {
+  const DetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
