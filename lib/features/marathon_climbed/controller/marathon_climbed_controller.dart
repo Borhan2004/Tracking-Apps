@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -8,8 +8,9 @@ import 'package:intl/intl.dart';
 class MarathonClimbedController extends GetxController with GetTickerProviderStateMixin {
   late ScrollController scrollController;
   late AnimationController animationController;
+  late AudioPlayer audioPlayer;
 
-  final double imageHeight = 2000; 
+  final double imageHeight = 2000;
   double maxScrollExtent = 0;
 
   @override
@@ -17,11 +18,12 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     super.onInit();
     updateCurrentDate();
     scrollController = ScrollController();
-
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
     );
+    audioPlayer = AudioPlayer();
+    audioPlayer.setSource(AssetSource('music/Running.wav')); 
 
     animationController.addListener(() {
       if (scrollController.hasClients) {
@@ -33,7 +35,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         animationController.reset();
-        animationController.forward(); // loop
+        animationController.forward();
       }
     });
   }
@@ -42,8 +44,8 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     maxScrollExtent = imageHeight - viewportHeight;
     if (maxScrollExtent <= 0) return;
 
-    scrollController.jumpTo(maxScrollExtent); // start from bottom
-    animationController.forward(); // animate upward
+    scrollController.jumpTo(maxScrollExtent);
+    animationController.forward();
   }
 
   void stopAnimation() {
@@ -54,18 +56,20 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
   void onClose() {
     scrollController.dispose();
     animationController.dispose();
+    audioPlayer.dispose();
     super.onClose();
   }
+
   RxBool isTracking = false.obs;
   RxBool isPaused = false.obs;
   RxDouble totalDistance = 0.0.obs;
   RxDouble totalClimbed = 0.0.obs;
-  RxInt floorCount = 0.obs; 
-  
+  RxInt floorCount = 0.obs;
 
   Position? _lastPosition;
   Timer? _timer;
   StreamSubscription<Position>? _positionStream;
+
   Future<bool> _checkAndRequestLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -110,47 +114,50 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
         double elevationGain = position.altitude - _lastPosition!.altitude;
         if (elevationGain > 0) {
           totalClimbed.value += elevationGain;
-          floorCount.value = (((totalClimbed.value / 2.4384).floor()) ~/ 4); 
+          floorCount.value = (((totalClimbed.value / 2.4384).floor()) ~/ 4);
         }
       }
       _lastPosition = position;
     });
 
-  double lastTotalClimbed = totalClimbed.value;
-  Timer.periodic(const Duration(seconds: 2), (timer) {
-    if (!isTracking.value || isPaused.value) {
-      timer.cancel();
-      return;
-    }
-    if (totalClimbed.value != lastTotalClimbed) {
-      startAnimation(height); 
-    } else {
-      stopAnimation();
-    }
+    await audioPlayer.setSource(AssetSource('music/Elevator.wav'));
+    await audioPlayer.resume(); 
 
-    lastTotalClimbed = totalClimbed.value;
-  });
-  
+    double lastTotalClimbed = totalClimbed.value;
+    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (!isTracking.value || isPaused.value) {
+        timer.cancel();
+        return;
+      }
+      if (totalClimbed.value != lastTotalClimbed) {
+        startAnimation(height);
+      } else {
+        stopAnimation();
+      }
 
-  
-
+      lastTotalClimbed = totalClimbed.value;
+    });
   }
-  void pauseTracking() {
+
+  void pauseTracking() async {
     isPaused.value = true;
     _positionStream?.pause();
     _timer?.cancel();
     stopAnimation();
+    await audioPlayer.pause();
   }
 
-  void resumeTracking() {
+  void resumeTracking() async {
     isPaused.value = false;
     _positionStream?.resume();
+    await audioPlayer.resume();
   }
 
-  void stopTracking() {
+  void stopTracking() async {
     _timer?.cancel();
     _positionStream?.cancel();
-    stopAnimation(); 
+    stopAnimation();
+    await audioPlayer.stop(); 
 
     isTracking.value = false;
     isPaused.value = false;
@@ -162,7 +169,6 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          
             Text('Floors Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
           ],
         ),
@@ -185,7 +191,6 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     floorCount.value = 0;
     _lastPosition = null;
   }
-
 
   RxString currentDate = ''.obs;
 

@@ -45,7 +45,6 @@ class MarathonClimbedScreen extends StatelessWidget {
             ),
           ),
 
-          // Static character image
           Positioned(
             top: MediaQuery.of(context).size.height * 0.13,
             child: Image.asset(
@@ -55,10 +54,8 @@ class MarathonClimbedScreen extends StatelessWidget {
             ),
           ),
 
-          // Floor and Height stats
           Positioned(top: 65, child: FloorAndHeightStats()),
 
-          // Start & Stop buttons
           Positioned(
             bottom: 40,
             child: Obx(
