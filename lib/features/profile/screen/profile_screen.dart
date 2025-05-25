@@ -1,3 +1,4 @@
+import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/profile/widget/profile_page_container.dart';
 import 'package:flutter/material.dart';
 
@@ -8,21 +9,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/icons/training.png', height: 30, width: 30),
-            SizedBox(width: 8),
-            Text(
-              'Profile ',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
+        title: Image.asset(ImagePath.appBarLogo, height: 50),
         elevation: 2,
         backgroundColor: Colors.teal,
         automaticallyImplyLeading: false,

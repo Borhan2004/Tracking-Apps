@@ -1,12 +1,11 @@
 class ImagePath {
   static const String logo = 'assets/images/userprofile.png';
   static const String joggingImage = 'assets/images/runImage.png';
+  static const String appBarLogo = 'assets/icons/appBarLogo.png';
   static const String appLogo = 'assets/images/appLogo.png';
   static const String signInWithGoogle = 'assets/images/signinWithGoogle.png';
   static const String signInWithFacebook =
       'assets/images/signInWithFacebook.png';
-  static const String boyCharacter = 'assets/images/boyCharacter.png';
-  static const String gitlCharacter = 'assets/images/girlCharacter.png';
   static const String activeRunning = 'assets/images/activeRunning.png';
   static const String activeChart = 'assets/images/activeChart.png';
   static const String activeUser = 'assets/images/activeUser.png';
@@ -25,12 +24,12 @@ class ImagePath {
   static const String liftCharacterBoy = 'assets/images/liftCharacterBoy.png';
   static const String upCover = 'assets/images/upCover.png';
   static const String girlRun = 'assets/images/runGirlCharacter.png';
-  static const String elk = 'assets/characters/Elk.png';
-  static const String elkAlt = 'assets/characters/elkAlt.png';
-  static const String ninja = 'assets/characters/Ninja.png';
-  static const String ninjaAlt = 'assets/characters/ninjaAlt.png';
-  static const String robo = 'assets/characters/Robo.png';
-  static const String roboAlt = 'assets/characters/roboAlt.png';
-  static const String skate = 'assets/characters/Skate.png';
-  static const String skateAlt = 'assets/characters/skateAlt.png';
+  static const String velza = 'assets/characters/velza.png';
+  static const String velzaHeatwave = 'assets/characters/velzaHeatwave.png';
+  static const String kaia = 'assets/characters/kaia.png';
+  static const String kaiaCloaked = 'assets/characters/kaiaCloaked.png';
+  static const String ryker = 'assets/characters/ryker.png';
+  static const String rykerHyperstream = 'assets/characters/rykerHyperstream.png';
+  static const String juno = 'assets/characters/juno.png';
+  static const String grooveJuno = 'assets/characters/grooveJuno.png';
 }

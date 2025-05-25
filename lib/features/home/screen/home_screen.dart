@@ -1,6 +1,7 @@
 import 'package:chrismiche/core/common/styles/global_text_style.dart'
     show getTextStyle;
 import 'package:chrismiche/core/utils/constants/colors.dart';
+import 'package:chrismiche/core/utils/constants/image_path.dart';
 
 import 'package:chrismiche/features/home/widgets/character_preview.dart'
     show CharacterPreview;
@@ -24,21 +25,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/icons/training.png', height: 30, width: 30),
-            SizedBox(width: 8),
-            Text(
-              "Activity Tracker",
-              style: getTextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
+        title: Image.asset(ImagePath.appBarLogo, height: 50),
         elevation: 2,
         backgroundColor: Colors.teal,
         automaticallyImplyLeading: false,

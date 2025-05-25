@@ -1,7 +1,7 @@
+import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/view_history/controller/history_controller.dart';
 import 'package:chrismiche/features/view_history/widget/calendar_strip.dart';
 import 'package:chrismiche/features/view_history/widget/chart_section.dart';
-import 'package:chrismiche/features/view_history/widget/history_app_bar.dart';
 import 'package:chrismiche/features/view_history/widget/section_title.dart';
 import 'package:chrismiche/features/view_history/widget/tab_buttons.dart';
 import 'package:chrismiche/features/view_history/widget/tab_content.dart';
@@ -96,12 +96,7 @@ class HistoryScreen extends StatelessWidget {
       'walk': '500 Meter',
       'floor': '3 Floor',
     },
-    {
-      'date': '18/03/2025',
-      'time': '2 hr',
-      'walk': '10 KM',
-      'floor': '7 Floor',
-    },
+    {'date': '18/03/2025', 'time': '2 hr', 'walk': '10 KM', 'floor': '7 Floor'},
     {
       'date': '19/03/2025',
       'time': '25 mins',
@@ -120,7 +115,12 @@ class HistoryScreen extends StatelessWidget {
     final List<double> y2 = [2, 3, 4, 5, 1, 4];
 
     return Scaffold(
-      appBar: HistoryAppBar(),
+      appBar: AppBar(
+        title: Image.asset(ImagePath.appBarLogo, height: 50),
+        elevation: 2,
+        backgroundColor: Colors.teal,
+        automaticallyImplyLeading: false,
+      ),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.only(left: 15, right: 15, bottom: 30),
