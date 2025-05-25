@@ -1,11 +1,10 @@
-
 import 'package:audioplayers/audioplayers.dart';
-import 'package:chrismiche/features/marathon/helper/tracking_data_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
-import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:chrismiche/core/services/tracking_data_storage.dart';
+import 'package:chrismiche/features/details/controller/details_controller.dart'; 
 
 class MarathonController extends GetxController with GetTickerProviderStateMixin {
   late ScrollController scrollController;
@@ -49,7 +48,6 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
 
     updateCurrentDate();
     _updatePreviousDayDistance(); // Initialize last saved distance
-
     // Periodically check for date change
     Timer.periodic(const Duration(minutes: 1), (timer) {
       if (isRunning.value) {
@@ -87,6 +85,14 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
       );
       debugPrint('Stop: Saved totalDistance: ${totalDistance.value} for ${currentDate.value}');
       previousDayDistance.value = totalDistance.value; // Update previous distance
+
+      // Update DetailsController meters if it exists
+      if (Get.isRegistered<DetailsController>()) {
+        final detailsController = Get.find<DetailsController>();
+        await detailsController.updateMeters();
+        debugPrint('Stop: Notified DetailsController to update meters to ${totalDistance.value}');
+      }
+
       totalDistance.value = 0.0; // Reset distance
       debugPrint('Stop: Reset totalDistance to 0.0');
     } catch (e) {
@@ -163,7 +169,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
   // Function to check date change and reset distance
   final RxString _lastSavedDate = ''.obs;
 
-  void _checkDateChangeAndReset() {
+  void _checkDateChangeAndReset() async {
     final now = DateTime.now();
     final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
 
@@ -175,12 +181,19 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     if (_lastSavedDate.value != currentFormattedDate) {
       // Save distance before resetting
       try {
-        TrackingDataStorage.saveDailyTracking(
+        await TrackingDataStorage.saveDailyTracking(
           totalDistance.value,
           _lastSavedDate.value,
         );
         debugPrint('Date change: Saved distance: ${totalDistance.value} for ${_lastSavedDate.value}');
         previousDayDistance.value = totalDistance.value; // Update previous distance
+
+        // Update DetailsController meters if it exists
+        if (Get.isRegistered<DetailsController>()) {
+          final detailsController = Get.find<DetailsController>();
+          await detailsController.updateMeters();
+          debugPrint('Date change: Notified DetailsController to update meters to ${totalDistance.value}');
+        }
       } catch (e) {
         debugPrint('Date change: Error saving distance: $e');
         Get.snackbar('Error', 'Failed to save distance: $e');
