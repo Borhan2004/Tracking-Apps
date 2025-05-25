@@ -1,5 +1,6 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/marathon/controller/marathon_controller.dart';
+import 'package:chrismiche/features/marathon/widgets/marathon_counters.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -55,7 +56,6 @@ class MarathonScreen extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         controller.startAnimation();
-                        controller.isRunning.value = true;
                       },
                       child: const Text('Start'),
                     ),
@@ -63,7 +63,6 @@ class MarathonScreen extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       controller.stopAnimation();
-                      controller.isRunning.value = false;
                     },
                     style: ElevatedButton.styleFrom(
                       minimumSize:
@@ -77,6 +76,12 @@ class MarathonScreen extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+          Positioned(
+            top: 65,
+            left: 0,
+            right: 0,
+            child: Column(children: [MarathonCounters(), const SizedBox(height: 40)]),
           ),
         ],
       ),
