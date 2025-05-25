@@ -36,7 +36,6 @@ class MarathonScreen extends StatelessWidget {
               );
             },
           ),
-
           Positioned(
             top: MediaQuery.of(context).size.height * 0.3,
             child: Image.asset(
@@ -45,7 +44,6 @@ class MarathonScreen extends StatelessWidget {
               width: MediaQuery.of(context).size.height * 0.55,
             ),
           ),
-
           Positioned(
             bottom: 40,
             child: Obx(
@@ -81,7 +79,9 @@ class MarathonScreen extends StatelessWidget {
             top: 65,
             left: 0,
             right: 0,
-            child: Column(children: [MarathonCounters(), const SizedBox(height: 40)]),
+            child: Column(
+              children: [MarathonCounters(), const SizedBox(height: 40)],
+            ),
           ),
         ],
       ),
