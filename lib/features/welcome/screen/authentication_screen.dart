@@ -18,8 +18,8 @@ class AuthenticationScreen extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(ImagePath.runBackground2),
-            fit: BoxFit.cover,
+            image: AssetImage(ImagePath.splashScreen),
+            fit: BoxFit.fill,
           ),
         ),
         child: Padding(

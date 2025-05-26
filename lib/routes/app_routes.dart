@@ -1,5 +1,5 @@
 
-import 'package:chrismiche/features/splash_screen/view/splash_screen.dart' show SplashScreen;
+import 'package:chrismiche/features/splash_screen/screen/splash_screen.dart' show SplashScreen;
 import 'package:get/get.dart';
 
 
