@@ -9,7 +9,6 @@ class ProfileSetupController extends GetxController {
   var nameController = TextEditingController();
   var phoneController = TextEditingController();
   var phoneNumber = ''.obs;
-  // final RxString selectedGame = ''.obs;
 
   final Rx<File?> selectedImage = Rx<File?>(null);
 
