@@ -22,7 +22,7 @@ class ProfilePageContainer extends StatelessWidget {
                 ImagePath.userPerson,
                 height: 100,
                 width: 100,
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
               ),
             ),
             PersonalInfo(),
