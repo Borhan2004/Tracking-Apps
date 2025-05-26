@@ -6,12 +6,10 @@ class ClimbingDataStorage {
   Future<void> saveClimbingData(double totalClimbed, String date) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> climbingDataList = prefs.getStringList(_climbingDataKey) ?? [];
-
     final data = {
       'totalClimbed': totalClimbed,
       'date': date,
     };
-
     climbingDataList.add(jsonEncode(data));
 
     await prefs.setStringList(_climbingDataKey, climbingDataList);

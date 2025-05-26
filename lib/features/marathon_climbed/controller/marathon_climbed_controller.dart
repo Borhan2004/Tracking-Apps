@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:chrismiche/core/services/climbing_data_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -158,6 +159,9 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     _positionStream?.cancel();
     stopAnimation();
     await audioPlayer.stop(); 
+
+    final storage = ClimbingDataStorage();
+    await storage.saveClimbingData(totalClimbed.value, currentDate.value);
 
     isTracking.value = false;
     isPaused.value = false;
