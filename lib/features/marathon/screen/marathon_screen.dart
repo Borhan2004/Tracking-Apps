@@ -1,4 +1,5 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
+import 'package:chrismiche/features/home/controller/change_character_controller.dart';
 import 'package:chrismiche/features/marathon/controller/marathon_controller.dart';
 import 'package:chrismiche/features/marathon/widgets/marathon_counters.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,9 @@ class MarathonScreen extends StatelessWidget {
   MarathonScreen({super.key});
 
   final MarathonController controller = Get.put(MarathonController());
+  final ChangeCharacterController runningController = Get.put(
+    ChangeCharacterController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +42,12 @@ class MarathonScreen extends StatelessWidget {
           ),
           Positioned(
             top: MediaQuery.of(context).size.height * 0.3,
-            child: Image.asset(
-              ImagePath.boyRun,
-              height: MediaQuery.of(context).size.height * 0.55,
-              width: MediaQuery.of(context).size.height * 0.55,
+            child: Obx(
+              () => Image.asset(
+                runningController.characterImagePath,
+                height: MediaQuery.of(context).size.height * 0.55,
+                width: MediaQuery.of(context).size.height * 0.55,
+              ),
             ),
           ),
           Positioned(
