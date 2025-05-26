@@ -34,11 +34,6 @@ class MarathonCounters extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text(
-              'Previous Day: ${controller.previousDayDistance.value.toStringAsFixed(2)} meters',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
             SizedBox(height: 30),
           ],
         ),
