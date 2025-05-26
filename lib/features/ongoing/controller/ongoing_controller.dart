@@ -192,7 +192,7 @@ class OngoingController extends GetxController
     WidgetsBinding.instance.addPostFrameCallback((_) {
       startTracking();
     });
-    Timer.periodic(const Duration(minutes: 1), (timer) {
+    Timer.periodic(const Duration(hours: 24), (timer) {
       if (isTracking.value && !isPaused.value) {
         _checkDateChangeAndStore();
         _reset();
@@ -209,6 +209,8 @@ class OngoingController extends GetxController
 
   final RxString _lastSavedDate = ''.obs;
 
+
+  ///////////////////////
   void _checkDateChangeAndStore() async {
     final now = DateTime.now();
     final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
