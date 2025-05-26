@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chrismiche/core/services/shared_preferences_data_helper.dart'
     show SharedPreferencesDataHelper;
+import 'package:chrismiche/features/details/controller/details_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -192,8 +193,18 @@ class OngoingController extends GetxController
     WidgetsBinding.instance.addPostFrameCallback((_) {
       startTracking();
     });
-    Timer.periodic(const Duration(hours: 24), (timer) {
+    Timer.periodic(const Duration(hours: 24), (timer) async {
       if (isTracking.value && !isPaused.value) {
+        final now = DateTime.now();
+        final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+        await SharedPreferencesDataHelper.saveDailyTracking(
+          totalDistance.value,
+          currentFormattedDate,
+        );
+        await SharedPreferencesDataHelper.printSavedTrackingData();
+        if (Get.isRegistered<DetailsController>()) {
+          await Get.find<DetailsController>().updateMeters();
+        }
         _checkDateChangeAndStore();
         _reset();
       }
@@ -209,8 +220,6 @@ class OngoingController extends GetxController
 
   final RxString _lastSavedDate = ''.obs;
 
-
-  ///////////////////////
   void _checkDateChangeAndStore() async {
     final now = DateTime.now();
     final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
@@ -225,7 +234,11 @@ class OngoingController extends GetxController
         totalDistance.value,
         _lastSavedDate.value,
       );
-      _reset(); 
+      await SharedPreferencesDataHelper.printSavedTrackingData();
+      if (Get.isRegistered<DetailsController>()) {
+        await Get.find<DetailsController>().updateMeters();
+      }
+      _reset();
       _lastSavedDate.value = currentFormattedDate;
     }
   }
