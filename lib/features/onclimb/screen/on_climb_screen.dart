@@ -1,4 +1,5 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
+import 'package:chrismiche/features/home/controller/change_character_controller.dart';
 import 'package:chrismiche/features/onclimb/controller/on_climb_controller.dart';
 import 'package:chrismiche/features/onclimb/widgets/floor_and_height_stats.dart' show FloorAndHeightStats;
 import 'package:flutter/material.dart';
@@ -8,6 +9,9 @@ class OnClimbScreen extends StatelessWidget {
   OnClimbScreen({super.key});
 
   final OnClimbController controller = Get.put(OnClimbController());
+  final ChangeCharacterController elevatorController = Get.put(
+    ChangeCharacterController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +47,13 @@ class OnClimbScreen extends StatelessWidget {
           ),
           Positioned(
             top: MediaQuery.of(context).size.height * 0.13,
-            child: Image.asset(
-              ImagePath.liftCharacterBoy,
-              height: MediaQuery.of(context).size.height * 0.7,        
+            child: Obx(
+                () => Image.asset(
+                  elevatorController.elevatorCharacterImagePath,
+                  height: MediaQuery.of(context).size.height * 0.7,        
               width: MediaQuery.of(context).size.height * 0.7,
-            ),
+                ),
+              ),
           ),
 
           

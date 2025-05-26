@@ -64,6 +64,29 @@ class ChangeCharacterController extends GetxController {
     }
   }
 
+  String get elevatorCharacterImagePath {
+    switch (selectedCharacter.value) {
+      case 'velza':
+        return ImagePath.velzaElevator;
+      case 'velzaHeatwave':
+        return ImagePath.velzaHeatwaveElevator;
+      case 'kaia':
+        return ImagePath.kaiaElevator;
+      case 'kaiaCloaked':
+        return ImagePath.kaiaCloakedElevator;
+      case 'ryker':
+        return ImagePath.rykerElevator;
+      case 'rykerHyperstream':
+        return ImagePath.rykerHyperstreamElevator;
+      case 'juno':
+        return ImagePath.junoElevator;
+      case 'grooveJuno':
+        return ImagePath.grooveJunoElevator;
+      default:
+        return ImagePath.velzaElevator;
+    }
+  }
+
   String get characterName {
     switch (selectedCharacter.value) {
       case 'velza':

@@ -1,4 +1,5 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart';
+import 'package:chrismiche/features/home/controller/change_character_controller.dart';
 import 'package:chrismiche/features/ongoing/controller/ongoing_controller.dart';
 import 'package:chrismiche/features/ongoing/widgets/counters.dart'
     show Counters;
@@ -10,6 +11,9 @@ class OngoingScreen extends StatelessWidget {
   OngoingScreen({super.key});
 
   final OngoingController controller = Get.put(OngoingController());
+  final ChangeCharacterController runningController = Get.put(
+    ChangeCharacterController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +47,12 @@ class OngoingScreen extends StatelessWidget {
             left: 10,
             right: 0,
             child: Center(
-              child: Image.asset(
-                ImagePath.boyRun,
-                height: screenSize.height * 0.8,
-                width: screenSize.width * 0.8,
+              child: Obx(
+                () => Image.asset(
+                  runningController.characterImagePath,
+                  height: screenSize.height * 0.8,
+                  width: screenSize.width * 0.8,
+                ),
               ),
             ),
           ),

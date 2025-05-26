@@ -7,10 +7,10 @@ import 'package:get/get.dart';
 
 class ProfileSetupController extends GetxController {
   var nameController = TextEditingController();
-  var phoneController = TextEditingController(); 
+  var phoneController = TextEditingController();
   var phoneNumber = ''.obs;
   // final RxString selectedGame = ''.obs;
-  
+
   final Rx<File?> selectedImage = Rx<File?>(null);
 
   Future<void> pickImage() async {
@@ -24,19 +24,10 @@ class ProfileSetupController extends GetxController {
     }
   }
 
-  void printNumber(){
+  void printNumber() {
     if (kDebugMode) {
       print("The phone number is ${phoneNumber.value}");
-    } 
-    Get.to(BottomNavbarScreen()); 
+    }
+    Get.to(BottomNavbarScreen());
   }
-
-
-  // void toggleGameSelection(String game) {
-  //   if (selectedGame.value == game) {
-  //     selectedGame.value = '';  
-  //   } else {
-  //     selectedGame.value = game;  
-  //   }
-  // }
 }
