@@ -6,14 +6,12 @@ class TabContent extends StatelessWidget {
   final HistoryController controller;
   final List<Map<String, dynamic>> runHistory;
   final List<Map<String, dynamic>> climbHistory;
-  final List<Map<String, dynamic>> achieveHistory;
 
   const TabContent({
     super.key,
     required this.controller,
     required this.runHistory,
     required this.climbHistory,
-    required this.achieveHistory,
   });
 
   double _calculateTotalDistance(List<Map<String, dynamic>> history) {
@@ -170,15 +168,12 @@ class TabContent extends StatelessWidget {
         ],
       ),
       child: Obx(
-        () =>
-            controller.activeTab.value == 'Run'
-                ? _buildTabContent(context, runHistory)
-                : controller.activeTab.value == 'Climb'
-                ? _buildTabContent(context, climbHistory)
-                : controller.activeTab.value == 'Achieve'
-                ? _buildTabContent(context, achieveHistory)
-                : Container(height: 200, color: Colors.white),
-      ),
+  () => controller.activeTab.value == 'Run'
+      ? _buildTabContent(context, runHistory)
+      : controller.activeTab.value == 'Climb'
+          ? _buildTabContent(context, climbHistory)
+          : Container(height: 200, color: Colors.white),
+),
     );
   }
 }

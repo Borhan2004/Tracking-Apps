@@ -19,11 +19,11 @@ class MarathonCounters extends StatelessWidget {
             Text(
               '⏱️ ${controller.currentDate.value}',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
             Text(
               '${(controller.totalDistance.value / 0.762).toStringAsFixed(2)} Steps',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 30,
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -32,12 +32,25 @@ class MarathonCounters extends StatelessWidget {
             Text(
               '${controller.totalDistance.value.toStringAsFixed(2)} meters',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 10),
+            Text(
+              'Time: ${_formatDuration(controller.elapsedTime.value)}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
     );
+  }
+
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours.toString().padLeft(2, '0');
+    final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
+    final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return '$hours:$minutes:$seconds';
   }
 }

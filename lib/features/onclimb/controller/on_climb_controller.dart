@@ -9,8 +9,21 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
   late ScrollController scrollController;
   late AnimationController animationController;
 
-  final double imageHeight = 2000; // taller than screen for scroll effect
+  final double imageHeight = 2000; 
   double maxScrollExtent = 0;
+
+  RxBool isTracking = false.obs;
+  RxBool isPaused = false.obs;
+  RxDouble totalDistance = 0.0.obs;
+  RxDouble totalClimbed = 0.0.obs;
+  RxInt floorCount = 0.obs;
+  RxDouble savedTotalClimbed = 0.0.obs; 
+  RxString currentDate = ''.obs;
+  final RxString _lastSavedDate = ''.obs;
+
+  Position? _lastPosition;
+  Timer? _timer;
+  StreamSubscription<Position>? _positionStream;
 
   @override
   void onInit() {
@@ -36,43 +49,56 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
         animationController.forward(); // loop
       }
     });
-
-    // Clear legacy climbing data to prevent type errors
     SharedPreferencesDataHelper.clearLegacyClimbingData();
+    _loadSavedData();
 
-    // Automatically start tracking on launch
     WidgetsBinding.instance.addPostFrameCallback((_) {
       startTracking(imageHeight);
     });
 
-    // Timer for checking date changes every minute
     Timer.periodic(const Duration(minutes: 1), (timer) {
       if (isTracking.value && !isPaused.value) {
         _checkDateChangeAndStore();
       }
     });
-
-    // Timer for saving and printing data every 10 seconds
     Timer.periodic(const Duration(hours: 24), (timer) {
       if (isTracking.value && !isPaused.value) {
-        SharedPreferencesDataHelper.saveDailyClimbingTracking(
-          totalDistance.value,
-          totalClimbed.value,
-          floorCount.value,
-          currentDate.value,
-        ).then((_) {
-          SharedPreferencesDataHelper.printSavedTrackingData();
-        });
+        _saveAndUpdateData();
       }
     });
+  }
+
+  Future<void> _loadSavedData() async {
+    final lastSavedDate = await SharedPreferencesDataHelper.getLastSavedDate();
+    final dateToFetch = lastSavedDate ?? currentDate.value;
+    final climbed = await SharedPreferencesDataHelper.getClimbedByDate(dateToFetch);
+    final floors = await SharedPreferencesDataHelper.getFloorCountByDate(dateToFetch);
+    
+    savedTotalClimbed.value = climbed ?? 0.0;
+    floorCount.value = floors ?? 0;
+    currentDate.value = dateToFetch;
+    _lastSavedDate.value = dateToFetch;
+    
+    await SharedPreferencesDataHelper.printSavedTrackingData();
+  }
+
+  Future<void> _saveAndUpdateData() async {
+    await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+      totalDistance.value,
+      totalClimbed.value,
+      floorCount.value,
+      currentDate.value,
+    );
+    savedTotalClimbed.value = totalClimbed.value;
+    await SharedPreferencesDataHelper.printSavedTrackingData();
   }
 
   void startAnimation(double viewportHeight) {
     maxScrollExtent = imageHeight - viewportHeight;
     if (maxScrollExtent <= 0) return;
 
-    scrollController.jumpTo(maxScrollExtent); // start from bottom
-    animationController.forward(); // animate upward
+    scrollController.jumpTo(maxScrollExtent); 
+    animationController.forward(); 
   }
 
   void stopAnimation() {
@@ -83,18 +109,10 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
   void onClose() {
     scrollController.dispose();
     animationController.dispose();
+    _timer?.cancel();
+    _positionStream?.cancel();
     super.onClose();
   }
-
-  RxBool isTracking = false.obs;
-  RxBool isPaused = false.obs;
-  RxDouble totalDistance = 0.0.obs;
-  RxDouble totalClimbed = 0.0.obs;
-  RxInt floorCount = 0.obs;
-
-  Position? _lastPosition;
-  Timer? _timer;
-  StreamSubscription<Position>? _positionStream;
 
   Future<bool> _checkAndRequestLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -147,7 +165,7 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     });
 
     double lastTotalClimbed = totalClimbed.value;
-    Timer.periodic(const Duration(seconds: 2), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       if (!isTracking.value || isPaused.value) {
         timer.cancel();
         return;
@@ -157,7 +175,6 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
       } else {
         stopAnimation();
       }
-
       lastTotalClimbed = totalClimbed.value;
     });
   }
@@ -174,17 +191,12 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     _positionStream?.resume();
   }
 
-  void stopTracking() {
+  void stopTracking() async {
     _timer?.cancel();
     _positionStream?.cancel();
     stopAnimation();
 
-    SharedPreferencesDataHelper.saveDailyClimbingTracking(
-      totalDistance.value,
-      totalClimbed.value,
-      floorCount.value,
-      currentDate.value,
-    );
+    await _saveAndUpdateData();
 
     isTracking.value = false;
     isPaused.value = false;
@@ -199,6 +211,7 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
             Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
             Text('Elevation Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
             Text('Floors Climbed: ${floorCount.value}'),
+            Text('Saved Elevation: ${savedTotalClimbed.value.toStringAsFixed(2)} meters'),
           ],
         ),
         actions: [
@@ -221,14 +234,10 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     _lastPosition = null;
   }
 
-  RxString currentDate = ''.obs;
-
   void updateCurrentDate() {
     final now = DateTime.now();
     currentDate.value = DateFormat("d, MMMM, y").format(now);
   }
-
-  final RxString _lastSavedDate = ''.obs;
 
   void _checkDateChangeAndStore() async {
     final now = DateTime.now();
@@ -240,12 +249,7 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     }
 
     if (_lastSavedDate.value != currentFormattedDate) {
-      await SharedPreferencesDataHelper.saveDailyClimbingTracking(
-        totalDistance.value,
-        totalClimbed.value,
-        floorCount.value,
-        _lastSavedDate.value,
-      );
+      await _saveAndUpdateData();
       _reset();
       _lastSavedDate.value = currentFormattedDate;
     }

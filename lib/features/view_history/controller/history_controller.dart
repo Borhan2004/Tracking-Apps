@@ -22,7 +22,9 @@ class HistoryController extends GetxController {
   }
 
   void changeTab(String tab) {
-    activeTab.value = tab;
+    if (tab == 'Run' || tab == 'Climb') {
+      activeTab.value = tab;
+    }
   }
 
   void previousMonth() {

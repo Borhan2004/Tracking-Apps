@@ -21,7 +21,6 @@ class TabButtons extends StatelessWidget {
           children: [
             _buildTabButton(context, 'Run', controller),
             _buildTabButton(context, 'Climb', controller),
-            _buildTabButton(context, 'Achieve', controller),
           ],
         ),
       ),
