@@ -77,34 +77,6 @@ class HistoryScreen extends StatelessWidget {
     },
   ];
 
-  final List<Map<String, dynamic>> achieveHistory = [
-    {
-      'date': '15/03/2025',
-      'time': '1 hr 30 mins',
-      'walk': '7 KM',
-      'floor': '5 Floor',
-    },
-    {
-      'date': '16/03/2025',
-      'time': '15 mins',
-      'walk': '3 KM',
-      'floor': '6 Floor',
-    },
-    {
-      'date': '17/03/2025',
-      'time': '1 hr 20 mins',
-      'walk': '500 Meter',
-      'floor': '3 Floor',
-    },
-    {'date': '18/03/2025', 'time': '2 hr', 'walk': '10 KM', 'floor': '7 Floor'},
-    {
-      'date': '19/03/2025',
-      'time': '25 mins',
-      'walk': '80 Meter',
-      'floor': '2 Floor',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     final HistoryController controller = Get.put(HistoryController());
@@ -141,7 +113,6 @@ class HistoryScreen extends StatelessWidget {
                 controller: controller,
                 runHistory: runHistory,
                 climbHistory: climbHistory,
-                achieveHistory: achieveHistory,
               ),
             ],
           ),
