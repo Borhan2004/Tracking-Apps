@@ -58,6 +58,9 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     scrollController.dispose();
     animationController.dispose();
     audioPlayer.dispose();
+    _timer?.cancel();
+    _trackingTimer?.cancel();
+    _positionStream?.cancel();
     super.onClose();
   }
 
@@ -66,6 +69,9 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
   RxDouble totalDistance = 0.0.obs;
   RxDouble totalClimbed = 0.0.obs;
   RxInt floorCount = 0.obs;
+  RxString elapsedTime = '00:00:00'.obs; // Timer display in hh:mm:ss
+  Timer? _trackingTimer;
+  int _secondsElapsed = 0;
 
   Position? _lastPosition;
   Timer? _timer;
@@ -99,6 +105,15 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     isTracking.value = true;
     isPaused.value = false;
     _lastPosition = null;
+    _secondsElapsed = 0;
+    elapsedTime.value = '00:00:00';
+
+    // Start the timer
+    _trackingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!isTracking.value || isPaused.value) return;
+      _secondsElapsed++;
+      _updateElapsedTime();
+    });
 
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.best, distanceFilter: 1),
@@ -144,6 +159,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     isPaused.value = true;
     _positionStream?.pause();
     _timer?.cancel();
+    _trackingTimer?.cancel();
     stopAnimation();
     await audioPlayer.pause();
   }
@@ -152,10 +168,16 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     isPaused.value = false;
     _positionStream?.resume();
     await audioPlayer.resume();
+    _trackingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!isTracking.value || isPaused.value) return;
+      _secondsElapsed++;
+      _updateElapsedTime();
+    });
   }
 
   void stopTracking() async {
     _timer?.cancel();
+    _trackingTimer?.cancel();
     _positionStream?.cancel();
     stopAnimation();
     await audioPlayer.stop(); 
@@ -173,7 +195,10 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Floors Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
+            Text('Date: ${currentDate.value}'),
+            Text('Floors Climbed: ${floorCount.value} floors'),
+            Text('Height Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
+            Text('Time Elapsed: ${elapsedTime.value}'),
           ],
         ),
         actions: [
@@ -189,10 +214,19 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     );
   }
 
+  void _updateElapsedTime() {
+    final hours = (_secondsElapsed ~/ 3600).toString().padLeft(2, '0');
+    final minutes = ((_secondsElapsed % 3600) ~/ 60).toString().padLeft(2, '0');
+    final seconds = (_secondsElapsed % 60).toString().padLeft(2, '0');
+    elapsedTime.value = '$hours:$minutes:$seconds';
+  }
+
   void _reset() {
     totalDistance.value = 0.0;
     totalClimbed.value = 0.0;
     floorCount.value = 0;
+    elapsedTime.value = '00:00:00';
+    _secondsElapsed = 0;
     _lastPosition = null;
   }
 

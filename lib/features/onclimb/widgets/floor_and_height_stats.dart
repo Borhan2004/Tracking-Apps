@@ -88,16 +88,6 @@ class FloorAndHeightStats extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Obx(
-                () => Text(
-                  "Saved: ${controller.savedTotalClimbed.value.toStringAsFixed(2)} m",
-                  style: getTextStyle(
-                    color: Colors.white70,
-                    fontSize: bodySize,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
             ],
           ),
         ],
