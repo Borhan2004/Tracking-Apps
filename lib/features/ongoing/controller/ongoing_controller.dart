@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:chrismiche/core/services/shared_preferences_data_helper.dart'
     show SharedPreferencesDataHelper;
 import 'package:chrismiche/features/details/controller/details_controller.dart';
@@ -15,6 +14,70 @@ class OngoingController extends GetxController
   final double imageWidth = 1000;
   final double viewportWidth = 400;
   double maxScrollExtent = 0;
+
+  @override
+  void onInit() {
+    super.onInit();
+    SharedPreferencesDataHelper.clearLegacyClimbingData();
+    updateCurrentDate();
+    scrollController = ScrollController();
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+
+    animationController.addListener(() {
+      if (scrollController.hasClients) {
+        final value = animationController.value * maxScrollExtent;
+        scrollController.jumpTo(value);
+      }
+    });
+
+    animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        animationController.reset();
+        animationController.forward();
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      startTracking();
+    });
+
+    Timer.periodic(const Duration(hours: 24), (timer) async {
+      if (isTracking.value && !isPaused.value) {
+        final now = DateTime.now();
+        final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+          totalDistance.value,
+          totalClimbed.value,
+          currentFormattedDate,
+        );
+        await SharedPreferencesDataHelper.printSavedTrackingData();
+        if (Get.isRegistered<DetailsController>()) {
+          await Get.find<DetailsController>().updateMeters();
+        }
+        _checkDateChangeAndStore();
+        _reset();
+      }
+    });
+
+    Timer.periodic(const Duration(hours: 24), (timer) async {
+      if (isTracking.value && !isPaused.value) {
+        final now = DateTime.now();
+        final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+          totalDistance.value,
+          totalClimbed.value,
+          currentFormattedDate,
+        );
+        await SharedPreferencesDataHelper.printSavedTrackingData();
+        if (Get.isRegistered<DetailsController>()) {
+          await Get.find<DetailsController>().updateMeters();
+        }
+      }
+    });
+  }
 
   void startAnimation() {
     maxScrollExtent = imageWidth - viewportWidth;
@@ -165,52 +228,6 @@ class OngoingController extends GetxController
     _lastPosition = null;
   }
 
-  @override
-  void onInit() {
-    _checkAndRequestLocationPermission();
-    updateCurrentDate();
-    super.onInit();
-    scrollController = ScrollController();
-    animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-
-    animationController.addListener(() {
-      if (scrollController.hasClients) {
-        final value = animationController.value * maxScrollExtent;
-        scrollController.jumpTo(value);
-      }
-    });
-
-    animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        animationController.reset();
-        animationController.forward();
-      }
-    });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      startTracking();
-    });
-    Timer.periodic(const Duration(hours: 24), (timer) async {
-      if (isTracking.value && !isPaused.value) {
-        final now = DateTime.now();
-        final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
-        await SharedPreferencesDataHelper.saveDailyTracking(
-          totalDistance.value,
-          currentFormattedDate,
-        );
-        await SharedPreferencesDataHelper.printSavedTrackingData();
-        if (Get.isRegistered<DetailsController>()) {
-          await Get.find<DetailsController>().updateMeters();
-        }
-        _checkDateChangeAndStore();
-        _reset();
-      }
-    });
-  }
-
   RxString currentDate = ''.obs;
 
   void updateCurrentDate() {
@@ -230,8 +247,9 @@ class OngoingController extends GetxController
     }
 
     if (_lastSavedDate.value != currentFormattedDate) {
-      await SharedPreferencesDataHelper.saveDailyTracking(
+      await SharedPreferencesDataHelper.saveDailyOngoingTracking(
         totalDistance.value,
+        totalClimbed.value,
         _lastSavedDate.value,
       );
       await SharedPreferencesDataHelper.printSavedTrackingData();
