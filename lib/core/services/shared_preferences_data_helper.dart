@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesDataHelper {
@@ -34,7 +35,6 @@ class SharedPreferencesDataHelper {
 
   static Future<void> saveDailyTracking(double distance, String date) async {
     await _initPrefs();
-    await clearPreviousDistanceData();
     await _prefs!.setDouble('${_distanceKey}_$date', distance);
     await _prefs!.setString('${_dateKey}_lastSaved', date);
   }
@@ -49,6 +49,17 @@ class SharedPreferencesDataHelper {
     await _prefs!.setDouble('${_distanceKey}_$date', distance);
     await _prefs!.setDouble('${_climbingKey}_$date', climbed);
     await _prefs!.setInt('${_floorCountKey}_$date', floorCount);
+    await _prefs!.setString('${_dateKey}_lastSaved', date);
+  }
+
+  static Future<void> saveDailyOngoingTracking(
+    double distance,
+    double climbed,
+    String date,
+  ) async {
+    await _initPrefs();
+    await _prefs!.setDouble('${_distanceKey}_$date', distance);
+    await _prefs!.setDouble('${_climbingKey}_$date', climbed);
     await _prefs!.setString('${_dateKey}_lastSaved', date);
   }
 
@@ -71,8 +82,7 @@ class SharedPreferencesDataHelper {
     if (value is int) {
       return value;
     } else if (value is String) {
-      // Handle legacy String data (date stored as floorCount)
-      await _prefs!.remove('${_floorCountKey}_$date'); // Remove invalid data
+      await _prefs!.remove('${_floorCountKey}_$date');
       return null;
     }
     return null;
@@ -97,6 +107,27 @@ class SharedPreferencesDataHelper {
     await _initPrefs();
     final lastSavedDate = await getLastSavedDate();
     if (lastSavedDate == null) {
+      final keys = _prefs!.getKeys();
+      String? latestDate;
+      DateTime? latestDateTime;
+      for (String key in keys) {
+        if (key.startsWith('${_distanceKey}_')) {
+          final dateStr = key.replaceFirst('${_distanceKey}_', '');
+          try {
+            final date = DateFormat("d, MMMM, y").parse(dateStr);
+            if (latestDateTime == null || date.isAfter(latestDateTime)) {
+              latestDateTime = date;
+              latestDate = dateStr;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+      }
+      if (latestDate != null) {
+        final distance = await getDistanceByDate(latestDate) ?? 0.0;
+        return {'distance': distance, 'date': latestDate};
+      }
       return {'distance': 0.0, 'date': ''};
     }
     final distance = await getDistanceByDate(lastSavedDate) ?? 0.0;

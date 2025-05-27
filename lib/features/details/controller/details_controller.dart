@@ -9,6 +9,7 @@ class DetailsController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    await SharedPreferencesDataHelper.clearLegacyClimbingData();
     await updateMeters();
     Timer.periodic(const Duration(seconds: 30), (timer) async {
       await updateMeters();
@@ -17,11 +18,10 @@ class DetailsController extends GetxController {
 
   Future<void> updateMeters() async {
     try {
-      final lastSaved =
-          await SharedPreferencesDataHelper.getLastSavedDistance();
+      final lastSaved = await SharedPreferencesDataHelper.getLastSavedDistance();
       meters.value = lastSaved['distance'] as double;
       debugPrint(
-        'DetailsController: Updated meters to ${meters.value} meters for date: ${lastSaved['date']}',
+        'DetailsController: Updated meters to ${meters.value.toStringAsFixed(2)} meters for date: ${lastSaved['date']}',
       );
     } catch (e) {
       debugPrint('DetailsController: Error retrieving last saved distance: $e');
