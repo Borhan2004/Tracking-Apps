@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:chrismiche/core/services/shared_preferences_data_helper.dart' show SharedPreferencesDataHelper;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -38,16 +37,34 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
       }
     });
 
+    // Clear legacy climbing data to prevent type errors
+    SharedPreferencesDataHelper.clearLegacyClimbingData();
 
     // Automatically start tracking on launch
-   WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       startTracking(imageHeight);
     });
+
+    // Timer for checking date changes every minute
     Timer.periodic(const Duration(minutes: 1), (timer) {
-  if (isTracking.value && !isPaused.value) {
-    _checkDateChangeAndStore();
-  }
-});
+      if (isTracking.value && !isPaused.value) {
+        _checkDateChangeAndStore();
+      }
+    });
+
+    // Timer for saving and printing data every 10 seconds
+    Timer.periodic(const Duration(hours: 24), (timer) {
+      if (isTracking.value && !isPaused.value) {
+        SharedPreferencesDataHelper.saveDailyClimbingTracking(
+          totalDistance.value,
+          totalClimbed.value,
+          floorCount.value,
+          currentDate.value,
+        ).then((_) {
+          SharedPreferencesDataHelper.printSavedTrackingData();
+        });
+      }
+    });
   }
 
   void startAnimation(double viewportHeight) {
@@ -69,15 +86,6 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     super.onClose();
   }
 
-
-
-
-
-
-  /////////Tracking///////////////
-  ///
-  ///
-  /////// Tracking///////////
   RxBool isTracking = false.obs;
   RxBool isPaused = false.obs;
   RxDouble totalDistance = 0.0.obs;
@@ -87,6 +95,7 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
   Position? _lastPosition;
   Timer? _timer;
   StreamSubscription<Position>? _positionStream;
+
   Future<bool> _checkAndRequestLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -131,32 +140,28 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
         double elevationGain = position.altitude - _lastPosition!.altitude;
         if (elevationGain > 0) {
           totalClimbed.value += elevationGain;
-          floorCount.value = (((totalClimbed.value / 2.4384).floor()) ~/ 4); 
+          floorCount.value = (((totalClimbed.value / 2.4384).floor()) ~/ 4);
         }
       }
       _lastPosition = position;
     });
 
-  double lastTotalClimbed = totalClimbed.value;
-  Timer.periodic(const Duration(seconds: 2), (timer) {
-    // Stop checking if tracking is paused or stopped
-    if (!isTracking.value || isPaused.value) {
-      timer.cancel();
-      return;
-    }
-    if (totalClimbed.value != lastTotalClimbed) {
-      startAnimation(height); 
-    } else {
-      stopAnimation();
-    }
+    double lastTotalClimbed = totalClimbed.value;
+    Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (!isTracking.value || isPaused.value) {
+        timer.cancel();
+        return;
+      }
+      if (totalClimbed.value != lastTotalClimbed) {
+        startAnimation(height);
+      } else {
+        stopAnimation();
+      }
 
-    lastTotalClimbed = totalClimbed.value;
-  });
-  
-
-  
-
+      lastTotalClimbed = totalClimbed.value;
+    });
   }
+
   void pauseTracking() {
     isPaused.value = true;
     _positionStream?.pause();
@@ -172,7 +177,14 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
   void stopTracking() {
     _timer?.cancel();
     _positionStream?.cancel();
-    stopAnimation(); 
+    stopAnimation();
+
+    SharedPreferencesDataHelper.saveDailyClimbingTracking(
+      totalDistance.value,
+      totalClimbed.value,
+      floorCount.value,
+      currentDate.value,
+    );
 
     isTracking.value = false;
     isPaused.value = false;
@@ -184,8 +196,9 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          
-            Text('Floors Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
+            Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
+            Text('Elevation Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
+            Text('Floors Climbed: ${floorCount.value}'),
           ],
         ),
         actions: [
@@ -208,7 +221,6 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     _lastPosition = null;
   }
 
-
   RxString currentDate = ''.obs;
 
   void updateCurrentDate() {
@@ -216,29 +228,26 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     currentDate.value = DateFormat("d, MMMM, y").format(now);
   }
 
+  final RxString _lastSavedDate = ''.obs;
 
+  void _checkDateChangeAndStore() async {
+    final now = DateTime.now();
+    final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
 
-   final RxString _lastSavedDate = ''.obs;
+    if (_lastSavedDate.value.isEmpty) {
+      _lastSavedDate.value = currentFormattedDate;
+      return;
+    }
 
-void _checkDateChangeAndStore() async {
-  final now = DateTime.now();
-  final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
-
-  if (_lastSavedDate.value.isEmpty) {
-    _lastSavedDate.value = currentFormattedDate;
-    return;
+    if (_lastSavedDate.value != currentFormattedDate) {
+      await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+        totalDistance.value,
+        totalClimbed.value,
+        floorCount.value,
+        _lastSavedDate.value,
+      );
+      _reset();
+      _lastSavedDate.value = currentFormattedDate;
+    }
   }
-
-  if (_lastSavedDate.value != currentFormattedDate) {
-    // Save data of the previous date
-    await SharedPreferencesDataHelper.saveDailyClimbingTracking(
-      totalDistance.value,
-      floorCount.value,
-      _lastSavedDate.value,
-    );
-    _reset(); // Reset distance for new day
-    _lastSavedDate.value = currentFormattedDate;
-  }
-}
-
 }

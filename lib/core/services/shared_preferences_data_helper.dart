@@ -22,6 +22,16 @@ class SharedPreferencesDataHelper {
     }
   }
 
+  static Future<void> clearLegacyClimbingData() async {
+    await _initPrefs();
+    final keys = _prefs!.getKeys();
+    for (String key in keys) {
+      if (key.startsWith('${_climbingKey}_') || key.startsWith('${_floorCountKey}_')) {
+        await _prefs!.remove(key);
+      }
+    }
+  }
+
   static Future<void> saveDailyTracking(double distance, String date) async {
     await _initPrefs();
     await clearPreviousDistanceData();
@@ -31,18 +41,41 @@ class SharedPreferencesDataHelper {
 
   static Future<void> saveDailyClimbingTracking(
     double distance,
+    double climbed,
     int floorCount,
     String date,
   ) async {
     await _initPrefs();
     await _prefs!.setDouble('${_distanceKey}_$date', distance);
-    await _prefs!.setInt('${_climbingKey}_$date', floorCount);
-    await _prefs!.setString('${_floorCountKey}_$date', date);
+    await _prefs!.setDouble('${_climbingKey}_$date', climbed);
+    await _prefs!.setInt('${_floorCountKey}_$date', floorCount);
+    await _prefs!.setString('${_dateKey}_lastSaved', date);
   }
 
   static Future<double?> getClimbedByDate(String date) async {
     await _initPrefs();
-    return _prefs!.getDouble('${_climbingKey}_$date');
+    final value = _prefs!.get('${_climbingKey}_$date');
+    if (value is double) {
+      return value;
+    } else if (value is int) {
+      final doubleValue = value.toDouble();
+      await _prefs!.setDouble('${_climbingKey}_$date', doubleValue);
+      return doubleValue;
+    }
+    return null;
+  }
+
+  static Future<int?> getFloorCountByDate(String date) async {
+    await _initPrefs();
+    final value = _prefs!.get('${_floorCountKey}_$date');
+    if (value is int) {
+      return value;
+    } else if (value is String) {
+      // Handle legacy String data (date stored as floorCount)
+      await _prefs!.remove('${_floorCountKey}_$date'); // Remove invalid data
+      return null;
+    }
+    return null;
   }
 
   static Future<String?> getLastClimbedSavedDate() async {
@@ -83,12 +116,15 @@ class SharedPreferencesDataHelper {
     for (String key in keys) {
       if (key.startsWith('${_distanceKey}_')) {
         final date = key.replaceFirst('${_distanceKey}_', '');
-        final distance = _prefs!.getDouble(key);
-        print('Date: $date, Distance: ${distance?.toStringAsFixed(2)} meters');
+        final distance = await getDistanceByDate(date);
+        final climbed = await getClimbedByDate(date);
+        final floors = await getFloorCountByDate(date);
+        print('Date: $date, Distance: ${distance?.toStringAsFixed(2) ?? '0.00'} meters, '
+              'Climbed: ${climbed?.toStringAsFixed(2) ?? '0.00'} meters, Floors: ${floors ?? 0}');
       }
     }
     final lastSavedDate = await getLastSavedDate();
-    print('Last Saved Date: $lastSavedDate');
+    print('Last Saved Date: ${lastSavedDate ?? 'None'}');
     print('==========================');
   }
 }
