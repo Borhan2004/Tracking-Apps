@@ -44,25 +44,13 @@ class OngoingController extends GetxController
       startTracking();
     });
 
-    Timer.periodic(const Duration(hours: 24), (timer) async {
+    Timer.periodic(const Duration(minutes: 1), (timer) async {
       if (isTracking.value && !isPaused.value) {
-        final now = DateTime.now();
-        final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
-        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-          totalDistance.value,
-          totalClimbed.value,
-          currentFormattedDate,
-        );
-        await SharedPreferencesDataHelper.printSavedTrackingData();
-        if (Get.isRegistered<DetailsController>()) {
-          await Get.find<DetailsController>().updateMeters();
-        }
         _checkDateChangeAndStore();
-        _reset();
       }
     });
 
-    Timer.periodic(const Duration(hours: 24), (timer) async {
+    Timer.periodic(const Duration(seconds: 10), (timer) async {
       if (isTracking.value && !isPaused.value) {
         final now = DateTime.now();
         final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
@@ -202,6 +190,14 @@ class OngoingController extends GetxController
     _positionStream?.cancel();
     stopAnimation();
 
+    final now = DateTime.now();
+    final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+    SharedPreferencesDataHelper.saveDailyOngoingTracking(
+      totalDistance.value,
+      totalClimbed.value,
+      currentFormattedDate,
+    );
+
     isTracking.value = false;
     isPaused.value = false;
 
@@ -213,11 +209,18 @@ class OngoingController extends GetxController
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
-            Text(
-              'Floors Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters',
-            ),
+            Text('Elevation Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              _reset();
+            },
+            child: const Text('Finish'),
+          ),
+        ],
       ),
     );
   }
