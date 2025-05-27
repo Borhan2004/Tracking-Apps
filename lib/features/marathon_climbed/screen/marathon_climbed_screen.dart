@@ -1,8 +1,7 @@
 import 'package:chrismiche/core/utils/constants/image_path.dart' show ImagePath;
 import 'package:chrismiche/features/home/controller/change_character_controller.dart';
 import 'package:chrismiche/features/marathon_climbed/controller/marathon_climbed_controller.dart';
-import 'package:chrismiche/features/onclimb/widgets/floor_and_height_stats.dart'
-    show FloorAndHeightStats;
+import 'package:chrismiche/features/marathon_climbed/widgets/marathon_climbed_stats.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -60,7 +59,7 @@ class MarathonClimbedScreen extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(top: 65, child: FloorAndHeightStats()),
+          Positioned(top: 65, child: MarathonClimbedStats()),
           Positioned(
             bottom: 40,
             child: Obx(
