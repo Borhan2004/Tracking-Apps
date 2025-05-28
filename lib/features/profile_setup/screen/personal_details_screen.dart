@@ -95,7 +95,7 @@ class PersonalDetailsScreen extends StatelessWidget {
             SizedBox(
               height: 40,
             ), 
-            CustomButton(onTap: (){controller.printNumber(); }, text: "Continue")
+            CustomButton(onTap: (){controller.updateProfile(); }, text: "Continue")
 
           ],
         ),

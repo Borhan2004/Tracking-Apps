@@ -33,8 +33,8 @@ class SignUpController extends GetxController {
         Uri.parse(Urls.register),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': emailController.text,
-          'password': passwordController.text,
+          'email': emailController.text.trim(),
+          'password': passwordController.text.trim(),
         }),
       );
 

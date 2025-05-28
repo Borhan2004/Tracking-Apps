@@ -58,17 +58,19 @@ class ProfileSetupController extends GetxController {
     try{
       String? token = await SharedPreferencesHelper.getAccessToken();
       if (token == null) {
-        print("No token found"); 
+        if (kDebugMode) {
+          print("No token found");
+        } 
       }
 
       final response = await http.patch(
         Uri.parse("${Urls.baseUrl}/users"), 
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token', 
+          'Authorization': 'bearer $token', 
         },  
         body: jsonEncode({
-         "fullName": nameController.text,
+         "fullName": nameController.text.trim(),
          "phoneNumber": phoneNumber.value,
          "gender": selectedGender.value, 
          "character": "Ninja", 
@@ -80,10 +82,14 @@ class ProfileSetupController extends GetxController {
         Get.offAll(() => BottomNavbarScreen());
       } 
       else{
-        print("Error updating profile: ${response.statusCode}");
+        if (kDebugMode) {
+          print("Error updating profile: ${response.statusCode}");
+        }
       }
     } catch (e){
-      print("The exception is $e"); 
+      if (kDebugMode) {
+        print("The exception is $e");
+      } 
     }
   }
 
