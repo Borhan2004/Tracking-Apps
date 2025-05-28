@@ -4,6 +4,7 @@ import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/core/common/widgets/custom_textfield.dart'
     show CustomTextfield;
 import 'package:chrismiche/features/profile_setup/controller/profile_setup_controller.dart';
+import 'package:chrismiche/features/profile_setup/widget/gender_dropdown.dart' show GenderDropdown;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -47,6 +48,23 @@ class PersonalDetailsScreen extends StatelessWidget {
               hintText: "John Doe",
               controller: controller.nameController,
             ),
+            SizedBox(
+              height: 20,
+            ), 
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                "Gender",
+                style: getTextStyle(
+                  color: Color(0xFF5A5C5F),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+
+            SizedBox(height: 10),
+            GenderDropdown(), 
             SizedBox(height: 20),
             Align(
               alignment: Alignment.bottomLeft,
@@ -59,6 +77,7 @@ class PersonalDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             SizedBox(height: 10),
             IntlPhoneField(
               decoration: InputDecoration(
