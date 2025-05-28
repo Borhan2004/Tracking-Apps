@@ -1,5 +1,6 @@
 import 'package:chrismiche/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart' show EasyLoading;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'core/bindings/controller_binder.dart';
@@ -20,6 +21,7 @@ class Chrismiche extends StatelessWidget {
           initialRoute: AppRoute.getSplashScreen(),
           getPages: AppRoute.routes,
           initialBinding: ControllerBinder(),
+           builder: EasyLoading.init(),
           themeMode: ThemeMode.system,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,

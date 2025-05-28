@@ -1,3 +1,5 @@
+import 'package:chrismiche/core/services/shared_preferences_helper.dart';
+import 'package:chrismiche/features/welcome/screen/authentication_screen.dart' show AuthenticationScreen;
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
@@ -30,5 +32,10 @@ class PersonalInfoController extends GetxController {
       email.value = emailController.text;
       phoneNumber.value = phoneNumberController.text;
     }
+  }
+
+  void logout() async {
+    await SharedPreferencesHelper.clearAllData(); 
+    Get.offAll(() => AuthenticationScreen()); 
   }
 }
