@@ -9,36 +9,44 @@ import 'package:intl/intl.dart';
 
 class OngoingController extends GetxController
     with GetTickerProviderStateMixin {
-  late ScrollController scrollController;
-  late AnimationController animationController;
+  ScrollController? scrollController;
+  AnimationController? animationController;
   final double imageWidth = 1000;
   final double viewportWidth = 400;
   double maxScrollExtent = 0;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    SharedPreferencesDataHelper.clearLegacyClimbingData();
-    updateCurrentDate();
     scrollController = ScrollController();
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
     );
 
-    animationController.addListener(() {
-      if (scrollController.hasClients) {
-        final value = animationController.value * maxScrollExtent;
-        scrollController.jumpTo(value);
+    animationController!.addListener(() {
+      if (scrollController!.hasClients) {
+        final value = animationController!.value * maxScrollExtent;
+        scrollController!.jumpTo(value);
       }
     });
 
-    animationController.addStatusListener((status) {
+    animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        animationController.reset();
-        animationController.forward();
+        animationController!.reset();
+        animationController!.forward();
       }
     });
+
+    await SharedPreferencesDataHelper.clearLegacyClimbingData();
+    updateCurrentDate();
+
+    final now = DateTime.now();
+    final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+    final distance = await SharedPreferencesDataHelper.getDistanceByDate(currentFormattedDate) ?? 0.0;
+    final climbed = await SharedPreferencesDataHelper.getClimbedByDate(currentFormattedDate) ?? 0.0;
+    totalDistance.value = distance;
+    totalClimbed.value = climbed;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       startTracking();
@@ -46,7 +54,7 @@ class OngoingController extends GetxController
 
     Timer.periodic(const Duration(minutes: 1), (timer) async {
       if (isTracking.value && !isPaused.value) {
-        _checkDateChangeAndStore();
+        await _checkDateChangeAndStore();
       }
     });
 
@@ -68,19 +76,23 @@ class OngoingController extends GetxController
   }
 
   void startAnimation() {
+    if (animationController == null || scrollController == null) return;
     maxScrollExtent = imageWidth - viewportWidth;
     if (maxScrollExtent <= 0) return;
-    animationController.forward();
+    animationController!.forward();
   }
 
   void stopAnimation() {
-    animationController.stop();
+    if (animationController == null) return;
+    animationController!.stop();
   }
 
   @override
   void onClose() {
-    scrollController.dispose();
-    animationController.dispose();
+    scrollController?.dispose();
+    animationController?.dispose();
+    _timer?.cancel();
+    _positionStream?.cancel();
     super.onClose();
   }
 
@@ -91,8 +103,8 @@ class OngoingController extends GetxController
 
   Position? _lastPosition;
   Timer? _timer;
-
   StreamSubscription<Position>? _positionStream;
+
   Future<bool> _checkAndRequestLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -149,7 +161,7 @@ class OngoingController extends GetxController
       _lastPosition = position;
     });
 
-    Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!isTracking.value || isPaused.value) {
         timer.cancel();
         return;
@@ -181,18 +193,47 @@ class OngoingController extends GetxController
   }
 
   void resumeTracking() {
+    if (!isPaused.value) return;
+
     isPaused.value = false;
     _positionStream?.resume();
+
+    bool isAnimating = animationController?.isAnimating ?? false;
+    double lastDistance = totalDistance.value;
+    int unchangedCount = 0;
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!isTracking.value || isPaused.value) {
+        timer.cancel();
+        return;
+      }
+
+      if (totalDistance.value != lastDistance) {
+        unchangedCount = 0;
+        if (!isAnimating) {
+          startAnimation();
+          isAnimating = true;
+        }
+      } else {
+        unchangedCount++;
+        if (unchangedCount >= 2 && isAnimating) {
+          stopAnimation();
+          isAnimating = false;
+        }
+      }
+
+      lastDistance = totalDistance.value;
+    });
   }
 
-  void stopTracking() {
+  void stopTracking() async {
     _timer?.cancel();
     _positionStream?.cancel();
     stopAnimation();
 
     final now = DateTime.now();
     final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
-    SharedPreferencesDataHelper.saveDailyOngoingTracking(
+    await SharedPreferencesDataHelper.saveDailyOngoingTracking(
       totalDistance.value,
       totalClimbed.value,
       currentFormattedDate,
@@ -240,7 +281,7 @@ class OngoingController extends GetxController
 
   final RxString _lastSavedDate = ''.obs;
 
-  void _checkDateChangeAndStore() async {
+  Future<void> _checkDateChangeAndStore() async {
     final now = DateTime.now();
     final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
 
@@ -261,6 +302,11 @@ class OngoingController extends GetxController
       }
       _reset();
       _lastSavedDate.value = currentFormattedDate;
+
+      final distance = await SharedPreferencesDataHelper.getDistanceByDate(currentFormattedDate) ?? 0.0;
+      final climbed = await SharedPreferencesDataHelper.getClimbedByDate(currentFormattedDate) ?? 0.0;
+      totalDistance.value = distance;
+      totalClimbed.value = climbed;
     }
   }
 }
