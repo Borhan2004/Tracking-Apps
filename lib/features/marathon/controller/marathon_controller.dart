@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chrismiche/core/localization/end_points.dart' show Urls;
 import 'package:chrismiche/core/services/shared_preferences_helper.dart' show SharedPreferencesHelper;
@@ -12,9 +11,9 @@ import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:chrismiche/core/services/tracking_data_storage.dart';
 import 'package:chrismiche/features/details/controller/details_controller.dart';
+import 'package:geolocator/geolocator.dart';
 
-class MarathonController extends GetxController
-    with GetTickerProviderStateMixin {
+class MarathonController extends GetxController with GetTickerProviderStateMixin {
   late ScrollController scrollController;
   late AnimationController animationController;
   late AudioPlayer audioPlayer;
@@ -26,9 +25,10 @@ class MarathonController extends GetxController
 
   RxDouble totalDistance = 0.0.obs;
   Rx<Duration> elapsedTime = Duration.zero.obs;
-  Timer? _distanceTimer;
-  Timer? _restartTimer;
   Timer? _timer;
+  Timer? _restartTimer;
+  StreamSubscription<Position>? _positionStream;
+  Position? _lastPosition;
 
   @override
   void onInit() async {
@@ -65,7 +65,31 @@ class MarathonController extends GetxController
     restartAnimationAtSpecificTime(const TimeOfDay(hour: 0, minute: 0));
   }
 
+  Future<bool> _checkAndRequestLocationPermission() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      return false;
+    }
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        Get.snackbar('Permission Denied', 'Location permission is required.');
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      Get.snackbar('Permission Denied', 'Enable location from app settings.');
+      await Geolocator.openAppSettings();
+      return false;
+    }
+    return true;
+  }
+
   void startAnimation() async {
+    if (!await _checkAndRequestLocationPermission()) return;
+
     maxScrollExtent = imageWidth - viewportWidth;
     if (maxScrollExtent <= 0) return;
     animationController.forward();
@@ -140,35 +164,49 @@ class MarathonController extends GetxController
           children: [
             Text('Date: ${currentDate.value}'),
             Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
-            Text('Steps: ${(totalDistance.value / 0.762).toStringAsFixed(2)}'),
+            Text('Steps: ${(totalDistance.value / 0.762).toInt()}'),
             Text('Elapsed Time: ${_formatDuration(elapsedTime.value)}'),
           ],
         ),
         actions: [
-          TextButton(onPressed: (){
-             sendData(currentDate.value, _formatDuration(elapsedTime.value), totalDistance.value);
-             Get.back(); 
-          }, child: const Text('OK')),
+          TextButton(
+            onPressed: () {
+              sendData(currentDate.value, _formatDuration(elapsedTime.value), totalDistance.value);
+              Get.back();
+            },
+            child: const Text('OK'),
+          ),
         ],
       ),
     );
   }
 
   void _startDistanceUpdate() {
-    const double speed = 2.0;
-    _distanceTimer?.cancel();
-    _distanceTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!isRunning.value) {
-        timer.cancel();
-        return;
+    _lastPosition = null;
+    _positionStream?.cancel();
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 1,
+      ),
+    ).listen((Position position) {
+      if (_lastPosition != null) {
+        double distance = Geolocator.distanceBetween(
+          _lastPosition!.latitude,
+          _lastPosition!.longitude,
+          position.latitude,
+          position.longitude,
+        );
+        totalDistance.value += distance;
       }
-      totalDistance.value += speed;
+      _lastPosition = position;
     });
   }
 
   void _stopDistanceUpdate() {
-    _distanceTimer?.cancel();
-    _distanceTimer = null;
+    _positionStream?.cancel();
+    _positionStream = null;
+    _lastPosition = null;
   }
 
   void _startTimer() {
@@ -255,9 +293,8 @@ class MarathonController extends GetxController
     });
   }
 
-
   Future<void> sendData(String date, String time, double distance) async {
-    try{
+    try {
       EasyLoading.show(status: "Sending data...");
       String? token = await SharedPreferencesHelper.getAccessToken();
       if (token == null) {
@@ -265,21 +302,21 @@ class MarathonController extends GetxController
           print("No access token found");
         }
         return;
-      }  
+      }
       final url = '${Urls.baseUrl}/instant-movements/tracking-run';
 
       final response = await http.post(
-        Uri.parse(url), 
+        Uri.parse(url),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
-        }, 
+        },
         body: jsonEncode({
           "date": date,
           "time": time,
           "distance": distance,
-        })
-      ); 
+        }),
+      );
 
       if (kDebugMode) {
         print("The response of sending marathon data is ${response.body}");
@@ -287,20 +324,19 @@ class MarathonController extends GetxController
 
       if (response.statusCode == 200) {
         EasyLoading.showSuccess("Data sent successfully");
-      } else{
+      } else {
         EasyLoading.showError("Failed to send data: ${response.statusCode}");
         if (kDebugMode) {
           print("Error sending marathon data: ${response.statusCode}");
         }
       }
-
-    } catch (e){
+    } catch (e) {
       EasyLoading.showError("Error: $e");
       if (kDebugMode) {
         print("The error for sending marathon data is $e");
-      } 
+      }
     } finally {
       EasyLoading.dismiss();
     }
   }
- }
+}
