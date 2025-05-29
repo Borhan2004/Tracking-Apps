@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:chrismiche/core/localization/end_points.dart' show Urls;
 import 'package:chrismiche/core/services/shared_preferences_data_helper.dart'
     show SharedPreferencesDataHelper;
-import 'package:chrismiche/features/details/controller/details_controller.dart';
+import 'package:chrismiche/core/services/shared_preferences_helper.dart' show SharedPreferencesHelper;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class OngoingController extends GetxController
@@ -46,7 +50,7 @@ class OngoingController extends GetxController
 
     Timer.periodic(const Duration(minutes: 1), (timer) async {
       if (isTracking.value && !isPaused.value) {
-        _checkDateChangeAndStore();
+         _checkDateChangeAndStore();
       }
     });
 
@@ -60,9 +64,6 @@ class OngoingController extends GetxController
           currentFormattedDate,
         );
         await SharedPreferencesDataHelper.printSavedTrackingData();
-        if (Get.isRegistered<DetailsController>()) {
-          await Get.find<DetailsController>().updateMeters();
-        }
       }
     });
   }
@@ -256,11 +257,46 @@ class OngoingController extends GetxController
         _lastSavedDate.value,
       );
       await SharedPreferencesDataHelper.printSavedTrackingData();
-      if (Get.isRegistered<DetailsController>()) {
-        await Get.find<DetailsController>().updateMeters();
-      }
+      
       _reset();
       _lastSavedDate.value = currentFormattedDate;
+    }
+  }
+
+  Future<void> updateDistance(String date, double distance) async{
+    try{
+      String? token = await SharedPreferencesHelper.getAccessToken(); 
+      if(token == null) {
+        if (kDebugMode) {
+          print("No token found");
+        }
+        return;
+      }
+      final response = await http.post(
+        Uri.parse('${Urls.baseUrl}/movements/ongoing'), 
+        headers: {
+          'Content-Type': 'application/json', 
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'date': date,
+          'distance': distance,
+        })
+      ); 
+
+      if (response.statusCode == 200){
+        if (kDebugMode) {
+          print("The data inseted successfully");
+        } 
+      } else{
+        if (kDebugMode) {
+          print("Error updating distance: ${response.statusCode}"); 
+        }
+      }
+    } catch (e){
+      if (kDebugMode) {
+        print("The error of fetching distance is $e");
+      }
     }
   }
 }
