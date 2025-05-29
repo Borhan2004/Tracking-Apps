@@ -1,12 +1,20 @@
+import 'dart:convert';
+
 import 'package:audioplayers/audioplayers.dart';
+import 'package:chrismiche/core/localization/end_points.dart' show Urls;
+import 'package:chrismiche/core/services/shared_preferences_helper.dart' show SharedPreferencesHelper;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:chrismiche/core/services/tracking_data_storage.dart';
-import 'package:chrismiche/features/details/controller/details_controller.dart'; 
+import 'package:chrismiche/features/details/controller/details_controller.dart';
 
-class MarathonController extends GetxController with GetTickerProviderStateMixin {
+class MarathonController extends GetxController
+    with GetTickerProviderStateMixin {
   late ScrollController scrollController;
   late AnimationController animationController;
   late AudioPlayer audioPlayer;
@@ -17,7 +25,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
   final RxBool isRunning = false.obs;
 
   RxDouble totalDistance = 0.0.obs;
-  Rx<Duration> elapsedTime = Duration.zero.obs; 
+  Rx<Duration> elapsedTime = Duration.zero.obs;
   Timer? _distanceTimer;
   Timer? _restartTimer;
   Timer? _timer;
@@ -62,34 +70,37 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     if (maxScrollExtent <= 0) return;
     animationController.forward();
     isRunning.value = true;
-    await audioPlayer.setSource(AssetSource('music/Running.wav')); 
-    await audioPlayer.resume(); 
+    await audioPlayer.setSource(AssetSource('music/Running.wav'));
+    await audioPlayer.resume();
 
     _startDistanceUpdate();
-    _startTimer(); 
+    _startTimer();
   }
 
   void stopAnimation() async {
     animationController.stop();
     isRunning.value = false;
-    await audioPlayer.stop(); 
+    await audioPlayer.stop();
     _stopDistanceUpdate();
-    _stopTimer(); 
+    _stopTimer();
 
     try {
       await TrackingDataStorage.saveDailyTracking(
         totalDistance.value,
         currentDate.value,
       );
-      debugPrint('Stop: Saved totalDistance: ${totalDistance.value} for ${currentDate.value}');
+      debugPrint(
+        'Stop: Saved totalDistance: ${totalDistance.value} for ${currentDate.value}',
+      );
 
       if (Get.isRegistered<DetailsController>()) {
         final detailsController = Get.find<DetailsController>();
         await detailsController.updateMeters();
-        debugPrint('Stop: Notified DetailsController to update meters to ${totalDistance.value}');
+        debugPrint(
+          'Stop: Notified DetailsController to update meters to ${totalDistance.value}',
+        );
       }
 
-   
       showDateAndDistance();
 
       totalDistance.value = 0.0;
@@ -116,7 +127,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
 
   void updateCurrentDate() {
     final now = DateTime.now();
-    currentDate.value = DateFormat("d, MMMM, y").format(now);
+    currentDate.value = DateFormat("d MMMM, y").format(now);
   }
 
   void showDateAndDistance() {
@@ -134,10 +145,10 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('OK'),
-          ),
+          TextButton(onPressed: (){
+             sendData(currentDate.value, _formatDuration(elapsedTime.value), totalDistance.value);
+             Get.back(); 
+          }, child: const Text('OK')),
         ],
       ),
     );
@@ -205,12 +216,16 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
           totalDistance.value,
           _lastSavedDate.value,
         );
-        debugPrint('Date change: Saved distance: ${totalDistance.value} for ${_lastSavedDate.value}');
+        debugPrint(
+          'Date change: Saved distance: ${totalDistance.value} for ${_lastSavedDate.value}',
+        );
 
         if (Get.isRegistered<DetailsController>()) {
           final detailsController = Get.find<DetailsController>();
           await detailsController.updateMeters();
-          debugPrint('Date change: Notified DetailsController to update meters to ${totalDistance.value}');
+          debugPrint(
+            'Date change: Notified DetailsController to update meters to ${totalDistance.value}',
+          );
         }
       } catch (e) {
         debugPrint('Date change: Error saving distance: $e');
@@ -232,10 +247,60 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
         stopAnimation();
         _reset();
         startAnimation();
-        Get.snackbar('Animation Restarted', 'Running animation restarted at $restartTime.');
+        Get.snackbar(
+          'Animation Restarted',
+          'Running animation restarted at $restartTime.',
+        );
       }
     });
   }
 
-  
-}
+
+  Future<void> sendData(String date, String time, double distance) async {
+    try{
+      EasyLoading.show(status: "Sending data...");
+      String? token = await SharedPreferencesHelper.getAccessToken();
+      if (token == null) {
+        if (kDebugMode) {
+          print("No access token found");
+        }
+        return;
+      }  
+      final url = '${Urls.baseUrl}/instant-movements/tracking-run';
+
+      final response = await http.post(
+        Uri.parse(url), 
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        }, 
+        body: jsonEncode({
+          "date": date,
+          "time": time,
+          "distance": distance,
+        })
+      ); 
+
+      if (kDebugMode) {
+        print("The response of sending marathon data is ${response.body}");
+      }
+
+      if (response.statusCode == 200) {
+        EasyLoading.showSuccess("Data sent successfully");
+      } else{
+        EasyLoading.showError("Failed to send data: ${response.statusCode}");
+        if (kDebugMode) {
+          print("Error sending marathon data: ${response.statusCode}");
+        }
+      }
+
+    } catch (e){
+      EasyLoading.showError("Error: $e");
+      if (kDebugMode) {
+        print("The error for sending marathon data is $e");
+      } 
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+ }
