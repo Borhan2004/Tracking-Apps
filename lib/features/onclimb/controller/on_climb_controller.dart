@@ -1,15 +1,22 @@
 import 'dart:async';
-import 'package:chrismiche/core/services/shared_preferences_data_helper.dart' show SharedPreferencesDataHelper;
+import 'dart:convert';
+import 'package:chrismiche/core/localization/end_points.dart';
+import 'package:chrismiche/core/services/shared_preferences_data_helper.dart'
+    show SharedPreferencesDataHelper;
+import 'package:chrismiche/core/services/shared_preferences_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-class OnClimbController extends GetxController with GetTickerProviderStateMixin {
+class OnClimbController extends GetxController
+    with GetTickerProviderStateMixin {
   late ScrollController scrollController;
   late AnimationController animationController;
 
-  final double imageHeight = 2000; 
+  final double imageHeight = 2000;
   double maxScrollExtent = 0;
 
   RxBool isTracking = false.obs;
@@ -17,7 +24,7 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
   RxDouble totalDistance = 0.0.obs;
   RxDouble totalClimbed = 0.0.obs;
   RxInt floorCount = 0.obs;
-  RxDouble savedTotalClimbed = 0.0.obs; 
+  RxDouble savedTotalClimbed = 0.0.obs;
   RxString currentDate = ''.obs;
   final RxString _lastSavedDate = ''.obs;
 
@@ -46,7 +53,7 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         animationController.reset();
-        animationController.forward(); // loop
+        animationController.forward();
       }
     });
     SharedPreferencesDataHelper.clearLegacyClimbingData();
@@ -61,9 +68,39 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
         _checkDateChangeAndStore();
       }
     });
-    Timer.periodic(const Duration(hours: 24), (timer) {
+
+
+    Timer.periodic(const Duration(seconds: 15), (timer) async {
       if (isTracking.value && !isPaused.value) {
-        _saveAndUpdateData();
+        final now = DateTime.now();
+        final currentFormattedDate = DateFormat("d MMMM, y").format(now);
+        await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+          totalClimbed.value,
+          floorCount.value,
+          currentFormattedDate,
+        );
+        String? token = await SharedPreferencesHelper.getAccessToken();
+        if (token == null) {
+          if (kDebugMode) {
+            await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+              totalClimbed.value,
+              floorCount.value,
+              currentFormattedDate,
+            );
+            print("Token is null, data saved to SharedPreferences only");
+          }
+        } else {
+          if (kDebugMode) {
+            print("Token found, sending data to API------------");
+            await sendData(currentFormattedDate, totalDistance.value);
+            await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+              totalClimbed.value,
+              floorCount.value,
+              currentFormattedDate,
+            );
+          }
+        }
+        await SharedPreferencesDataHelper.printSavedTrackingData();
       }
     });
   }
@@ -71,25 +108,18 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
   Future<void> _loadSavedData() async {
     final lastSavedDate = await SharedPreferencesDataHelper.getLastSavedDate();
     final dateToFetch = lastSavedDate ?? currentDate.value;
-    final climbed = await SharedPreferencesDataHelper.getClimbedByDate(dateToFetch);
-    final floors = await SharedPreferencesDataHelper.getFloorCountByDate(dateToFetch);
-    
+    final climbed = await SharedPreferencesDataHelper.getClimbedByDate(
+      dateToFetch,
+    );
+    final floors = await SharedPreferencesDataHelper.getFloorCountByDate(
+      dateToFetch,
+    );
+
     savedTotalClimbed.value = climbed ?? 0.0;
     floorCount.value = floors ?? 0;
     currentDate.value = dateToFetch;
     _lastSavedDate.value = dateToFetch;
-    
-    await SharedPreferencesDataHelper.printSavedTrackingData();
-  }
 
-  Future<void> _saveAndUpdateData() async {
-    await SharedPreferencesDataHelper.saveDailyClimbingTracking(
-      totalDistance.value,
-      totalClimbed.value,
-      floorCount.value,
-      currentDate.value,
-    );
-    savedTotalClimbed.value = totalClimbed.value;
     await SharedPreferencesDataHelper.printSavedTrackingData();
   }
 
@@ -97,8 +127,8 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     maxScrollExtent = imageHeight - viewportHeight;
     if (maxScrollExtent <= 0) return;
 
-    scrollController.jumpTo(maxScrollExtent); 
-    animationController.forward(); 
+    scrollController.jumpTo(maxScrollExtent);
+    animationController.forward();
   }
 
   void stopAnimation() {
@@ -144,7 +174,10 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     _lastPosition = null;
 
     _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.best, distanceFilter: 1),
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 1,
+      ),
     ).listen((Position position) {
       if (_lastPosition != null) {
         double distance = Geolocator.distanceBetween(
@@ -196,35 +229,8 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     _positionStream?.cancel();
     stopAnimation();
 
-    await _saveAndUpdateData();
-
     isTracking.value = false;
     isPaused.value = false;
-
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Tracking Summary'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
-            Text('Elevation Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
-            Text('Floors Climbed: ${floorCount.value}'),
-            Text('Saved Elevation: ${savedTotalClimbed.value.toStringAsFixed(2)} meters'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              _reset();
-            },
-            child: const Text('Finish'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _reset() {
@@ -234,24 +240,106 @@ class OnClimbController extends GetxController with GetTickerProviderStateMixin 
     _lastPosition = null;
   }
 
+
   void updateCurrentDate() {
     final now = DateTime.now();
-    currentDate.value = DateFormat("d, MMMM, y").format(now);
+    currentDate.value = DateFormat("d MMMM, y").format(now);
   }
 
   void _checkDateChangeAndStore() async {
-    final now = DateTime.now();
-    final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+  final now = DateTime.now();
+  final currentFormattedDate = DateFormat("d MMMM, y").format(now);
 
-    if (_lastSavedDate.value.isEmpty) {
-      _lastSavedDate.value = currentFormattedDate;
-      return;
+  if (_lastSavedDate.value.isEmpty) {
+    _lastSavedDate.value = currentFormattedDate;
+    return;
+  }
+
+  if (_lastSavedDate.value != currentFormattedDate) {
+    String? token = await SharedPreferencesHelper.getAccessToken();
+    if (token == null) {
+      if (kDebugMode) {
+        print("Token is null, saving to SharedPreferences on date change");
+      }
+      await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+        totalClimbed.value,
+        floorCount.value,
+        _lastSavedDate.value,
+      );
+      await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+        totalDistance.value,
+        _lastSavedDate.value,
+      );
+      await SharedPreferencesDataHelper.printSavedTrackingData();
+    } else {
+      if (kDebugMode) {
+        print(
+          "Token found, sending data to API and saving to SharedPreferences on date change",
+        );
+      }
+      await sendData(_lastSavedDate.value, totalDistance.value);
+      await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+        totalClimbed.value,
+        floorCount.value,
+        _lastSavedDate.value,
+      );
+      await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+        totalDistance.value,
+        _lastSavedDate.value,
+      );
+      await SharedPreferencesDataHelper.printSavedTrackingData();
     }
 
-    if (_lastSavedDate.value != currentFormattedDate) {
-      await _saveAndUpdateData();
-      _reset();
-      _lastSavedDate.value = currentFormattedDate;
+    _reset();
+    _lastSavedDate.value = currentFormattedDate;
+
+    final distance = await SharedPreferencesDataHelper.getDistanceByDate(
+          currentFormattedDate,
+        ) ?? 0.0;
+    final climbed = await SharedPreferencesDataHelper.getClimbedByDate(
+          currentFormattedDate,
+        ) ?? 0.0;
+    final floors = await SharedPreferencesDataHelper.getFloorCountByDate(
+          currentFormattedDate,
+        ) ?? 0;
+    totalDistance.value = distance;
+    totalClimbed.value = climbed;
+    floorCount.value = floors;
+  }
+}
+
+  Future<void> sendData(String date, double distance) async {
+    try {
+      String? token = await SharedPreferencesHelper.getAccessToken();
+      if (token == null) {
+        if (kDebugMode) {
+          print("No access token found");
+        }
+        return;
+      }
+      final url = '${Urls.baseUrl}/movements/on-climbing';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({"date": date, "distance": distance}),
+      );
+      if (kDebugMode) {
+        print("The response of sending climbing data is ${response.body}");
+      }
+      if (response.statusCode != 200) {
+        if (kDebugMode) {
+          print("Error sending climbing data: ${response.statusCode}");
+        }
+        Get.snackbar('Error', 'Failed to send data: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("The error for sending climbing data is $e");
+      }
+      Get.snackbar('Error', 'Network error while sending data');
     }
   }
 }

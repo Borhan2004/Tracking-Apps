@@ -36,6 +36,8 @@ class ChangeCharacterController extends GetxController {
     }
   }
 
+  
+
   Future<void> _saveCharacter() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(_characterKey, selectedCharacter.value);

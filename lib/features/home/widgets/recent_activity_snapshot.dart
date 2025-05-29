@@ -28,7 +28,7 @@ class RecentActivitySnapshot extends StatelessWidget {
         trailing: TextButton(
           onPressed: () {
             controller.viewHistory;
-            Get.to(HistoryScreen());
+            // Get.to(HistoryScreen());
           },
           style: TextButton.styleFrom(padding: EdgeInsets.zero),
           child: Text(

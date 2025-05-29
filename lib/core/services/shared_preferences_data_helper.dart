@@ -40,13 +40,11 @@ class SharedPreferencesDataHelper {
   }
 
   static Future<void> saveDailyClimbingTracking(
-    double distance,
     double climbed,
     int floorCount,
     String date,
   ) async {
     await _initPrefs();
-    await _prefs!.setDouble('${_distanceKey}_$date', distance);
     await _prefs!.setDouble('${_climbingKey}_$date', climbed);
     await _prefs!.setInt('${_floorCountKey}_$date', floorCount);
     await _prefs!.setString('${_dateKey}_lastSaved', date);
@@ -54,12 +52,10 @@ class SharedPreferencesDataHelper {
 
   static Future<void> saveDailyOngoingTracking(
     double distance,
-    double climbed,
     String date,
   ) async {
     await _initPrefs();
     await _prefs!.setDouble('${_distanceKey}_$date', distance);
-    await _prefs!.setDouble('${_climbingKey}_$date', climbed);
     await _prefs!.setString('${_dateKey}_lastSaved', date);
   }
 
@@ -139,23 +135,38 @@ class SharedPreferencesDataHelper {
     await _prefs!.clear();
   }
 
-  static Future<void> printSavedTrackingData() async {
-    await _initPrefs();
-    final keys = _prefs!.getKeys();
+  static String formatDate(DateTime date) {
+  return DateFormat("d MMMM, y").format(date);
+}
 
-    print('=== Saved Tracking Data ===');
-    for (String key in keys) {
-      if (key.startsWith('${_distanceKey}_')) {
-        final date = key.replaceFirst('${_distanceKey}_', '');
-        final distance = await getDistanceByDate(date);
-        final climbed = await getClimbedByDate(date);
-        final floors = await getFloorCountByDate(date);
-        print('Date: $date, Distance: ${distance?.toStringAsFixed(2) ?? '0.00'} meters, '
-              'Climbed: ${climbed?.toStringAsFixed(2) ?? '0.00'} meters, Floors: ${floors ?? 0}');
-      }
+
+  static Future<void> printSavedTrackingData() async {
+  await _initPrefs();
+  final keys = _prefs!.getKeys();
+
+  final today = formatDate(DateTime.now());
+  final yesterday = formatDate(DateTime.now().subtract(const Duration(days: 1)));
+
+  print('=== Saved Tracking Data ===');
+  for (String key in keys) {
+    if (key.startsWith('${_distanceKey}_')) {
+      final date = key.replaceFirst('${_distanceKey}_', '');
+
+      // Filter: only today or yesterday
+      if (date != today && date != yesterday) continue;
+
+      final distance = await getDistanceByDate(date);
+      final climbed = await getClimbedByDate(date);
+      final floors = await getFloorCountByDate(date);
+
+      print('Date: $date, Distance: ${distance?.toStringAsFixed(2) ?? '0.00'} meters, '
+            'Climbed: ${climbed?.toStringAsFixed(2) ?? '0.00'} meters, Floors: ${floors ?? 0}');
     }
-    final lastSavedDate = await getLastSavedDate();
-    print('Last Saved Date: ${lastSavedDate ?? 'None'}');
-    print('==========================');
   }
+
+  final lastSavedDate = await getLastSavedDate();
+  print('Last Saved Date: ${lastSavedDate ?? 'None'}');
+  print('==========================');
+}
+
 }
