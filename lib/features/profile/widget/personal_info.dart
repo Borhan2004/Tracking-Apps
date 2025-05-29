@@ -31,7 +31,16 @@ class PersonalInfo extends StatelessWidget {
               Spacer(),
               Obx(() {
                 return GestureDetector(
-                  onTap: controller.toggleEdit,
+                  onTap: () {
+                    if (controller.isEditing.value) {
+                        
+                      controller.toggleEdit();  
+                      controller.updateProfile();  
+                    } else {
+                      // Edit mode: enter editing
+                      controller.toggleEdit();
+                    }
+                  },
                   child: Text(
                     controller.isEditing.value ? 'Save' : 'Edit',
                     style: TextStyle(
