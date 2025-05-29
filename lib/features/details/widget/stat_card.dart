@@ -81,7 +81,16 @@ class StatCard extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             Text(
-              '${controller.meters.value.toStringAsFixed(2)} meters',
+              '${controller.ongoingDistance.value.toStringAsFixed(2)} meters-Run',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.teal,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              '${controller.climbingDistance.value.toStringAsFixed(2)} meters-Climb',
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.teal,

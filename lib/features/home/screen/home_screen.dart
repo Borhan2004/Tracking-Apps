@@ -10,8 +10,7 @@ import 'package:chrismiche/features/home/widgets/quick_navigation_tiles.dart'
     show QuickNavigationTiles;
 import 'package:chrismiche/features/home/widgets/quick_stats_overview.dart'
     show QuickStatsOverview;
-import 'package:chrismiche/features/home/widgets/recent_activity_snapshot.dart'
-    show RecentActivitySnapshot;
+
 import 'package:chrismiche/features/marathon/screen/marathon_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -36,12 +35,14 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Welcome, John Doe! 🚀",
-              style: getTextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+            Obx(
+              () => Text(
+                "Welcome, ${controller.fullName.value} 🚀",
+                style: getTextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
             ),
             SizedBox(height: 8),
@@ -80,8 +81,8 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 24),
-            RecentActivitySnapshot(),
+            //SizedBox(height: 24),
+            // RecentActivitySnapshot(),
             SizedBox(height: 24),
             CharacterPreview(),
             SizedBox(height: 24),

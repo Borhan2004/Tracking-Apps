@@ -10,35 +10,35 @@ class AllDetails extends StatelessWidget {
   final DetailsController detailsController = Get.put(DetailsController());
 
   double get caloriesPerDay {
-    return (detailsController.meters.value / 0.762) * 0.035;
+    return (detailsController.ongoingDistance.value / 0.762) * 0.035;
   }
 
   int get totalCalories {
-    return ((detailsController.meters.value / 0.762) * 0.035).round();
+    return ((detailsController.ongoingDistance.value / 0.762) * 0.035).round();
   }
 
   double get footballFields {
-    return detailsController.meters.value / 109.7;
+    return detailsController.ongoingDistance.value / 109.7;
   }
 
   double get marathons {
-    return detailsController.meters.value / 42200;
+    return detailsController.ongoingDistance.value / 42200;
   }
 
   double get earthCircuits {
-    return detailsController.meters.value / 40075000;
+    return detailsController.ongoingDistance.value / 40075000;
   }
 
   double get eiffelTowers {
-    return (detailsController.meters.value / 10) / 330;
+    return (detailsController.climbingDistance.value / 10) / 330;
   }
 
   double get burjKhalifas {
-    return (detailsController.meters.value / 10) / 828;
+    return (detailsController.climbingDistance.value / 10) / 828;
   }
 
   double get spaceStations {
-    return (detailsController.meters.value / 10) / 400000;
+    return (detailsController.climbingDistance.value / 10) / 400000;
   }
 
   @override

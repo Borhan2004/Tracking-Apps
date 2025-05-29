@@ -75,7 +75,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
   RxDouble totalDistance = 0.0.obs;
   RxDouble totalClimbed = 0.0.obs;
   RxInt floorCount = 0.obs;
-  RxString elapsedTime = '00:00:00'.obs; // Timer display in hh:mm:ss
+  RxString elapsedTime = '00:00:00'.obs; 
   Timer? _trackingTimer;
   int _secondsElapsed = 0;
 
@@ -114,7 +114,6 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     _secondsElapsed = 0;
     elapsedTime.value = '00:00:00';
 
-    // Start the timer
     _trackingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!isTracking.value || isPaused.value) return;
       _secondsElapsed++;
@@ -241,7 +240,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
 
   void updateCurrentDate() {
     final now = DateTime.now();
-    currentDate.value = DateFormat("d, MMMM, y").format(now);
+    currentDate.value = DateFormat("d MMMM, y").format(now);
   }
   
   Future<void> sendData(String date, String time, double distance) async {
@@ -254,7 +253,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
         }
         return;
       }
-      final url = '${Urls.baseUrl}/instant-movements/tracking-run';
+      final url = '${Urls.baseUrl}/instant-movements/tracking-climb';
 
       final response = await http.post(
         Uri.parse(url),

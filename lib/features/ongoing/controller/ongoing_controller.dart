@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:chrismiche/core/localization/end_points.dart' show Urls;
 import 'package:chrismiche/core/services/shared_preferences_data_helper.dart'
     show SharedPreferencesDataHelper;
-import 'package:chrismiche/core/services/shared_preferences_helper.dart' show SharedPreferencesHelper;
+import 'package:chrismiche/core/services/shared_preferences_helper.dart'
+    show SharedPreferencesHelper;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -46,11 +47,13 @@ class OngoingController extends GetxController
     updateCurrentDate();
 
     final now = DateTime.now();
-    final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
-    final distance = await SharedPreferencesDataHelper.getDistanceByDate(currentFormattedDate) ?? 0.0;
-    final climbed = await SharedPreferencesDataHelper.getClimbedByDate(currentFormattedDate) ?? 0.0;
+    final currentFormattedDate = DateFormat("d MMMM, y").format(now);
+    final distance =
+        await SharedPreferencesDataHelper.getDistanceByDate(
+          currentFormattedDate,
+        ) ??
+        0.0;
     totalDistance.value = distance;
-    totalClimbed.value = climbed;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       startTracking();
@@ -58,22 +61,35 @@ class OngoingController extends GetxController
 
     Timer.periodic(const Duration(minutes: 1), (timer) async {
       if (isTracking.value && !isPaused.value) {
-
-         _checkDateChangeAndStore();
-
+        await _checkDateChangeAndStore();
       }
     });
 
     Timer.periodic(const Duration(seconds: 10), (timer) async {
       if (isTracking.value && !isPaused.value) {
         final now = DateTime.now();
-        final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
-        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-          totalDistance.value,
-          totalClimbed.value,
-          currentFormattedDate,
-        );
-        await SharedPreferencesDataHelper.printSavedTrackingData();
+        final currentFormattedDate = DateFormat("d MMMM, y").format(now);
+        String? token = await SharedPreferencesHelper.getAccessToken();
+        if (token == null) {
+          if (kDebugMode) {
+            print("Token is null, saving to SharedPreferences");
+          }
+          await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+            totalDistance.value,
+            currentFormattedDate,
+          );
+          await SharedPreferencesDataHelper.printSavedTrackingData();
+        } else {
+          if (kDebugMode) {
+            print("Token found, sending data to API///////");
+          }
+          await sendData(currentFormattedDate, totalDistance.value);
+          await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+            totalDistance.value,
+            currentFormattedDate,
+          );
+          await SharedPreferencesDataHelper.printSavedTrackingData();
+        }
       }
     });
   }
@@ -102,7 +118,6 @@ class OngoingController extends GetxController
   RxBool isTracking = false.obs;
   RxBool isPaused = false.obs;
   RxDouble totalDistance = 0.0.obs;
-  RxDouble totalClimbed = 0.0.obs;
 
   Position? _lastPosition;
   Timer? _timer;
@@ -155,11 +170,6 @@ class OngoingController extends GetxController
           position.longitude,
         );
         totalDistance.value += distance;
-
-        double elevationGain = position.altitude - _lastPosition!.altitude;
-        if (elevationGain > 0) {
-          totalClimbed.value += elevationGain;
-        }
       }
       _lastPosition = position;
     });
@@ -235,10 +245,9 @@ class OngoingController extends GetxController
     stopAnimation();
 
     final now = DateTime.now();
-    final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+    final currentFormattedDate = DateFormat("d MMMM, y").format(now);
     await SharedPreferencesDataHelper.saveDailyOngoingTracking(
       totalDistance.value,
-      totalClimbed.value,
       currentFormattedDate,
     );
 
@@ -253,7 +262,6 @@ class OngoingController extends GetxController
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
-            Text('Elevation Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
           ],
         ),
         actions: [
@@ -271,7 +279,6 @@ class OngoingController extends GetxController
 
   void _reset() {
     totalDistance.value = 0.0;
-    totalClimbed.value = 0.0;
     _lastPosition = null;
   }
 
@@ -279,14 +286,14 @@ class OngoingController extends GetxController
 
   void updateCurrentDate() {
     final now = DateTime.now();
-    currentDate.value = DateFormat("d, MMMM, y").format(now);
+    currentDate.value = DateFormat("d MMMM, y").format(now);
   }
 
   final RxString _lastSavedDate = ''.obs;
 
   Future<void> _checkDateChangeAndStore() async {
     final now = DateTime.now();
-    final currentFormattedDate = DateFormat("d, MMMM, y").format(now);
+    final currentFormattedDate = DateFormat("d MMMM, y").format(now);
 
     if (_lastSavedDate.value.isEmpty) {
       _lastSavedDate.value = currentFormattedDate;
@@ -294,56 +301,75 @@ class OngoingController extends GetxController
     }
 
     if (_lastSavedDate.value != currentFormattedDate) {
-      await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-        totalDistance.value,
-        totalClimbed.value,
-        _lastSavedDate.value,
-      );
-      await SharedPreferencesDataHelper.printSavedTrackingData();
-      
+      String? token = await SharedPreferencesHelper.getAccessToken();
+      if (token == null) {
+        if (kDebugMode) {
+          print("Token is null, saving to SharedPreferences on date change");
+        }
+        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+          totalDistance.value,
+          _lastSavedDate.value,
+        );
+        await SharedPreferencesDataHelper.printSavedTrackingData();
+      } else {
+        if (kDebugMode) {
+          print(
+            "Token found, sending data to API and saving to SharedPreferences on date change",
+          );
+        }
+        await sendData(_lastSavedDate.value, totalDistance.value);
+        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+          totalDistance.value,
+          _lastSavedDate.value,
+        );
+        await SharedPreferencesDataHelper.printSavedTrackingData();
+      }
+
       _reset();
       _lastSavedDate.value = currentFormattedDate;
 
-      final distance = await SharedPreferencesDataHelper.getDistanceByDate(currentFormattedDate) ?? 0.0;
-      final climbed = await SharedPreferencesDataHelper.getClimbedByDate(currentFormattedDate) ?? 0.0;
+      final distance =
+          await SharedPreferencesDataHelper.getDistanceByDate(
+            currentFormattedDate,
+          ) ??
+          0.0;
       totalDistance.value = distance;
-      totalClimbed.value = climbed;
     }
   }
 
-  Future<void> updateDistance(String date, double distance) async{
-    try{
-      String? token = await SharedPreferencesHelper.getAccessToken(); 
-      if(token == null) {
+  Future<void> sendData(String date, double distance) async {
+    try {
+      String? token = await SharedPreferencesHelper.getAccessToken();
+      if (token == null) {
         if (kDebugMode) {
-          print("No token found");
+          print("No access token found");
         }
         return;
       }
-      final response = await http.post(
-        Uri.parse('${Urls.baseUrl}/movements/ongoing'), 
-        headers: {
-          'Content-Type': 'application/json', 
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'date': date,
-          'distance': distance,
-        })
-      ); 
+      final url = '${Urls.baseUrl}/movements/ongoing';
 
-      if (response.statusCode == 200){
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({"date": date, "distance": distance}),
+      );
+
+      if (kDebugMode) {
+        print("The response of sending marathon data is ${response.body}");
+      }
+
+      if (response.statusCode == 200) {
+      } else {
         if (kDebugMode) {
-          print("The data inseted successfully");
-        } 
-      } else{
-        if (kDebugMode) {
-          print("Error updating distance: ${response.statusCode}"); 
+          print("Error sending marathon data: ${response.statusCode}");
         }
       }
-    } catch (e){
+    } catch (e) {
       if (kDebugMode) {
-        print("The error of fetching distance is $e");
+        print("The error for sending marathon data is $e");
       }
     }
   }

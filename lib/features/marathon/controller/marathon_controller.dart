@@ -119,7 +119,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
 
       if (Get.isRegistered<DetailsController>()) {
         final detailsController = Get.find<DetailsController>();
-        await detailsController.updateMeters();
+        await detailsController.updateDistance();
         debugPrint(
           'Stop: Notified DetailsController to update meters to ${totalDistance.value}',
         );
@@ -260,7 +260,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
 
         if (Get.isRegistered<DetailsController>()) {
           final detailsController = Get.find<DetailsController>();
-          await detailsController.updateMeters();
+          await detailsController.updateDistance();
           debugPrint(
             'Date change: Notified DetailsController to update meters to ${totalDistance.value}',
           );
