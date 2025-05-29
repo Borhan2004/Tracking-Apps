@@ -22,7 +22,7 @@ class MarathonCounters extends StatelessWidget {
               style: const TextStyle(fontSize: 16),
             ),
             Text(
-              '${(controller.totalDistance.value / 0.762).toStringAsFixed(2)} Steps',
+              '${(controller.totalDistance.value / 0.762).toInt()} Steps',
               style: const TextStyle(
                 fontSize: 30,
                 color: Colors.black,

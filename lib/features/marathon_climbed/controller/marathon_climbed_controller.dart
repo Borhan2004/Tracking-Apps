@@ -1,9 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:chrismiche/core/localization/end_points.dart';
 import 'package:chrismiche/core/services/climbing_data_storage.dart';
+import 'package:chrismiche/core/services/shared_preferences_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class MarathonClimbedController extends GetxController with GetTickerProviderStateMixin {
@@ -204,6 +210,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
         actions: [
           TextButton(
             onPressed: () {
+              sendData(currentDate.value, elapsedTime.value, totalClimbed.value);
               Get.back();
               _reset();
             },
@@ -235,5 +242,52 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
   void updateCurrentDate() {
     final now = DateTime.now();
     currentDate.value = DateFormat("d, MMMM, y").format(now);
+  }
+  
+  Future<void> sendData(String date, String time, double distance) async {
+    try {
+      EasyLoading.show(status: "Sending data...");
+      String? token = await SharedPreferencesHelper.getAccessToken();
+      if (token == null) {
+        if (kDebugMode) {
+          print("No access token found");
+        }
+        return;
+      }
+      final url = '${Urls.baseUrl}/instant-movements/tracking-run';
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({
+          "date": date,
+          "time": time,
+          "distance": distance,
+        }),
+      );
+
+      if (kDebugMode) {
+        print("The response of sending marathon data is ${response.body}");
+      }
+
+      if (response.statusCode == 200) {
+        EasyLoading.showSuccess("Data sent successfully");
+      } else {
+        EasyLoading.showError("Failed to send data: ${response.statusCode}");
+        if (kDebugMode) {
+          print("Error sending marathon data: ${response.statusCode}");
+        }
+      }
+    } catch (e) {
+      EasyLoading.showError("Error: $e");
+      if (kDebugMode) {
+        print("The error for sending marathon data is $e");
+      }
+    } finally {
+      EasyLoading.dismiss();
+    }
   }
 }
