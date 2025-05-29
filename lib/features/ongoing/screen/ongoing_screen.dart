@@ -3,7 +3,6 @@ import 'package:chrismiche/features/home/controller/change_character_controller.
 import 'package:chrismiche/features/ongoing/controller/ongoing_controller.dart';
 import 'package:chrismiche/features/ongoing/widgets/counters.dart'
     show Counters;
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,10 +22,12 @@ class OngoingScreen extends StatelessWidget {
       body: Stack(
         children: [
           AnimatedBuilder(
-            animation: controller.animationController,
+            animation: controller.animationController ?? Listenable.merge([]),
             builder: (context, child) {
+              final scrollController =
+                  controller.scrollController ?? ScrollController();
               return SingleChildScrollView(
-                controller: controller.scrollController,
+                controller: scrollController,
                 scrollDirection: Axis.horizontal,
                 physics: const NeverScrollableScrollPhysics(),
                 child: Row(

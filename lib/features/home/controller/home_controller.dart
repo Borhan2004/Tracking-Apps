@@ -1,7 +1,9 @@
+
 import 'package:chrismiche/core/localization/end_points.dart' show Urls;
 import 'package:chrismiche/core/services/shared_preferences_helper.dart' show SharedPreferencesHelper;
 import 'package:chrismiche/features/home/model/movement_history.dart' show MovementHistoryResponse;
 import 'package:flutter/foundation.dart';
+
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -20,6 +22,7 @@ class HomeController extends GetxController {
     final today = DateFormat('d MMMM, yyyy').format(DateTime.now());
     fetchMovementData(today);
   }
+
 
   Future<void> fetchMovementData(String date) async {
     try {
@@ -61,9 +64,26 @@ class HomeController extends GetxController {
     } catch (e) {
       print("Error fetching movement data: $e");
     }
+
   }
 
-  void startNewRun() => Get.toNamed('/ongoing');
+  Future<void> updateTrackingData() async {
+    final lastSavedData = await SharedPreferencesDataHelper.getLastSavedDistance();
+    distanceToday.value = lastSavedData['distance'] ?? 0.0;
+
+    final lastSavedDate = lastSavedData['date'] as String?;
+    if (lastSavedDate != null && lastSavedDate.isNotEmpty) {
+      final climbed = await SharedPreferencesDataHelper.getClimbedByDate(lastSavedDate);
+      floorsClimbed.value = climbed ?? 0.0;
+    } else {
+      floorsClimbed.value = 0.0;
+    }
+  }
+
+  Future<void> saveAndUpdateTrackingData(double distance, double climbed, String date) async {
+    await SharedPreferencesDataHelper.saveDailyOngoingTracking(distance, climbed, date);
+    await updateTrackingData();
+  }
   void viewHistory() => Get.toNamed('/statistics');
   void changeCharacter() => Get.toNamed('/character-setup');
   void navigateToScreen(String route) => Get.toNamed(route);

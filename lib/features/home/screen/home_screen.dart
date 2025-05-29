@@ -12,6 +12,7 @@ import 'package:chrismiche/features/home/widgets/quick_stats_overview.dart'
     show QuickStatsOverview;
 import 'package:chrismiche/features/home/widgets/recent_activity_snapshot.dart'
     show RecentActivitySnapshot;
+import 'package:chrismiche/features/marathon/screen/marathon_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chrismiche/features/home/controller/home_controller.dart';
@@ -59,7 +60,9 @@ class HomeScreen extends StatelessWidget {
                 width: double.infinity,
 
                 child: ElevatedButton(
-                  onPressed: controller.startNewRun,
+                  onPressed: () {
+                    Get.to(MarathonScreen());
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.appPrimaryColor,
                     shape: RoundedRectangleBorder(

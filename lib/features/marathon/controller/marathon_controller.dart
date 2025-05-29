@@ -17,9 +17,10 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
   final RxBool isRunning = false.obs;
 
   RxDouble totalDistance = 0.0.obs;
-  RxDouble previousDayDistance = 0.0.obs; // Store last saved distance
+  Rx<Duration> elapsedTime = Duration.zero.obs; 
   Timer? _distanceTimer;
   Timer? _restartTimer;
+  Timer? _timer;
 
   @override
   void onInit() async {
@@ -47,16 +48,13 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     });
 
     updateCurrentDate();
-    _updatePreviousDayDistance(); // Initialize last saved distance
-    // Periodically check for date change
     Timer.periodic(const Duration(minutes: 1), (timer) {
       if (isRunning.value) {
         _checkDateChangeAndReset();
       }
     });
 
-    // Start checking for animation restart time
-    restartAnimationAtSpecificTime(const TimeOfDay(hour: 0, minute: 0)); // Restart at 12:00 AM daily
+    restartAnimationAtSpecificTime(const TimeOfDay(hour: 0, minute: 0));
   }
 
   void startAnimation() async {
@@ -67,8 +65,8 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     await audioPlayer.setSource(AssetSource('music/Running.wav')); 
     await audioPlayer.resume(); 
 
-    // Start updating distance
     _startDistanceUpdate();
+    _startTimer(); 
   }
 
   void stopAnimation() async {
@@ -76,25 +74,27 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     isRunning.value = false;
     await audioPlayer.stop(); 
     _stopDistanceUpdate();
+    _stopTimer(); 
 
-    // Save totalDistance to SharedPreferences before resetting
     try {
       await TrackingDataStorage.saveDailyTracking(
         totalDistance.value,
         currentDate.value,
       );
       debugPrint('Stop: Saved totalDistance: ${totalDistance.value} for ${currentDate.value}');
-      previousDayDistance.value = totalDistance.value; // Update previous distance
 
-      // Update DetailsController meters if it exists
       if (Get.isRegistered<DetailsController>()) {
         final detailsController = Get.find<DetailsController>();
         await detailsController.updateMeters();
         debugPrint('Stop: Notified DetailsController to update meters to ${totalDistance.value}');
       }
 
-      totalDistance.value = 0.0; // Reset distance
-      debugPrint('Stop: Reset totalDistance to 0.0');
+   
+      showDateAndDistance();
+
+      totalDistance.value = 0.0;
+      elapsedTime.value = Duration.zero;
+      debugPrint('Stop: Reset totalDistance to 0.0 and elapsedTime to 0');
     } catch (e) {
       debugPrint('Stop: Error saving distance: $e');
       Get.snackbar('Error', 'Failed to save distance: $e');
@@ -107,6 +107,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     animationController.dispose();
     audioPlayer.dispose();
     _stopDistanceUpdate();
+    _stopTimer();
     _restartTimer?.cancel();
     super.onClose();
   }
@@ -116,10 +117,8 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
   void updateCurrentDate() {
     final now = DateTime.now();
     currentDate.value = DateFormat("d, MMMM, y").format(now);
-    _updatePreviousDayDistance(); // Update last saved distance when date changes
   }
 
-  // Function to show date and running distance in a dialog
   void showDateAndDistance() {
     Get.dialog(
       AlertDialog(
@@ -130,6 +129,8 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
           children: [
             Text('Date: ${currentDate.value}'),
             Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
+            Text('Steps: ${(totalDistance.value / 0.762).toStringAsFixed(2)}'),
+            Text('Elapsed Time: ${_formatDuration(elapsedTime.value)}'),
           ],
         ),
         actions: [
@@ -142,31 +143,51 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     );
   }
 
-  // Function to start updating distance
   void _startDistanceUpdate() {
-    const double speed = 2.0; // Simulated speed in meters per second (adjustable)
-    _distanceTimer?.cancel(); // Cancel any existing timer
+    const double speed = 2.0;
+    _distanceTimer?.cancel();
     _distanceTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!isRunning.value) {
         timer.cancel();
         return;
       }
-      totalDistance.value += speed; // Increment distance based on speed
+      totalDistance.value += speed;
     });
   }
 
-  // Function to stop updating distance
   void _stopDistanceUpdate() {
     _distanceTimer?.cancel();
     _distanceTimer = null;
   }
 
-  // Function to reset distance
-  void _reset() {
-    totalDistance.value = 0.0;
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!isRunning.value) {
+        timer.cancel();
+        return;
+      }
+      elapsedTime.value += const Duration(seconds: 1);
+    });
   }
 
-  // Function to check date change and reset distance
+  void _stopTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours.toString().padLeft(2, '0');
+    final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
+    final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return '$hours:$minutes:$seconds';
+  }
+
+  void _reset() {
+    totalDistance.value = 0.0;
+    elapsedTime.value = Duration.zero;
+  }
+
   final RxString _lastSavedDate = ''.obs;
 
   void _checkDateChangeAndReset() async {
@@ -179,16 +200,13 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     }
 
     if (_lastSavedDate.value != currentFormattedDate) {
-      // Save distance before resetting
       try {
         await TrackingDataStorage.saveDailyTracking(
           totalDistance.value,
           _lastSavedDate.value,
         );
         debugPrint('Date change: Saved distance: ${totalDistance.value} for ${_lastSavedDate.value}');
-        previousDayDistance.value = totalDistance.value; // Update previous distance
 
-        // Update DetailsController meters if it exists
         if (Get.isRegistered<DetailsController>()) {
           final detailsController = Get.find<DetailsController>();
           await detailsController.updateMeters();
@@ -200,48 +218,24 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
       }
       _reset();
       _lastSavedDate.value = currentFormattedDate;
-      _updatePreviousDayDistance(); // Update last saved distance
     }
   }
 
-  // Function to restart animation at a specific time
   void restartAnimationAtSpecificTime(TimeOfDay restartTime) {
-    // Cancel any existing restart timer to avoid duplicates
     _restartTimer?.cancel();
-
-    // Create a periodic timer to check the current time every minute
     _restartTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
       final now = DateTime.now();
       final currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
 
-      // Check if the current time matches the specified restart time
       if (currentTime.hour == restartTime.hour &&
           currentTime.minute == restartTime.minute) {
-        // Stop the current animation and distance updates
         stopAnimation();
-
-        // Reset distance to start fresh
         _reset();
-
-        // Start the animation and distance updates again
         startAnimation();
-
-        // Show a notification to the user
         Get.snackbar('Animation Restarted', 'Running animation restarted at $restartTime.');
       }
     });
   }
 
-  // Function to update the last saved distance
-  void _updatePreviousDayDistance() async {
-    try {
-      final lastSaved = await TrackingDataStorage.getLastSavedDistance();
-      previousDayDistance.value = lastSaved['distance'] as double;
-      debugPrint('Updated previousDayDistance: ${previousDayDistance.value} for date: ${lastSaved['date']}');
-    } catch (e) {
-      debugPrint('Error updating last saved distance: $e');
-      Get.snackbar('Error', 'Failed to retrieve last saved distance: $e');
-      previousDayDistance.value = 0.0;
-    }
-  }
+  
 }

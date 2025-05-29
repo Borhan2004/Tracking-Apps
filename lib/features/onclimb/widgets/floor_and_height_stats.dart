@@ -10,8 +10,8 @@ class FloorAndHeightStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double headSize = 12;
-    double bodySize = 10;
+    const double headSize = 12;
+    const double bodySize = 10;
 
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.9,
@@ -31,7 +31,7 @@ class FloorAndHeightStats extends StatelessWidget {
               ),
               Obx(
                 () => Text(
-                  " ${controller.currentDate.value}",
+                  " ${controller.currentDate.value.isEmpty ? 'No data' : controller.currentDate.value}",
                   style: getTextStyle(
                     color: Colors.white,
                     fontSize: bodySize,
@@ -41,33 +41,31 @@ class FloorAndHeightStats extends StatelessWidget {
               ),
             ],
           ),
-
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Floor Climbed: ",
-                style: TextStyle(
+                "Floors Climbed: ",
+                style: getTextStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: headSize,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Obx(
                 () => Text(
-                  "${controller.floorCount.value.toString()} floors",
+                  "${controller.floorCount.value} floors",
                   style: getTextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: bodySize,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
             ],
           ),
-
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -89,6 +87,7 @@ class FloorAndHeightStats extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 10),
             ],
           ),
         ],
