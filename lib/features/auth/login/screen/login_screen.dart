@@ -19,6 +19,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.only(top: 65, left: 15, right: 15, bottom: 30),
         child: SingleChildScrollView(
@@ -102,8 +103,8 @@ class LoginScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.bottomRight,
                   child: InkWell(
-                    onTap: (){
-                      Get.to(ForgetPasswordScreen()); 
+                    onTap: () {
+                      Get.to(ForgetPasswordScreen());
                     },
                     child: Text(
                       "Forgot Password?",
@@ -111,16 +112,14 @@ class LoginScreen extends StatelessWidget {
                         color: AppColors.primaryColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                      ), 
+                      ),
                     ),
                   ),
                 ),
 
                 SizedBox(height: 20),
 
-                CustomButton(
-                  onTap: controller.login, 
-                text: "Log In"),
+                CustomButton(onTap: controller.login, text: "Log In"),
                 SizedBox(height: 30),
                 Row(
                   children: [
@@ -172,9 +171,11 @@ class LoginScreen extends StatelessWidget {
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
-                        recognizer: TapGestureRecognizer()..onTap = () {
-                          Get.offAll(SignUpScreen()); 
-                        },
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                Get.offAll(SignUpScreen());
+                              },
                       ),
                     ],
                   ),

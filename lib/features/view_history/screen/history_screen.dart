@@ -87,6 +87,7 @@ class HistoryScreen extends StatelessWidget {
     final List<double> y2 = [2, 3, 4, 5, 1, 4];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Image.asset(ImagePath.appBarLogo, height: 50),
         elevation: 2,

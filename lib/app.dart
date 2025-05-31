@@ -21,7 +21,9 @@ class Chrismiche extends StatelessWidget {
           initialRoute: AppRoute.getSplashScreen(),
           getPages: AppRoute.routes,
           initialBinding: ControllerBinder(),
-           builder: EasyLoading.init(),
+          builder: (context, widget) {
+            return EasyLoading.init()(context, widget);
+          },
           themeMode: ThemeMode.system,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,

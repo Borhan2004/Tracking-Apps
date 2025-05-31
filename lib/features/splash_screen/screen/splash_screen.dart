@@ -14,6 +14,7 @@ class SplashScreen extends StatelessWidget {
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Image.asset(
         ImagePath.splashScreenLogo,
         height: height,

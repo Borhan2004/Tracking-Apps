@@ -17,6 +17,7 @@ class ForgetPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.only(top: 65, left: 15, right: 15, bottom: 30),
         child: Column(
@@ -33,9 +34,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
-              height: 10,
-            ), 
+            SizedBox(height: 10),
             Align(
               alignment: Alignment.center,
               child: Text(
@@ -61,12 +60,13 @@ class ForgetPasswordScreen extends StatelessWidget {
               hintText: "xyz@gmail.com",
               controller: controller.emailController,
             ),
-            SizedBox(
-              height: 40,
-            ), 
-            CustomButton(onTap: (){
-              Get.offAll(VerifyOtp()); 
-            }, text: "Next")
+            SizedBox(height: 40),
+            CustomButton(
+              onTap: () {
+                Get.offAll(VerifyOtp());
+              },
+              text: "Next",
+            ),
           ],
         ),
       ),
