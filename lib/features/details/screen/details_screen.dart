@@ -8,6 +8,7 @@ class DetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Image.asset(ImagePath.appBarLogo, height: 50),
         elevation: 2,

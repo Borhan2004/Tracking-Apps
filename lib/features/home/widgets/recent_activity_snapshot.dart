@@ -2,7 +2,6 @@ import 'package:chrismiche/core/common/styles/global_text_style.dart'
     show getTextStyle;
 import 'package:chrismiche/core/utils/constants/colors.dart';
 import 'package:chrismiche/features/home/controller/home_controller.dart';
-import 'package:chrismiche/features/view_history/screen/history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -10,6 +10,7 @@ class LoginAlert extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       appBar: AppBar(
         title: Image.asset(ImagePath.appBarLogo, height: 50),
         elevation: 2,

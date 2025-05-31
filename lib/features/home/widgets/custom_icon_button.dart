@@ -17,7 +17,7 @@ class CustomIconButton extends StatelessWidget {
           color: Colors.teal,
           borderRadius: BorderRadius.circular(50),
         ),
-        child: Icon(icon, size: 40, color: Colors.white),
+        child: Center(child: Icon(icon, size: 40, color: Colors.white)),
       ),
     );
   }
