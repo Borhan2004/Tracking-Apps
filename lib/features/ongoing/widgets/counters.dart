@@ -19,7 +19,7 @@ class Counters extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '⏱️ ${controller.currentDate.value}',
+              controller.currentDate.value,
               textAlign: TextAlign.center,
               style: getTextStyle(fontSize: 16),
             ),
@@ -28,7 +28,7 @@ class Counters extends StatelessWidget {
               '${(controller.totalDistance.value / 0.762).toInt()} Steps',
               style: TextStyle(
                 fontSize: 30,
-                color: Colors.black,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),

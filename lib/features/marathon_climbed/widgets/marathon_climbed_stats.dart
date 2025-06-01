@@ -13,35 +13,18 @@ class MarathonClimbedStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double headSize = 12;
-    double bodySize = 10;
 
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Date:",
-                style: getTextStyle(
-                  color: Colors.white,
-                  fontSize: headSize,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Obx(
-                () => Text(
-                  " ${controller.currentDate.value}",
-                  style: getTextStyle(
-                    color: Colors.white,
-                    fontSize: bodySize,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+          Obx(
+            () => Text(
+              " ${controller.currentDate.value}",
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.white),
+            ),
           ),
           const SizedBox(height: 5),
           Row(
@@ -58,10 +41,11 @@ class MarathonClimbedStats extends StatelessWidget {
               Obx(
                 () => Text(
                   "${controller.floorCount.value.toString()} floors",
-                  style: getTextStyle(
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                     color: Colors.white,
-                    fontSize: bodySize,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -84,7 +68,7 @@ class MarathonClimbedStats extends StatelessWidget {
                   "${controller.totalClimbed.value.toStringAsFixed(2)} m",
                   style: getTextStyle(
                     color: Colors.white,
-                    fontSize: bodySize,
+                    fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -108,7 +92,7 @@ class MarathonClimbedStats extends StatelessWidget {
                   controller.elapsedTime.value,
                   style: getTextStyle(
                     color: Colors.white,
-                    fontSize: bodySize,
+                    fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
