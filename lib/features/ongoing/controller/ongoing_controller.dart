@@ -26,20 +26,12 @@ class OngoingController extends GetxController
     scrollController = ScrollController();
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-
-    animationController!.addListener(() {
+      duration: const Duration(seconds: 10),
+    )..addListener(() {
       if (scrollController!.hasClients) {
-        final value = animationController!.value * maxScrollExtent;
+        final value =
+            (animationController!.value * maxScrollExtent) % maxScrollExtent;
         scrollController!.jumpTo(value);
-      }
-    });
-
-    animationController!.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        animationController!.reset();
-        animationController!.forward();
       }
     });
 
@@ -98,7 +90,7 @@ class OngoingController extends GetxController
     if (animationController == null || scrollController == null) return;
     maxScrollExtent = imageWidth - viewportWidth;
     if (maxScrollExtent <= 0) return;
-    animationController!.forward();
+    animationController!.repeat();
   }
 
   void stopAnimation() {
@@ -145,16 +137,41 @@ class OngoingController extends GetxController
     return true;
   }
 
+  void _startStepMonitor() {
+    bool isAnimating = false;
+    double lastDistance = totalDistance.value;
+    int unchangedCount = 0;
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!isTracking.value || isPaused.value) {
+        timer.cancel();
+        return;
+      }
+
+      final current = totalDistance.value;
+      if (current != lastDistance) {
+        unchangedCount = 0;
+        if (!isAnimating) {
+          startAnimation();
+          isAnimating = true;
+        }
+      } else {
+        unchangedCount++;
+        if (unchangedCount >= 2 && isAnimating) {
+          stopAnimation();
+          isAnimating = false;
+        }
+      }
+      lastDistance = current;
+    });
+  }
+
   void startTracking() async {
     if (!await _checkAndRequestLocationPermission()) return;
 
     isTracking.value = true;
     isPaused.value = false;
     _lastPosition = null;
-
-    bool isAnimating = false;
-    double lastDistance = totalDistance.value;
-    int unchangedCount = 0;
 
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
@@ -174,28 +191,7 @@ class OngoingController extends GetxController
       _lastPosition = position;
     });
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!isTracking.value || isPaused.value) {
-        timer.cancel();
-        return;
-      }
-
-      if (totalDistance.value != lastDistance) {
-        unchangedCount = 0;
-        if (!isAnimating) {
-          startAnimation();
-          isAnimating = true;
-        }
-      } else {
-        unchangedCount++;
-        if (unchangedCount >= 2 && isAnimating) {
-          stopAnimation();
-          isAnimating = false;
-        }
-      }
-
-      lastDistance = totalDistance.value;
-    });
+    _startStepMonitor();
   }
 
   void pauseTracking() {
@@ -210,33 +206,7 @@ class OngoingController extends GetxController
 
     isPaused.value = false;
     _positionStream?.resume();
-
-    bool isAnimating = animationController?.isAnimating ?? false;
-    double lastDistance = totalDistance.value;
-    int unchangedCount = 0;
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!isTracking.value || isPaused.value) {
-        timer.cancel();
-        return;
-      }
-
-      if (totalDistance.value != lastDistance) {
-        unchangedCount = 0;
-        if (!isAnimating) {
-          startAnimation();
-          isAnimating = true;
-        }
-      } else {
-        unchangedCount++;
-        if (unchangedCount >= 2 && isAnimating) {
-          stopAnimation();
-          isAnimating = false;
-        }
-      }
-
-      lastDistance = totalDistance.value;
-    });
+    _startStepMonitor();
   }
 
   void stopTracking() async {
