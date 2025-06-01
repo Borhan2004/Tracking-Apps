@@ -40,4 +40,5 @@ class ImagePath {
       'assets/characters/rykerHyperstreamElevator.png';
   static const String junoElevator = 'assets/characters/junoElevator.png';
   static const String grooveJunoElevator = 'assets/characters/grooveJunoElevator.png';
+  static const String characterBackground = 'assets/images/characterBackground.png';
 }

@@ -17,7 +17,7 @@ class MarathonCounters extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '⏱️ ${controller.currentDate.value}',
+              controller.currentDate.value,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16),
             ),
