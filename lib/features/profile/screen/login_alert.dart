@@ -1,3 +1,4 @@
+import 'package:chrismiche/core/auth/auth_service.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/auth/login/screen/login_screen.dart';
 import 'package:chrismiche/features/profile/widget/login_button.dart';
@@ -5,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginAlert extends StatelessWidget {
-  const LoginAlert({super.key});
+  LoginAlert({super.key});
+  final _auth = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +48,9 @@ class LoginAlert extends StatelessWidget {
             LoginButton(
               title: 'Continue with Facebook',
               icon: 'assets/icons/google.png',
-              onPressed: () {},
+              onPressed: () async{
+                await _auth.loginWithGoogle();
+              },
             ),
             LoginButton(
               title: 'Continue with Facebook',

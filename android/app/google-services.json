@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "224795856969",
+    "project_id": "chrismiche-a8b48",
+    "storage_bucket": "chrismiche-a8b48.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224795856969:android:7627e7e2423ef55f2e2f98",
+        "android_client_info": {
+          "package_name": "com.example.chrismiche"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3j3Bsoa6kP0uVlzhTdrGTs5ylFLGfC6Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
