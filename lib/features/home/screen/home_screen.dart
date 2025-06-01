@@ -56,6 +56,13 @@ class HomeScreen extends StatelessWidget {
             ),
             SizedBox(height: 24),
             QuickStatsOverview(),
+
+            //SizedBox(height: 24),
+            // RecentActivitySnapshot(),
+            SizedBox(height: 24),
+            CharacterPreview(),
+            SizedBox(height: 24),
+            QuickNavigationTiles(),
             SizedBox(height: 24),
             Center(
               child: SizedBox(
@@ -82,12 +89,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            //SizedBox(height: 24),
-            // RecentActivitySnapshot(),
-            SizedBox(height: 24),
-            CharacterPreview(),
-            SizedBox(height: 24),
-            QuickNavigationTiles(),
+            SizedBox(height: 20),
           ],
         ),
       ),

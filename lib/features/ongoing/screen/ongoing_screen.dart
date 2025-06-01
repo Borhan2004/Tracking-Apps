@@ -44,15 +44,15 @@ class OngoingScreen extends StatelessWidget {
             },
           ),
           Positioned(
-            top: screenSize.height * 0.15,
+            top: 10,
             left: 10,
             right: 0,
             child: Center(
               child: Obx(
                 () => Image.asset(
                   runningController.characterImagePath,
-                  height: screenSize.height * 0.8,
-                  width: screenSize.width * 0.8,
+                  height: screenSize.height * 1,
+                  width: screenSize.width * 1,
                 ),
               ),
             ),
