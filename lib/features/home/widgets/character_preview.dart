@@ -16,7 +16,8 @@ class CharacterPreview extends StatelessWidget {
     );
 
     return Card(
-      elevation: 2,
+      elevation: 3,
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: EdgeInsets.zero,
       child: ListTile(

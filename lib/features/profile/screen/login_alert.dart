@@ -46,7 +46,7 @@ class LoginAlert extends StatelessWidget {
             ),
             SizedBox(height: 20),
             LoginButton(
-              title: 'Continue with Facebook',
+              title: 'Continue with Google',
               icon: 'assets/icons/google.png',
               onPressed: () async{
                 await _auth.loginWithGoogle();

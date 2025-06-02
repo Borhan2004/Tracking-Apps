@@ -1,3 +1,4 @@
+import 'package:chrismiche/core/auth/auth_service.dart';
 import 'package:chrismiche/core/common/styles/global_text_style.dart';
 import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/core/common/widgets/custom_textfield.dart';
@@ -13,6 +14,8 @@ import 'package:get/get.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
+
+  final _auth = AuthService();
 
   final LoginScreenController controller = Get.put(LoginScreenController());
 
@@ -141,7 +144,9 @@ class LoginScreen extends StatelessWidget {
                 Signinmethod(
                   color: Colors.transparent,
                   textColor: Color(0xFF050505),
-                  onTap: () {},
+                  onTap: () async {
+                    await _auth.loginWithGoogle();
+                  },
                   text: "Continue with Google",
                   image: ImagePath.signInWithGoogle,
                 ),
@@ -149,7 +154,9 @@ class LoginScreen extends StatelessWidget {
                 Signinmethod(
                   color: Colors.transparent,
                   textColor: Color(0xFF050505),
-                  onTap: () {},
+                  onTap: () async {
+                    await _auth.signInWithFacebook();
+                  },
                   text: "Continue with Facebook",
                   image: ImagePath.signInWithFacebook,
                 ),
