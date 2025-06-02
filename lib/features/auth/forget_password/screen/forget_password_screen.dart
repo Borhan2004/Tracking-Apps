@@ -3,7 +3,6 @@ import 'package:chrismiche/core/common/styles/global_text_style.dart'
 import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/core/common/widgets/custom_textfield.dart';
 import 'package:chrismiche/features/auth/forget_password/controller/forget_password_controller.dart';
-import 'package:chrismiche/features/auth/forget_password/screen/verify_otp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -42,7 +41,6 @@ class ForgetPasswordScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-
             SizedBox(height: 40),
             Align(
               alignment: Alignment.bottomLeft,
@@ -63,7 +61,7 @@ class ForgetPasswordScreen extends StatelessWidget {
             SizedBox(height: 40),
             CustomButton(
               onTap: () {
-                Get.offAll(VerifyOtp());
+                controller.sendVerificationEmail();
               },
               text: "Next",
             ),
