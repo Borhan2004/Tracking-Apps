@@ -55,7 +55,9 @@ class LoginAlert extends StatelessWidget {
             LoginButton(
               title: 'Continue with Facebook',
               icon: 'assets/icons/facebook.png',
-              onPressed: () {},
+              onPressed: () async{
+                await _auth.signInWithFacebook();
+              },
             ),
             LoginButton(
               title: 'Continue with Email',
