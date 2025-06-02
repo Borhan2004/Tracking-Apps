@@ -40,6 +40,5 @@ flutter {
 
 dependencies {
     implementation ("com.google.android.gms:play-services-auth:20.7.0")
-
-    // Other dependencies go here (e.g., Firebase Auth if needed)
+    implementation ("com.facebook.android:facebook-android-sdk:latest.release")
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chrismiche</string>
+    <string name="facebook_app_id">1345589173218186</string>
+    <string name="fb_login_protocol_scheme">fb1345589173218186</string>
+    <string name="facebook_client_token">2c96b927e230f00acbb29568effc671e</string>
+</resources>
