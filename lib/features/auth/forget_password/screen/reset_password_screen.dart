@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:get/get.dart';
 
-class ResetPassword extends StatelessWidget {
-  ResetPassword({super.key});
+class ResetPasswordScreen extends StatelessWidget {
+  ResetPasswordScreen({super.key});
 
   final ForgetPasswordController controller = Get.find<ForgetPasswordController>();
   final ResetPasswordController resetPasswordController = Get.put(ResetPasswordController());
