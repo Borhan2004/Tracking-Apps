@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'dart:convert';
 import '../screen/reset_password.dart';
 
@@ -13,9 +14,11 @@ class ForgetPasswordController extends GetxController {
     final email = emailController.text.trim();
 
     if (email.isEmpty) {
-      Get.snackbar("Error", "Email field cannot be empty");
+      EasyLoading.showError("Email field cannot be empty");
       return;
     }
+
+    EasyLoading.show(status: 'Sending...');
 
     try {
       final response = await http.post(
@@ -23,19 +26,22 @@ class ForgetPasswordController extends GetxController {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );
+
       if (kDebugMode) {
         print("Status: ${response.statusCode}");
-      }
-      if (kDebugMode) {
         print("Body: ${response.body}");
       }
+
       if (response.statusCode == 200) {
+        EasyLoading.showSuccess("Verification email sent");
+        await Future.delayed(Duration(seconds: 1));
+        EasyLoading.dismiss();
         Get.offAll(ResetPassword());
       } else {
-        Get.snackbar("Failed", "Failed to send verification email");
+        EasyLoading.showError("Failed to send verification email");
       }
     } catch (e) {
-      Get.snackbar("Error", "Something went wrong");
+      EasyLoading.showError("Something went wrong");
     }
   }
 }
