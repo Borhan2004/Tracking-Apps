@@ -96,12 +96,8 @@ class MarathonController extends GetxController
     if (maxScrollExtent <= 0) return;
     animationController.forward();
     isRunning.value = true;
-    try {
-      await audioPlayer.setSource(AssetSource('assets/music/Running.wav'));
-      await audioPlayer.resume();
-    } catch (e) {
-      debugPrint("Audio error: $e");
-    }
+    await audioPlayer.setSource(AssetSource('music/Running.wav'));
+    await audioPlayer.resume();
 
     _startDistanceUpdate();
     _startTimer();
