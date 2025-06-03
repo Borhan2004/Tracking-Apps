@@ -1,24 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-
-// class ResetPasswordController extends GetxController {
-//   var passwordController = TextEditingController(); 
-//   var confirmPasswordController = TextEditingController();
-
- 
-
-//   var isObscure = false.obs;
-//   void togglePasswordVisibility() {
-//     isObscure.value = !isObscure.value;
-//     update();
-//   }
-//   var isObscureConfirm = false.obs;
-//   void toggleConfirmPasswordVisibility() {
-//     isObscureConfirm.value = !isObscureConfirm.value;
-//     update();
-//   }
-// }
-
 import 'dart:convert';
 import 'package:chrismiche/core/localization/end_points.dart';
 import 'package:chrismiche/features/auth/login/screen/login_screen.dart';
