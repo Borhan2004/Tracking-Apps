@@ -1,4 +1,4 @@
-import 'package:chrismiche/core/auth/auth_service.dart';
+import 'package:chrismiche/core/services/auth_service.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/auth/login/screen/login_screen.dart';
 import 'package:chrismiche/features/profile/widget/login_button.dart';

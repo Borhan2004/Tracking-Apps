@@ -12,7 +12,8 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-class MarathonClimbedController extends GetxController with GetTickerProviderStateMixin {
+class MarathonClimbedController extends GetxController
+    with GetTickerProviderStateMixin {
   late ScrollController scrollController;
   late AnimationController animationController;
   late AudioPlayer audioPlayer;
@@ -30,7 +31,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
       duration: const Duration(seconds: 10),
     );
     audioPlayer = AudioPlayer();
-    audioPlayer.setSource(AssetSource('music/Running.wav')); 
+    audioPlayer.setSource(AssetSource('music/Running.wav'));
 
     animationController.addListener(() {
       if (scrollController.hasClients) {
@@ -75,7 +76,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
   RxDouble totalDistance = 0.0.obs;
   RxDouble totalClimbed = 0.0.obs;
   RxInt floorCount = 0.obs;
-  RxString elapsedTime = '00:00:00'.obs; 
+  RxString elapsedTime = '00:00:00'.obs;
   Timer? _trackingTimer;
   int _secondsElapsed = 0;
 
@@ -121,7 +122,10 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     });
 
     _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.best, distanceFilter: 1),
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 1,
+      ),
     ).listen((Position position) {
       if (_lastPosition != null) {
         double distance = Geolocator.distanceBetween(
@@ -141,8 +145,12 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
       _lastPosition = position;
     });
 
-    await audioPlayer.setSource(AssetSource('music/Elevator.wav'));
-    await audioPlayer.resume(); 
+    try {
+      audioPlayer.setSource(AssetSource('assets/music/Elevator.wav'));
+      audioPlayer.resume();
+    } catch (e) {
+      debugPrint("Audio error: $e");
+    }
 
     double lastTotalClimbed = totalClimbed.value;
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
@@ -185,7 +193,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     _trackingTimer?.cancel();
     _positionStream?.cancel();
     stopAnimation();
-    await audioPlayer.stop(); 
+    await audioPlayer.stop();
 
     final storage = ClimbingDataStorage();
     await storage.saveClimbingData(totalClimbed.value, currentDate.value);
@@ -202,14 +210,20 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
           children: [
             Text('Date: ${currentDate.value}'),
             Text('Floors Climbed: ${floorCount.value} floors'),
-            Text('Height Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters'),
+            Text(
+              'Height Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters',
+            ),
             Text('Time Elapsed: ${elapsedTime.value}'),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () {
-              sendData(currentDate.value, elapsedTime.value, totalClimbed.value);
+              sendData(
+                currentDate.value,
+                elapsedTime.value,
+                totalClimbed.value,
+              );
               Get.back();
               _reset();
             },
@@ -242,7 +256,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
     final now = DateTime.now();
     currentDate.value = DateFormat("d MMMM, y").format(now);
   }
-  
+
   Future<void> sendData(String date, String time, double distance) async {
     try {
       EasyLoading.show(status: "Sending data...");
@@ -261,11 +275,7 @@ class MarathonClimbedController extends GetxController with GetTickerProviderSta
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
-        body: jsonEncode({
-          "date": date,
-          "time": time,
-          "distance": distance,
-        }),
+        body: jsonEncode({"date": date, "time": time, "distance": distance}),
       );
 
       if (kDebugMode) {

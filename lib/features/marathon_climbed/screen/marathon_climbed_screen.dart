@@ -48,14 +48,13 @@ class MarathonClimbedScreen extends StatelessWidget {
               },
             ),
           ),
-
           Positioned(
             top: MediaQuery.of(context).size.height * 0.13,
             child: Obx(
               () => Image.asset(
                 elevatorController.elevatorCharacterImagePath,
-                height: MediaQuery.of(context).size.height * 0.7,
-                width: MediaQuery.of(context).size.height * 0.7,
+                height: MediaQuery.of(context).size.height * 0.9,
+                width: MediaQuery.of(context).size.height * 0.9,
               ),
             ),
           ),

@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 class MarathonClimbedStats extends StatelessWidget {
   MarathonClimbedStats({super.key});
 
+
   final MarathonClimbedController controller =
       Get.find<MarathonClimbedController>();
 
