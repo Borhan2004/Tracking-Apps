@@ -1,4 +1,4 @@
-import 'package:chrismiche/core/auth/auth_service.dart';
+import 'package:chrismiche/core/services/auth_service.dart';
 import 'package:chrismiche/core/common/styles/global_text_style.dart';
 import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/core/common/widgets/custom_textfield.dart';

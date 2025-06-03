@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chrismiche/core/localization/end_points.dart' show Urls;
-import 'package:chrismiche/core/services/shared_preferences_helper.dart' show SharedPreferencesHelper;
+import 'package:chrismiche/core/services/shared_preferences_helper.dart'
+    show SharedPreferencesHelper;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -13,7 +14,8 @@ import 'package:chrismiche/core/services/tracking_data_storage.dart';
 import 'package:chrismiche/features/details/controller/details_controller.dart';
 import 'package:geolocator/geolocator.dart';
 
-class MarathonController extends GetxController with GetTickerProviderStateMixin {
+class MarathonController extends GetxController
+    with GetTickerProviderStateMixin {
   late ScrollController scrollController;
   late AnimationController animationController;
   late AudioPlayer audioPlayer;
@@ -36,7 +38,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     scrollController = ScrollController();
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
+      duration: const Duration(seconds: 10),
     );
     audioPlayer = AudioPlayer();
     audioPlayer.setSource(AssetSource('music/Running.wav'));
@@ -94,8 +96,12 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     if (maxScrollExtent <= 0) return;
     animationController.forward();
     isRunning.value = true;
-    await audioPlayer.setSource(AssetSource('music/Running.wav'));
-    await audioPlayer.resume();
+    try {
+      await audioPlayer.setSource(AssetSource('assets/music/Running.wav'));
+      await audioPlayer.resume();
+    } catch (e) {
+      debugPrint("Audio error: $e");
+    }
 
     _startDistanceUpdate();
     _startTimer();
@@ -171,7 +177,11 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
         actions: [
           TextButton(
             onPressed: () {
-              sendData(currentDate.value, _formatDuration(elapsedTime.value), totalDistance.value);
+              sendData(
+                currentDate.value,
+                _formatDuration(elapsedTime.value),
+                totalDistance.value,
+              );
               Get.back();
             },
             child: const Text('OK'),
@@ -311,11 +321,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
-        body: jsonEncode({
-          "date": date,
-          "time": time,
-          "distance": distance,
-        }),
+        body: jsonEncode({"date": date, "time": time, "distance": distance}),
       );
 
       if (kDebugMode) {

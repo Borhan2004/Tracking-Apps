@@ -16,7 +16,7 @@ class QuickNavigationTiles extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.count(
       crossAxisCount: 2,
-      
+
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       crossAxisSpacing: 12,
@@ -24,10 +24,18 @@ class QuickNavigationTiles extends StatelessWidget {
       childAspectRatio: 1.2,
       children: [
         HomeNavTile(
-          title: "Ongoing",
+          title: "Running",
           icon: Icons.directions_run,
           onTap: () {
             Get.to(() => MarathonScreen());
+          },
+        ),
+        HomeNavTile(
+          title: "Climbing",
+          icon: Icons.stairs,
+
+          onTap: () {
+            Get.to(() => MarathonClimbedScreen());
           },
         ),
         HomeNavTile(
@@ -37,14 +45,6 @@ class QuickNavigationTiles extends StatelessWidget {
           onTap: () {
             final controller = Get.find<BottomNavbarController>();
             controller.changeIndex(3);
-          },
-        ),
-        HomeNavTile(
-          title: "Floor Climb",
-          icon: Icons.stairs,
-
-          onTap: () {
-            Get.to(() => MarathonClimbedScreen());
           },
         ),
       ],

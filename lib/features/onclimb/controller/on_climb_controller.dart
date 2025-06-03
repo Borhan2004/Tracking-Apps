@@ -69,7 +69,6 @@ class OnClimbController extends GetxController
       }
     });
 
-
     Timer.periodic(const Duration(seconds: 15), (timer) async {
       if (isTracking.value && !isPaused.value) {
         final now = DateTime.now();
@@ -240,73 +239,78 @@ class OnClimbController extends GetxController
     _lastPosition = null;
   }
 
-
   void updateCurrentDate() {
     final now = DateTime.now();
     currentDate.value = DateFormat("d MMMM, y").format(now);
   }
 
   void _checkDateChangeAndStore() async {
-  final now = DateTime.now();
-  final currentFormattedDate = DateFormat("d MMMM, y").format(now);
+    final now = DateTime.now();
+    final currentFormattedDate = DateFormat("d MMMM, y").format(now);
 
-  if (_lastSavedDate.value.isEmpty) {
-    _lastSavedDate.value = currentFormattedDate;
-    return;
-  }
-
-  if (_lastSavedDate.value != currentFormattedDate) {
-    String? token = await SharedPreferencesHelper.getAccessToken();
-    if (token == null) {
-      if (kDebugMode) {
-        print("Token is null, saving to SharedPreferences on date change");
-      }
-      await SharedPreferencesDataHelper.saveDailyClimbingTracking(
-        totalClimbed.value,
-        floorCount.value,
-        _lastSavedDate.value,
-      );
-      await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-        totalDistance.value,
-        _lastSavedDate.value,
-      );
-      await SharedPreferencesDataHelper.printSavedTrackingData();
-    } else {
-      if (kDebugMode) {
-        print(
-          "Token found, sending data to API and saving to SharedPreferences on date change",
-        );
-      }
-      await sendData(_lastSavedDate.value, totalDistance.value);
-      await SharedPreferencesDataHelper.saveDailyClimbingTracking(
-        totalClimbed.value,
-        floorCount.value,
-        _lastSavedDate.value,
-      );
-      await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-        totalDistance.value,
-        _lastSavedDate.value,
-      );
-      await SharedPreferencesDataHelper.printSavedTrackingData();
+    if (_lastSavedDate.value.isEmpty) {
+      _lastSavedDate.value = currentFormattedDate;
+      return;
     }
 
-    _reset();
-    _lastSavedDate.value = currentFormattedDate;
+    if (_lastSavedDate.value != currentFormattedDate) {
+      String? token = await SharedPreferencesHelper.getAccessToken();
+      if (token == null) {
+        if (kDebugMode) {
+          print("Token is null, saving to SharedPreferences on date change");
+        }
+        await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+          totalClimbed.value,
+          floorCount.value,
+          _lastSavedDate.value,
+        );
+        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+          totalDistance.value,
+          _lastSavedDate.value,
+        );
+        await SharedPreferencesDataHelper.printSavedTrackingData();
+      } else {
+        if (kDebugMode) {
+          print(
+            "Token found, sending data to API and saving to SharedPreferences on date change",
+          );
+        }
+        await sendData(_lastSavedDate.value, totalDistance.value);
+        await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+          totalClimbed.value,
+          floorCount.value,
+          _lastSavedDate.value,
+        );
+        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+          totalDistance.value,
+          _lastSavedDate.value,
+        );
+        await SharedPreferencesDataHelper.printSavedTrackingData();
+      }
 
-    final distance = await SharedPreferencesDataHelper.getDistanceByDate(
-          currentFormattedDate,
-        ) ?? 0.0;
-    final climbed = await SharedPreferencesDataHelper.getClimbedByDate(
-          currentFormattedDate,
-        ) ?? 0.0;
-    final floors = await SharedPreferencesDataHelper.getFloorCountByDate(
-          currentFormattedDate,
-        ) ?? 0;
-    totalDistance.value = distance;
-    totalClimbed.value = climbed;
-    floorCount.value = floors;
+      _reset();
+      _lastSavedDate.value = currentFormattedDate;
+
+      final distance =
+          await SharedPreferencesDataHelper.getDistanceByDate(
+            currentFormattedDate,
+          ) ??
+          0.0;
+      final climbed =
+          await SharedPreferencesDataHelper.getClimbedByDate(
+            currentFormattedDate,
+          ) ??
+          0.0;
+      final floors =
+          await SharedPreferencesDataHelper.getFloorCountByDate(
+            currentFormattedDate,
+          ) ??
+          0;
+      totalDistance.value = distance;
+      totalClimbed.value = climbed;
+      floorCount.value = floors;
+    }
   }
-}
 
   Future<void> sendData(String date, double distance) async {
     try {

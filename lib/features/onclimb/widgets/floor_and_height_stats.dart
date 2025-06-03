@@ -10,36 +10,20 @@ class FloorAndHeightStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double headSize = 12;
-    const double bodySize = 10;
-
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Date:",
-                style: getTextStyle(
-                  color: Colors.white,
-                  fontSize: headSize,
-                  fontWeight: FontWeight.w600,
-                ),
+          Obx(
+            () => Text(
+              " ${controller.currentDate.value.isEmpty ? 'No data' : controller.currentDate.value}",
+              style: getTextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
-              Obx(
-                () => Text(
-                  " ${controller.currentDate.value.isEmpty ? 'No data' : controller.currentDate.value}",
-                  style: getTextStyle(
-                    color: Colors.white,
-                    fontSize: bodySize,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 10),
           Row(
@@ -49,7 +33,7 @@ class FloorAndHeightStats extends StatelessWidget {
                 "Floors Climbed: ",
                 style: getTextStyle(
                   color: Colors.white,
-                  fontSize: headSize,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -58,7 +42,7 @@ class FloorAndHeightStats extends StatelessWidget {
                   "${controller.floorCount.value} floors",
                   style: getTextStyle(
                     color: Colors.white,
-                    fontSize: bodySize,
+                    fontSize: 30,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -73,7 +57,7 @@ class FloorAndHeightStats extends StatelessWidget {
                 "Height: ",
                 style: getTextStyle(
                   color: Colors.white,
-                  fontSize: headSize,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -82,7 +66,7 @@ class FloorAndHeightStats extends StatelessWidget {
                   "${controller.totalClimbed.value.toStringAsFixed(2)} m",
                   style: getTextStyle(
                     color: Colors.white,
-                    fontSize: bodySize,
+                    fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

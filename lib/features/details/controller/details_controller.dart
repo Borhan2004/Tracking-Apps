@@ -17,18 +17,24 @@ class DetailsController extends GetxController {
   void onInit() async {
     super.onInit();
     await SharedPreferencesDataHelper.clearLegacyClimbingData();
-    Timer.periodic(const Duration(seconds: 30), (timer) async {
+    Timer.periodic(const Duration(seconds: 10), (timer) async {
       String? token = await SharedPreferencesHelper.getAccessToken();
-      final String currentDate = DateFormat('dd MMMM, yyyy').format(DateTime.now());
+      final String currentDate = DateFormat(
+        'dd MMMM, yyyy',
+      ).format(DateTime.now());
       if (token == null) {
         await updateDistance();
         if (kDebugMode) {
-          print('DetailsController: Token is null, updated distances from SharedPreferences');
+          print(
+            'DetailsController: Token is null, updated distances from SharedPreferences',
+          );
         }
       } else {
         await fetchMovementDistances(currentDate);
         if (kDebugMode) {
-          print('DetailsController: Token found, fetched distances from API for date: $currentDate');
+          print(
+            'DetailsController: Token found, fetched distances from API for date: $currentDate',
+          );
         }
       }
     });
@@ -80,7 +86,9 @@ class DetailsController extends GetxController {
     try {
       String? token = await SharedPreferencesHelper.getAccessToken();
       if (token == null) {
-        print('Token is null');
+        if (kDebugMode) {
+          print('Token is null');
+        }
         return;
       }
 
@@ -96,7 +104,9 @@ class DetailsController extends GetxController {
         },
       );
 
-      print("///////The response of the statastic part is ${response.body}");
+      if (kDebugMode) {
+        print("///////The response of the statastic part is ${response.body}");
+      }
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -111,13 +121,14 @@ class DetailsController extends GetxController {
                 ? statData.climbingMovements!.first.distance ?? 0.0
                 : 0.0;
       } else {
-        print('Failed to fetch movements: ${response.statusCode}');
+        if (kDebugMode) {
+          print('Failed to fetch movements: ${response.statusCode}');
+        }
       }
     } catch (e) {
-      print('Error fetching movement data: $e');
+      if (kDebugMode) {
+        print('Error fetching movement data: $e');
+      }
     }
-  } 
-
-
-  
+  }
 }

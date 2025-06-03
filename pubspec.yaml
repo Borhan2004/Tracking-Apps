@@ -87,7 +87,8 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/characters/
-    - assets/music/
+    - assets/music/Elevator.wav
+    - assets/music/Running.wav
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
