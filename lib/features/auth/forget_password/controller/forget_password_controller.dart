@@ -1,5 +1,5 @@
 import 'package:chrismiche/core/localization/end_points.dart';
-import 'package:chrismiche/features/auth/forget_password/screen/reset_password_screen.dart';
+import 'package:chrismiche/features/auth/forget_password/screen/otp_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -36,12 +36,14 @@ class ForgetPasswordController extends GetxController {
         EasyLoading.showSuccess("Verification email sent");
         await Future.delayed(Duration(seconds: 1));
         EasyLoading.dismiss();
-        Get.offAll(ResetPasswordScreen());
+        Get.offAll(OtpScreen());
       } else {
         EasyLoading.showError("Failed to send verification email");
       }
     } catch (e) {
       EasyLoading.showError("Something went wrong");
+    } finally {
+      EasyLoading.dismiss();
     }
   }
 }
