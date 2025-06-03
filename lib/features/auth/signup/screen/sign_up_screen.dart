@@ -136,7 +136,6 @@ class SignUpScreen extends StatelessWidget {
 
                 CustomButton(
                   onTap: () {
-                    // Get.offAll(() => PersonalDetailsScreen());
                     controller.signup();
                   },
                   text: "Sign Up",
