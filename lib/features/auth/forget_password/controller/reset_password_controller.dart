@@ -8,7 +8,6 @@ import 'package:http/http.dart' as http;
 class ResetPasswordController extends GetxController {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
-  final otpController = ''.obs;
 
   var isObscure = false.obs;
   var isObscureConfirm = false.obs;
@@ -23,12 +22,11 @@ class ResetPasswordController extends GetxController {
     update();
   }
 
-  Future<void> submitReset(String email) async {
+  Future<void> submitReset() async {
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
-    final otp = otpController.value.trim();
 
-    if (password.isEmpty || confirmPassword.isEmpty || otp.isEmpty) {
+    if (password.isEmpty || confirmPassword.isEmpty) {
       Get.snackbar("Error", "All fields are required");
       return;
     }
@@ -40,13 +38,9 @@ class ResetPasswordController extends GetxController {
 
     try {
       final response = await http.post(
-        Uri.parse('${Urls.baseUrl}/auth/reset-password/verify-otp'),
+        Uri.parse('${Urls.baseUrl}/auth/reset-password'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "email": email,
-          "newPassword": password,
-          "otp": otp,
-        }),
+        body: jsonEncode({"newPassword": password}),
       );
 
       if (response.statusCode == 200) {

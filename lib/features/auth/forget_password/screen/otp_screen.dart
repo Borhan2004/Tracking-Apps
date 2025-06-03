@@ -1,6 +1,7 @@
 import 'package:chrismiche/core/common/styles/global_text_style.dart';
 import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/features/auth/forget_password/controller/otp_controller.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:get/get.dart';
@@ -49,6 +50,9 @@ class OtpScreen extends StatelessWidget {
                 showFieldAsBox: true,
                 onSubmit: (String code) {
                   controller.otpController.value = code;
+                  if (kDebugMode) {
+                    print("Entered OTP is => $code");
+                  }
                 },
                 textStyle: TextStyle(
                   color: Colors.black,
