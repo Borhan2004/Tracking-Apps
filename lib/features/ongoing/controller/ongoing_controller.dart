@@ -12,13 +12,13 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-class OngoingController extends GetxController
-    with GetTickerProviderStateMixin {
+class OngoingController extends GetxController with GetTickerProviderStateMixin {
   ScrollController? scrollController;
   AnimationController? animationController;
   final double imageWidth = 1000;
   final double viewportWidth = 400;
   double maxScrollExtent = 0;
+  final double minDistanceThreshold = 3.0; // Ignore GPS noise < 3 meters
 
   @override
   void onInit() async {
@@ -28,12 +28,12 @@ class OngoingController extends GetxController
       vsync: this,
       duration: const Duration(seconds: 10),
     )..addListener(() {
-      if (scrollController!.hasClients) {
-        final value =
-            (animationController!.value * maxScrollExtent) % maxScrollExtent;
-        scrollController!.jumpTo(value);
-      }
-    });
+        if (scrollController!.hasClients) {
+          final value =
+              (animationController!.value * maxScrollExtent) % maxScrollExtent;
+          scrollController!.jumpTo(value);
+        }
+      });
 
     await SharedPreferencesDataHelper.clearLegacyClimbingData();
     updateCurrentDate();
@@ -41,10 +41,8 @@ class OngoingController extends GetxController
     final now = DateTime.now();
     final currentFormattedDate = DateFormat("d MMMM, y").format(now);
     final distance =
-        await SharedPreferencesDataHelper.getDistanceByDate(
-          currentFormattedDate,
-        ) ??
-        0.0;
+        await SharedPreferencesDataHelper.getDistanceByDate(currentFormattedDate) ??
+            0.0;
     totalDistance.value = distance;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -175,7 +173,7 @@ class OngoingController extends GetxController
 
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
+        accuracy: LocationAccuracy.bestForNavigation,
         distanceFilter: 1,
       ),
     ).listen((Position position) {
@@ -186,9 +184,14 @@ class OngoingController extends GetxController
           position.latitude,
           position.longitude,
         );
-        totalDistance.value += distance;
+
+        if (distance > minDistanceThreshold) {
+          totalDistance.value += distance;
+          _lastPosition = position;
+        }
+      } else {
+        _lastPosition = position;
       }
-      _lastPosition = position;
     });
 
     _startStepMonitor();
@@ -299,10 +302,8 @@ class OngoingController extends GetxController
       _lastSavedDate.value = currentFormattedDate;
 
       final distance =
-          await SharedPreferencesDataHelper.getDistanceByDate(
-            currentFormattedDate,
-          ) ??
-          0.0;
+          await SharedPreferencesDataHelper.getDistanceByDate(currentFormattedDate) ??
+              0.0;
       totalDistance.value = distance;
     }
   }
@@ -331,11 +332,8 @@ class OngoingController extends GetxController
         print("The response of sending marathon data is ${response.body}");
       }
 
-      if (response.statusCode == 200) {
-      } else {
-        if (kDebugMode) {
-          print("Error sending marathon data: ${response.statusCode}");
-        }
+      if (response.statusCode != 200 && kDebugMode) {
+        print("Error sending marathon data: ${response.statusCode}");
       }
     } catch (e) {
       if (kDebugMode) {
