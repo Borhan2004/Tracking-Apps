@@ -145,12 +145,8 @@ class MarathonClimbedController extends GetxController
       _lastPosition = position;
     });
 
-    try {
-      audioPlayer.setSource(AssetSource('assets/music/Elevator.wav'));
-      audioPlayer.resume();
-    } catch (e) {
-      debugPrint("Audio error: $e");
-    }
+    audioPlayer.setSource(AssetSource('music/Elevator.wav'));
+    audioPlayer.resume();
 
     double lastTotalClimbed = totalClimbed.value;
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
