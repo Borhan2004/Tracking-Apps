@@ -1,18 +1,17 @@
-import 'package:chrismiche/core/services/auth_service.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/auth/login/screen/login_screen.dart';
+import 'package:chrismiche/features/profile/controller/social_login_controller.dart';
 import 'package:chrismiche/features/profile/widget/login_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginAlert extends StatelessWidget {
   LoginAlert({super.key});
-  final _auth = AuthService();
+  final socialLoginController = Get.put(SocialLoginController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(
         title: Image.asset(ImagePath.appBarLogo, height: 50),
         elevation: 2,
@@ -48,15 +47,15 @@ class LoginAlert extends StatelessWidget {
             LoginButton(
               title: 'Continue with Google',
               icon: 'assets/icons/google.png',
-              onPressed: () async{
-                await _auth.loginWithGoogle();
+              onPressed: () async {
+                await socialLoginController.loginWithGoogle();
               },
             ),
             LoginButton(
               title: 'Continue with Facebook',
               icon: 'assets/icons/facebook.png',
-              onPressed: () async{
-                await _auth.signInWithFacebook();
+              onPressed: () async {
+                await socialLoginController.loginWithFacebook();
               },
             ),
             LoginButton(

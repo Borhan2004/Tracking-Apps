@@ -43,63 +43,49 @@
 //     );
 //   }
 // }
-
-import 'package:chrismiche/core/services/api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
-  final _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<UserCredential?> loginWithGoogle() async {
     try {
-      final googleUser = await GoogleSignIn().signIn();
-      final googleAuth = await googleUser?.authentication;
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return null;
 
-      if (googleAuth == null) return null;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      final credential = GoogleAuthProvider.credential(
+      final OAuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
         accessToken: googleAuth.accessToken,
       );
 
-      final userCredential = await _auth.signInWithCredential(credential);
-      await ApiService.authenticateWithProvider(
-        provider: 'google',
-        tokenKey: 'idToken',
-        tokenValue: googleAuth.idToken!,
-      );
-
-      return userCredential;
+      return await _auth.signInWithCredential(credential);
     } catch (e) {
-      if (kDebugMode) print(e.toString());
+      if (kDebugMode) print("Google sign-in error: $e");
+      return null;
     }
-    return null;
   }
 
   Future<UserCredential?> signInWithFacebook() async {
     try {
       final LoginResult loginResult = await FacebookAuth.instance.login();
 
-      if (loginResult.accessToken == null) return null;
+      if (loginResult.status == LoginStatus.success) {
+        final OAuthCredential facebookAuthCredential =
+            FacebookAuthProvider.credential(loginResult.accessToken!.tokenString);
 
-      final accessToken = loginResult.accessToken!.tokenString;
-
-      final credential = FacebookAuthProvider.credential(accessToken);
-      final userCredential = await _auth.signInWithCredential(credential);
-
-      await ApiService.authenticateWithProvider(
-        provider: 'facebook',
-        tokenKey: 'accessToken',
-        tokenValue: accessToken,
-      );
-
-      return userCredential;
+        return await _auth.signInWithCredential(facebookAuthCredential);
+      } else {
+        if (kDebugMode) print("Facebook login failed: ${loginResult.message}");
+        return null;
+      }
     } catch (e) {
-      if (kDebugMode) print(e.toString());
+      if (kDebugMode) print("Facebook sign-in error: $e");
+      return null;
     }
-    return null;
   }
 }

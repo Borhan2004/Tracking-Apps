@@ -24,7 +24,7 @@ class OtpController extends GetxController {
 
     try {
       final response = await http.post(
-        Uri.parse('${Urls.baseUrl}/auth/reset-password/verify-otp'),
+        Uri.parse('${Urls.baseUrl}/auth/forgot-password/verify-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({"email": email, "otp": otp}),
       );

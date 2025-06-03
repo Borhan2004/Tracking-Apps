@@ -1,13 +1,14 @@
 import 'package:chrismiche/core/common/styles/global_text_style.dart'
     show getTextStyle;
-import 'package:chrismiche/features/home/controller/home_controller.dart';
+import 'package:chrismiche/features/details/controller/details_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class QuickStatsOverview extends StatelessWidget {
   QuickStatsOverview({super.key});
 
-  final HomeController controller = Get.find<HomeController>();
+  final controller = Get.put(DetailsController());
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class QuickStatsOverview extends StatelessWidget {
                   ),
                   Obx(
                     () => Text(
-                      "${controller.distanceToday.value.toStringAsFixed(2)} meters",
+                      "${controller.ongoingDistance.value.toStringAsFixed(2)} meters",
                       textAlign: TextAlign.center,
                       style: getTextStyle(
                         fontSize: 14,
@@ -55,7 +56,7 @@ class QuickStatsOverview extends StatelessWidget {
                   ),
                   Obx(
                     () => Text(
-                      "${controller.floorsClimbed.value.toStringAsFixed(2)} meters",
+                      "${controller.climbingDistance.value.toStringAsFixed(2)} meters",
                       textAlign: TextAlign.center,
                       style: getTextStyle(
                         fontSize: 14,

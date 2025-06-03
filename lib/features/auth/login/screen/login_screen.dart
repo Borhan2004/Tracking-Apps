@@ -1,4 +1,3 @@
-import 'package:chrismiche/core/services/auth_service.dart';
 import 'package:chrismiche/core/common/styles/global_text_style.dart';
 import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/core/common/widgets/custom_textfield.dart';
@@ -8,6 +7,7 @@ import 'package:chrismiche/features/auth/forget_password/screen/forget_password_
 import 'package:chrismiche/features/auth/login/controller/login_screen_controller.dart';
 import 'package:chrismiche/features/auth/login/widget/signin_method.dart';
 import 'package:chrismiche/features/auth/signup/screen/sign_up_screen.dart';
+import 'package:chrismiche/features/profile/controller/social_login_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,10 +15,9 @@ import 'package:get/get.dart';
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  final _auth = AuthService();
-
   final LoginScreenController controller = Get.put(LoginScreenController());
-
+  final socialLoginController = Get.put(SocialLoginController());
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,7 +144,7 @@ class LoginScreen extends StatelessWidget {
                   color: Colors.transparent,
                   textColor: Color(0xFF050505),
                   onTap: () async {
-                    await _auth.loginWithGoogle();
+                    await socialLoginController.loginWithGoogle();
                   },
                   text: "Continue with Google",
                   image: ImagePath.signInWithGoogle,
@@ -155,7 +154,7 @@ class LoginScreen extends StatelessWidget {
                   color: Colors.transparent,
                   textColor: Color(0xFF050505),
                   onTap: () async {
-                    await _auth.signInWithFacebook();
+                    await socialLoginController.loginWithFacebook();
                   },
                   text: "Continue with Facebook",
                   image: ImagePath.signInWithFacebook,
