@@ -56,7 +56,8 @@ class AuthService {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return null;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
@@ -70,13 +71,19 @@ class AuthService {
     }
   }
 
-  Future<UserCredential?> signInWithFacebook() async {
+  Future<UserCredential?> loginWithFacebook() async {
     try {
       final LoginResult loginResult = await FacebookAuth.instance.login();
 
       if (loginResult.status == LoginStatus.success) {
+        final accessToken = loginResult.accessToken?.tokenString;
+        if (accessToken == null) {
+          if (kDebugMode) print("Access token is null.");
+          return null;
+        }
+
         final OAuthCredential facebookAuthCredential =
-            FacebookAuthProvider.credential(loginResult.accessToken!.tokenString);
+            FacebookAuthProvider.credential(accessToken);
 
         return await _auth.signInWithCredential(facebookAuthCredential);
       } else {
@@ -84,8 +91,10 @@ class AuthService {
         return null;
       }
     } catch (e) {
-      if (kDebugMode) print("Facebook sign-in error: $e");
-      return null;
+      if (kDebugMode) {
+        print("Facebook sign-in error: $e");
+      }
+      rethrow;
     }
   }
 }
