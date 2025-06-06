@@ -1,314 +1,143 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:chrismiche/core/localization/end_points.dart' show Urls;
-import 'package:chrismiche/core/services/shared_preferences_data_helper.dart'
-    show SharedPreferencesDataHelper;
-import 'package:chrismiche/core/services/shared_preferences_helper.dart'
-    show SharedPreferencesHelper;
+import 'package:chrismiche/core/localization/end_points.dart';
+import 'package:chrismiche/core/services/shared_preferences_data_helper.dart' show SharedPreferencesDataHelper;
+import 'package:chrismiche/core/services/shared_preferences_helper.dart' show SharedPreferencesHelper;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
+
 
 class OngoingController extends GetxController with GetTickerProviderStateMixin {
-  ScrollController? scrollController;
-  AnimationController? animationController;
-  final double imageWidth = 1000;
-  final double viewportWidth = 400;
-  double maxScrollExtent = 0;
-  final double minDistanceThreshold = 3.0; // Ignore GPS noise < 3 meters
+ final totalDistance = 0.0.obs;
+  final currentDate = ''.obs;
+  final isMoving = false.obs;
+  final scrollController = ScrollController();
+  Timer? resetTimer;
+  Position? _lastPosition;
+
+  double scrollSpeedPerMeter = 2; // Adjust for speed of scroll
 
   @override
-  void onInit() async {
+  void onInit() {
     super.onInit();
-    scrollController = ScrollController();
-    animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..addListener(() {
-        if (scrollController!.hasClients) {
-          final value =
-              (animationController!.value * maxScrollExtent) % maxScrollExtent;
-          scrollController!.jumpTo(value);
-        }
-      });
+    _initLocation();
+    _startDateListener();
+  }
 
-    await SharedPreferencesDataHelper.clearLegacyClimbingData();
-    updateCurrentDate();
+  void _initLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) await Geolocator.openLocationSettings();
 
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 1,
+      ),
+    ).listen((Position position) {
+      _handleMovement(position);
+    });
+  }
+
+  void _handleMovement(Position newPosition) {
+  if (_lastPosition != null) {
+    double distance = Geolocator.distanceBetween(
+      _lastPosition!.latitude,
+      _lastPosition!.longitude,
+      newPosition.latitude,
+      newPosition.longitude,
+    );
+
+    if (kDebugMode) {
+      print("Raw distance: $distance");
+    }
+
+    // Accept distances between 1.5 and 30 meters
+    if (distance >= 1.5 ) {
+      if (kDebugMode) {
+        print("Valid movement detected: $distance");
+      }
+      isMoving.value = true;
+      totalDistance.value += distance;
+      _scrollBackground(distance);
+    } else {
+      if (kDebugMode) {
+        print("Ignored movement: $distance");
+      }
+      isMoving.value = false;
+    }
+  }
+  _lastPosition = newPosition;
+}
+
+
+
+  void _scrollBackground(double distance) {
+    if (!scrollController.hasClients) return;
+
+    double scrollAmount = distance * scrollSpeedPerMeter;
+    double newOffset = scrollController.offset + scrollAmount;
+    double maxExtent = scrollController.position.maxScrollExtent;
+
+    if (newOffset >= maxExtent) {
+      scrollController.jumpTo(0); // Restart from beginning
+    } else {
+      scrollController.animateTo(
+        newOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.linear,
+      );
+    }
+  }
+
+  void _startDateListener() {
+  _updateDate();
+  resetTimer = Timer.periodic(const Duration(minutes: 1), (_) async {
     final now = DateTime.now();
-    final currentFormattedDate = DateFormat("d MMMM, y").format(now);
-    final distance =
-        await SharedPreferencesDataHelper.getDistanceByDate(currentFormattedDate) ??
-            0.0;
-    totalDistance.value = distance;
+    final today = "${now.year}-${now.month}-${now.day}";
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      startTracking();
-    });
+    if (today != currentDate.value) {
+      // Format date as "06 June, 2025"
+      final formattedDate = SharedPreferencesDataHelper.formatDate(DateTime.now().subtract(const Duration(days: 1)));
 
-    Timer.periodic(const Duration(minutes: 1), (timer) async {
-      if (isTracking.value && !isPaused.value) {
-        await _checkDateChangeAndStore();
+      final distanceToSave = totalDistance.value;
+
+      // Get token
+      String? token = await SharedPreferencesHelper.getAccessToken();
+
+      if (token != null) {
+        await sendData(formattedDate, distanceToSave);
+      } else {
+        await SharedPreferencesDataHelper.saveDailyTracking(distanceToSave, formattedDate);
       }
-    });
 
-    Timer.periodic(const Duration(seconds: 10), (timer) async {
-      if (isTracking.value && !isPaused.value) {
-        final now = DateTime.now();
-        final currentFormattedDate = DateFormat("d MMMM, y").format(now);
-        String? token = await SharedPreferencesHelper.getAccessToken();
-        if (token == null) {
-          if (kDebugMode) {
-            print("Token is null, saving to SharedPreferences");
-          }
-          await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-            totalDistance.value,
-            currentFormattedDate,
-          );
-          await SharedPreferencesDataHelper.printSavedTrackingData();
-        } else {
-          if (kDebugMode) {
-            print("Token found, sending data to API///////");
-          }
-          await sendData(currentFormattedDate, totalDistance.value);
-          await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-            totalDistance.value,
-            currentFormattedDate,
-          );
-          await SharedPreferencesDataHelper.printSavedTrackingData();
-        }
-      }
-    });
-  }
+      totalDistance.value = 0.0;
+      _updateDate();
+    }
+  });
+}
 
-  void startAnimation() {
-    if (animationController == null || scrollController == null) return;
-    maxScrollExtent = imageWidth - viewportWidth;
-    if (maxScrollExtent <= 0) return;
-    animationController!.repeat();
-  }
 
-  void stopAnimation() {
-    if (animationController == null) return;
-    animationController!.stop();
+  void _updateDate() {
+    final now = DateTime.now();
+    currentDate.value = "${now.year}-${now.month}-${now.day}";
   }
 
   @override
   void onClose() {
-    scrollController?.dispose();
-    animationController?.dispose();
-    _timer?.cancel();
-    _positionStream?.cancel();
+    resetTimer?.cancel();
     super.onClose();
   }
+  
 
-  RxBool isTracking = false.obs;
-  RxBool isPaused = false.obs;
-  RxDouble totalDistance = 0.0.obs;
-
-  Position? _lastPosition;
-  Timer? _timer;
-  StreamSubscription<Position>? _positionStream;
-
-  Future<bool> _checkAndRequestLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      return false;
-    }
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        Get.snackbar('Permission Denied', 'Location permission is required.');
-        return false;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      Get.snackbar('Permission Denied', 'Enable location from app settings.');
-      await Geolocator.openAppSettings();
-      return false;
-    }
-    return true;
-  }
-
-  void _startStepMonitor() {
-    bool isAnimating = false;
-    double lastDistance = totalDistance.value;
-    int unchangedCount = 0;
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!isTracking.value || isPaused.value) {
-        timer.cancel();
-        return;
-      }
-
-      final current = totalDistance.value;
-      if (current != lastDistance) {
-        unchangedCount = 0;
-        if (!isAnimating) {
-          startAnimation();
-          isAnimating = true;
-        }
-      } else {
-        unchangedCount++;
-        if (unchangedCount >= 2 && isAnimating) {
-          stopAnimation();
-          isAnimating = false;
-        }
-      }
-      lastDistance = current;
-    });
-  }
-
-  void startTracking() async {
-    if (!await _checkAndRequestLocationPermission()) return;
-
-    isTracking.value = true;
-    isPaused.value = false;
-    _lastPosition = null;
-
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.bestForNavigation,
-        distanceFilter: 1,
-      ),
-    ).listen((Position position) {
-      if (_lastPosition != null) {
-        double distance = Geolocator.distanceBetween(
-          _lastPosition!.latitude,
-          _lastPosition!.longitude,
-          position.latitude,
-          position.longitude,
-        );
-
-        if (distance > minDistanceThreshold) {
-          totalDistance.value += distance;
-          _lastPosition = position;
-        }
-      } else {
-        _lastPosition = position;
-      }
-    });
-
-    _startStepMonitor();
-  }
-
-  void pauseTracking() {
-    isPaused.value = true;
-    _positionStream?.pause();
-    _timer?.cancel();
-    stopAnimation();
-  }
-
-  void resumeTracking() {
-    if (!isPaused.value) return;
-
-    isPaused.value = false;
-    _positionStream?.resume();
-    _startStepMonitor();
-  }
-
-  void stopTracking() async {
-    _timer?.cancel();
-    _positionStream?.cancel();
-    stopAnimation();
-
-    final now = DateTime.now();
-    final currentFormattedDate = DateFormat("d MMMM, y").format(now);
-    await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-      totalDistance.value,
-      currentFormattedDate,
-    );
-
-    isTracking.value = false;
-    isPaused.value = false;
-
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Tracking Summary'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              _reset();
-            },
-            child: const Text('Finish'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _reset() {
-    totalDistance.value = 0.0;
-    _lastPosition = null;
-  }
-
-  RxString currentDate = ''.obs;
-
-  void updateCurrentDate() {
-    final now = DateTime.now();
-    currentDate.value = DateFormat("d MMMM, y").format(now);
-  }
-
-  final RxString _lastSavedDate = ''.obs;
-
-  Future<void> _checkDateChangeAndStore() async {
-    final now = DateTime.now();
-    final currentFormattedDate = DateFormat("d MMMM, y").format(now);
-
-    if (_lastSavedDate.value.isEmpty) {
-      _lastSavedDate.value = currentFormattedDate;
-      return;
-    }
-
-    if (_lastSavedDate.value != currentFormattedDate) {
-      String? token = await SharedPreferencesHelper.getAccessToken();
-      if (token == null) {
-        if (kDebugMode) {
-          print("Token is null, saving to SharedPreferences on date change");
-        }
-        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-          totalDistance.value,
-          _lastSavedDate.value,
-        );
-        await SharedPreferencesDataHelper.printSavedTrackingData();
-      } else {
-        if (kDebugMode) {
-          print(
-            "Token found, sending data to API and saving to SharedPreferences on date change",
-          );
-        }
-        await sendData(_lastSavedDate.value, totalDistance.value);
-        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-          totalDistance.value,
-          _lastSavedDate.value,
-        );
-        await SharedPreferencesDataHelper.printSavedTrackingData();
-      }
-
-      _reset();
-      _lastSavedDate.value = currentFormattedDate;
-
-      final distance =
-          await SharedPreferencesDataHelper.getDistanceByDate(currentFormattedDate) ??
-              0.0;
-      totalDistance.value = distance;
-    }
-  }
-
-  Future<void> sendData(String date, double distance) async {
+   Future<void> sendData(String date, double distance) async {
     try {
       String? token = await SharedPreferencesHelper.getAccessToken();
       if (token == null) {
@@ -333,7 +162,9 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
       }
 
       if (response.statusCode != 200 && kDebugMode) {
-        print("Error sending marathon data: ${response.statusCode}");
+        if (kDebugMode) {
+          print("Error sending marathon data: ${response.statusCode}");
+        }
       }
     } catch (e) {
       if (kDebugMode) {
@@ -341,4 +172,6 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
       }
     }
   }
+ 
+
 }

@@ -1,8 +1,6 @@
-import 'package:chrismiche/core/utils/constants/image_path.dart';
 import 'package:chrismiche/features/home/controller/change_character_controller.dart';
 import 'package:chrismiche/features/ongoing/controller/ongoing_controller.dart';
-import 'package:chrismiche/features/ongoing/widgets/counters.dart'
-    show Counters;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,55 +14,58 @@ class OngoingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
+   final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          AnimatedBuilder(
-            animation: controller.animationController ?? Listenable.merge([]),
-            builder: (context, child) {
-              final scrollController =
-                  controller.scrollController ?? ScrollController();
-              return SingleChildScrollView(
-                controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                physics: const NeverScrollableScrollPhysics(),
-                child: Row(
+      body: Obx(() {
+        return Stack(
+          children: [
+            // Scrolling image
+            SingleChildScrollView(
+              controller: controller.scrollController,
+              scrollDirection: Axis.horizontal,
+              physics:   NeverScrollableScrollPhysics(),
+              child: Image.asset(
+                'assets/images/runBackground.png',
+                height: screenHeight,
+                fit: BoxFit.fitHeight,
+              ),
+            ),
+
+            // Overlay with distance and date
+            Positioned.fill(
+              child: Container(
+                alignment: Alignment.center, 
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      ImagePath.runBackground,
-                      width: controller.imageWidth,
-                      height: screenSize.height,
-                      fit: BoxFit.cover,
+                    Container(
+                      padding:  EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha:  0.5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            "Distance: ${controller.totalDistance.value.toStringAsFixed(2)} m",
+                            style:   TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                            SizedBox(height: 8),
+                          Text(
+                            "Date: ${controller.currentDate.value}",
+                            style:   TextStyle(fontSize: 18, color: Colors.white70),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              );
-            },
-          ),
-          Positioned(
-            top: 10,
-            left: 10,
-            right: 0,
-            child: Center(
-              child: Obx(
-                () => Image.asset(
-                  runningController.characterImagePath,
-                  height: screenSize.height * 1,
-                  width: screenSize.width * 1,
-                ),
               ),
             ),
-          ),
-          Positioned(
-            top: 65,
-            left: 0,
-            right: 0,
-            child: Column(children: [Counters(), const SizedBox(height: 40)]),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 }
