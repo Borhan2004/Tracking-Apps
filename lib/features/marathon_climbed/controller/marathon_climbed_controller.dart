@@ -3,199 +3,159 @@ import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chrismiche/core/localization/end_points.dart';
 import 'package:chrismiche/core/services/climbing_data_storage.dart';
+import 'package:chrismiche/core/services/location_service.dart';
 import 'package:chrismiche/core/services/shared_preferences_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class MarathonClimbedController extends GetxController
     with GetTickerProviderStateMixin {
-  late ScrollController scrollController;
-  late AnimationController animationController;
-  late AudioPlayer audioPlayer;
+  final locationService = LocationService();
 
-  final double imageHeight = 2000;
-  double maxScrollExtent = 0;
+  final RxDouble totalElevation = 0.0.obs;
+  final RxList<double> altitudeRoute = <double>[].obs;
+  final RxBool isTracking = false.obs;
+  final RxInt floorCount = 0.obs;
+  late AnimationController animationController;
+  final RxDouble offset = 0.0.obs;
+  double scrollSpeed = 50.0;
+  Timer? _trackingTimer;
+  int _secondsElapsed = 0;
+  RxString currentDate = ''.obs;
+  RxString elapsedTime = '00:00:00'.obs;
+  late AudioPlayer audioPlayer;
+  RxBool isPaused = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     updateCurrentDate();
-    scrollController = ScrollController();
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(days: 1),
     );
     audioPlayer = AudioPlayer();
-    audioPlayer.setSource(AssetSource('music/Running.wav'));
-
+    audioPlayer.setSource(AssetSource('music/Elevator.wav'));
     animationController.addListener(() {
-      if (scrollController.hasClients) {
-        final value = (1 - animationController.value) * maxScrollExtent;
-        scrollController.jumpTo(value);
-      }
-    });
-
-    animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        animationController.reset();
-        animationController.forward();
-      }
+      final elapsed =
+          animationController.lastElapsedDuration?.inMilliseconds ?? 0;
+      offset.value = (elapsed / 1000) * scrollSpeed;
     });
   }
 
-  void startAnimation(double viewportHeight) {
-    maxScrollExtent = imageHeight - viewportHeight;
-    if (maxScrollExtent <= 0) return;
-
-    scrollController.jumpTo(maxScrollExtent);
-    animationController.forward();
+  void setScrollSpeed(double imageWidth, double seconds) {
+    scrollSpeed = imageWidth / seconds;
+    update();
   }
 
-  void stopAnimation() {
-    animationController.stop();
-  }
+  StreamSubscription<Position>? _positionSub;
+  double? _lastAltitude;
 
-  @override
-  void onClose() {
-    scrollController.dispose();
-    animationController.dispose();
-    audioPlayer.dispose();
-    _timer?.cancel();
-    _trackingTimer?.cancel();
-    _positionStream?.cancel();
-    super.onClose();
-  }
+  static const double minAltitudeThreshold = 0.5;
 
-  RxBool isTracking = false.obs;
-  RxBool isPaused = false.obs;
-  RxDouble totalDistance = 0.0.obs;
-  RxDouble totalClimbed = 0.0.obs;
-  RxInt floorCount = 0.obs;
-  RxString elapsedTime = '00:00:00'.obs;
-  Timer? _trackingTimer;
-  int _secondsElapsed = 0;
-
-  Position? _lastPosition;
-  Timer? _timer;
-  StreamSubscription<Position>? _positionStream;
-
-  Future<bool> _checkAndRequestLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      return false;
+  void startClimbTracking() async {
+    audioPlayer.setSource(AssetSource('music/Elevator.wav'));
+    audioPlayer.resume();
+    if (!animationController.isAnimating) {
+      animationController.repeat();
     }
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        Get.snackbar('Permission Denied', 'Location permission is required.');
-        return false;
+    bool permissionGranted = await locationService.ensurePermission();
+    if (!permissionGranted) {
+      Get.snackbar("Permission Denied", "Location permission is required.");
+      if (kDebugMode) print("❌ Location permission not granted.");
+      return;
+    }
+
+    if (kDebugMode) print('✅ Location permission granted');
+
+    await _positionSub?.cancel();
+
+    _positionSub = locationService.getPositionStream().listen((position) {
+      double currentAltitude = position.altitude;
+
+      if (_lastAltitude == null) {
+        _lastAltitude = currentAltitude;
+        altitudeRoute.add(currentAltitude);
+        if (kDebugMode) {
+          print('📍 First altitude: ${currentAltitude.toStringAsFixed(2)} m');
+        }
+        return;
       }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      Get.snackbar('Permission Denied', 'Enable location from app settings.');
-      await Geolocator.openAppSettings();
-      return false;
-    }
-    return true;
-  }
 
-  void startTracking(double height) async {
-    if (!await _checkAndRequestLocationPermission()) return;
+      double diff = currentAltitude - _lastAltitude!;
+      if (diff.abs() >= minAltitudeThreshold) {
+        totalElevation.value += diff.abs();
+        _lastAltitude = currentAltitude;
+        altitudeRoute.add(currentAltitude);
+        countFloor();
+
+        if (kDebugMode) {
+          print('⛰️ Altitude: ${currentAltitude.toStringAsFixed(2)} m');
+          print('⬆️ Gained: ${diff.toStringAsFixed(2)} m');
+          print(
+            '📏 Total elevation: ${totalElevation.value.toStringAsFixed(2)} m',
+          );
+          print('🏢 Estimated floors: ${floorCount.value}');
+        }
+      } else {
+        if (kDebugMode) {
+          print(
+            '⚠️ Ignored minor altitude change: ${diff.toStringAsFixed(2)} m',
+          );
+        }
+      }
+    });
 
     isTracking.value = true;
     isPaused.value = false;
-    _lastPosition = null;
     _secondsElapsed = 0;
     elapsedTime.value = '00:00:00';
-
+    _trackingTimer?.cancel();
     _trackingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!isTracking.value || isPaused.value) return;
       _secondsElapsed++;
       _updateElapsedTime();
     });
-
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 1,
-      ),
-    ).listen((Position position) {
-      if (_lastPosition != null) {
-        double distance = Geolocator.distanceBetween(
-          _lastPosition!.latitude,
-          _lastPosition!.longitude,
-          position.latitude,
-          position.longitude,
-        );
-        totalDistance.value += distance;
-
-        double elevationGain = position.altitude - _lastPosition!.altitude;
-        if (elevationGain > 0) {
-          totalClimbed.value += elevationGain;
-          floorCount.value = (((totalClimbed.value / 2.4384).floor()) ~/ 4);
-        }
-      }
-      _lastPosition = position;
-    });
-
-    audioPlayer.setSource(AssetSource('music/Elevator.wav'));
-    audioPlayer.resume();
-
-    double lastTotalClimbed = totalClimbed.value;
-    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      if (!isTracking.value || isPaused.value) {
-        timer.cancel();
-        return;
-      }
-      if (totalClimbed.value != lastTotalClimbed) {
-        startAnimation(height);
-      } else {
-        stopAnimation();
-      }
-
-      lastTotalClimbed = totalClimbed.value;
-    });
   }
 
-  void pauseTracking() async {
+  void countFloor() {
+    floorCount.value = ((totalElevation.value / 2.4384) / 2).floor();
+  }
+
+  void pauseClimbTracking() {
     isPaused.value = true;
-    _positionStream?.pause();
-    _timer?.cancel();
     _trackingTimer?.cancel();
-    stopAnimation();
-    await audioPlayer.pause();
+    if (kDebugMode) print('⏸️ Tracking paused');
   }
 
-  void resumeTracking() async {
+  void resumeClimbTracking() {
+    if (!isTracking.value) return;
     isPaused.value = false;
-    _positionStream?.resume();
-    await audioPlayer.resume();
+    _trackingTimer?.cancel();
     _trackingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!isTracking.value || isPaused.value) return;
       _secondsElapsed++;
       _updateElapsedTime();
     });
+    if (kDebugMode) print('▶️ Tracking resumed');
   }
 
-  void stopTracking() async {
-    _timer?.cancel();
+  void stopClimbTracking() async {
     _trackingTimer?.cancel();
-    _positionStream?.cancel();
-    stopAnimation();
-    await audioPlayer.stop();
-
-    final storage = ClimbingDataStorage();
-    await storage.saveClimbingData(totalClimbed.value, currentDate.value);
-
     isTracking.value = false;
     isPaused.value = false;
+    await audioPlayer.stop();
+    _positionSub?.cancel();
+    animationController.stop();
+    _positionSub = null;
+
+    final storage = ClimbingDataStorage();
+    storage.saveClimbingData(0.0, currentDate.value);
 
     Get.dialog(
       AlertDialog(
@@ -205,10 +165,10 @@ class MarathonClimbedController extends GetxController
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Date: ${currentDate.value}'),
-            Text('Floors Climbed: ${floorCount.value} floors'),
             Text(
-              'Height Climbed: ${totalClimbed.value.toStringAsFixed(2)} meters',
+              'Height Climed: ${totalElevation.value.toStringAsFixed(2)} meters',
             ),
+            Text('Floor Climed: ${floorCount.value} floors'),
             Text('Time Elapsed: ${elapsedTime.value}'),
           ],
         ),
@@ -218,7 +178,7 @@ class MarathonClimbedController extends GetxController
               sendData(
                 currentDate.value,
                 elapsedTime.value,
-                totalClimbed.value,
+                totalElevation.value,
               );
               Get.back();
               _reset();
@@ -230,6 +190,20 @@ class MarathonClimbedController extends GetxController
     );
   }
 
+  @override
+  void onClose() {
+    _trackingTimer?.cancel();
+    audioPlayer.dispose();
+    stopClimbTracking();
+    animationController.dispose();
+    super.onClose();
+  }
+
+  void updateCurrentDate() {
+    final now = DateTime.now();
+    currentDate.value = DateFormat("d MMMM, y").format(now);
+  }
+
   void _updateElapsedTime() {
     final hours = (_secondsElapsed ~/ 3600).toString().padLeft(2, '0');
     final minutes = ((_secondsElapsed % 3600) ~/ 60).toString().padLeft(2, '0');
@@ -238,19 +212,8 @@ class MarathonClimbedController extends GetxController
   }
 
   void _reset() {
-    totalDistance.value = 0.0;
-    totalClimbed.value = 0.0;
-    floorCount.value = 0;
     elapsedTime.value = '00:00:00';
     _secondsElapsed = 0;
-    _lastPosition = null;
-  }
-
-  RxString currentDate = ''.obs;
-
-  void updateCurrentDate() {
-    final now = DateTime.now();
-    currentDate.value = DateFormat("d MMMM, y").format(now);
   }
 
   Future<void> sendData(String date, String time, double distance) async {

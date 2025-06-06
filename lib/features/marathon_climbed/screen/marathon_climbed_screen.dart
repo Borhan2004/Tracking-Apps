@@ -1,105 +1,246 @@
-import 'package:chrismiche/core/utils/constants/image_path.dart' show ImagePath;
+import 'dart:async';
+import 'package:chrismiche/core/common/styles/global_text_style.dart';
 import 'package:chrismiche/features/home/controller/change_character_controller.dart';
 import 'package:chrismiche/features/marathon_climbed/controller/marathon_climbed_controller.dart';
-import 'package:chrismiche/features/marathon_climbed/widgets/marathon_climbed_stats.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MarathonClimbedScreen extends StatelessWidget {
-  MarathonClimbedScreen({super.key});
-
-  final MarathonClimbedController controller = Get.put(
+  final String backgroundImage = 'assets/images/climbBackground.png';
+  final String characterImage = 'assets/images/rykerElevator.png';
+  final MarathonClimbedController climbController = Get.put(
     MarathonClimbedController(),
   );
-
   final ChangeCharacterController elevatorController = Get.put(
     ChangeCharacterController(),
   );
 
+  MarathonClimbedScreen({super.key});
+
+  Future<Size> getImageSize(String imagePath, double devicePixelRatio) async {
+    final imageProvider = AssetImage(imagePath);
+    final completer = Completer<Size>();
+    imageProvider
+        .resolve(const ImageConfiguration())
+        .addListener(
+          ImageStreamListener((ImageInfo info, bool synchronousCall) {
+            completer.complete(
+              Size(info.image.width.toDouble(), info.image.height.toDouble()),
+            );
+          }),
+        );
+    final size = await completer.future;
+    return Size(size.width / devicePixelRatio, size.height / devicePixelRatio);
+  }
+
+  static const _whiteTextStyle = TextStyle(color: Colors.white);
+
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     return Scaffold(
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            height: screenHeight,
-            child: AnimatedBuilder(
-              animation: controller.animationController,
-              builder: (context, child) {
-                return SingleChildScrollView(
-                  controller: controller.scrollController,
-                  scrollDirection: Axis.vertical,
-                  physics: const NeverScrollableScrollPhysics(),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        ImagePath.upCover,
-                        height: controller.imageHeight,
-                        width: screenWidth,
-                        fit: BoxFit.cover,
-                      ),
-                    ],
-                  ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = constraints.maxWidth;
+
+          return FutureBuilder<Size>(
+            future: getImageSize(backgroundImage, devicePixelRatio),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text('Error loading background image'),
                 );
-              },
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.13,
-            child: Obx(
-              () => Image.asset(
-                elevatorController.elevatorCharacterImagePath,
-                height: MediaQuery.of(context).size.height * 0.9,
-                width: MediaQuery.of(context).size.height * 0.9,
-              ),
-            ),
-          ),
-          Positioned(top: 65, child: MarathonClimbedStats()),
-          Positioned(
-            bottom: 40,
-            child: Obx(
-              () => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              }
+              final imageSize = snapshot.data!;
+              final aspectRatio = imageSize.width / imageSize.height;
+              final scaledHeight = screenWidth / aspectRatio;
+
+              return Stack(
                 children: [
-                  if (!controller.isTracking.value) ...[
-                    ElevatedButton(
-                      onPressed: () => controller.startTracking(screenHeight),
-                      child: const Text('Start'),
-                    ),
-                    const SizedBox(width: 20),
-                  ],
-                  SizedBox(
-                    width: controller.isTracking.value ? 250 : null,
-                    height: controller.isTracking.value ? 60 : null,
-                    child: ElevatedButton(
-                      onPressed: controller.stopTracking,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding:
-                            controller.isTracking.value
-                                ? const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 15,
-                                )
-                                : null,
-                      ),
-                      child: Text(
-                        'Stop',
-                        style: TextStyle(
-                          fontSize: controller.isTracking.value ? 18 : 14,
+                  Obx(() {
+                    final offsetY =
+                        climbController.offset.value % (scaledHeight * 2);
+                    return Stack(
+                      children: [
+                        Positioned(
+                          top: offsetY,
+                          left: 0,
+                          width: screenWidth,
+                          height: scaledHeight,
+                          child: Image.asset(
+                            backgroundImage,
+                            fit: BoxFit.fill,
+                            alignment: Alignment.topLeft,
+                          ),
                         ),
+                        Positioned(
+                          top: offsetY - scaledHeight,
+                          left: 0,
+                          width: screenWidth,
+                          height: scaledHeight,
+                          child: Image.asset(
+                            backgroundImage,
+                            fit: BoxFit.fill,
+                            alignment: Alignment.topLeft,
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                  Center(
+                    child: Image.asset(
+                      elevatorController.elevatorCharacterImagePath,
+                      height: 650,
+                      width: 650,
+                    ),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0,
+                      vertical: 40,
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Obx(
+                            () => Text(
+                              " ${climbController.currentDate.value}",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Distance: ",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Obx(
+                                () => Text(
+                                  "${climbController.totalElevation.value.toStringAsFixed(2)} meters",
+                                  style: _whiteTextStyle.copyWith(fontSize: 20),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Floor: ",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Obx(
+                                () => Text(
+                                  "${climbController.floorCount.value} floors",
+                                  style: _whiteTextStyle.copyWith(fontSize: 20),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Time Elapsed: ",
+                                style: getTextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Obx(
+                                () => Text(
+                                  climbController.elapsedTime.value,
+                                  style: getTextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Obx(() {
+                            final currentAltitude =
+                                climbController.altitudeRoute.isNotEmpty
+                                    ? climbController.altitudeRoute.last
+                                    : null;
+
+                            if (currentAltitude == null) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return Column(
+                              children: [
+                                const Text(
+                                  "Current Altitude:",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  "${currentAltitude.toStringAsFixed(2)} meters",
+                                  style: _whiteTextStyle.copyWith(fontSize: 18),
+                                ),
+                              ],
+                            );
+                          }),
+                        ],
                       ),
+                    ),
+                  ),
+
+                  Positioned(
+                    bottom: 40,
+                    left: 40,
+                    right: 40,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            climbController.startClimbTracking();
+                          },
+                          child: const Text("Start"),
+                        ),
+
+                        ElevatedButton(
+                          onPressed: () {
+                            climbController.stopClimbTracking();
+                          },
+                          child: const Text("Stop"),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
-            ),
-          ),
-        ],
+              );
+            },
+          );
+        },
       ),
     );
   }
