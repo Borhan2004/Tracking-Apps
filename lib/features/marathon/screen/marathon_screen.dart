@@ -1,95 +1,211 @@
-import 'package:chrismiche/core/utils/constants/image_path.dart';
+import 'dart:async';
 import 'package:chrismiche/features/home/controller/change_character_controller.dart';
 import 'package:chrismiche/features/marathon/controller/marathon_controller.dart';
-import 'package:chrismiche/features/marathon/widgets/marathon_counters.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MarathonScreen extends StatelessWidget {
-  MarathonScreen({super.key});
-
   final MarathonController controller = Get.put(MarathonController());
   final ChangeCharacterController runningController = Get.put(
     ChangeCharacterController(),
   );
 
+  final String backgroundImage = 'assets/images/runBackground.png';
+
+  MarathonScreen({super.key});
+
+  Future<Size> getImageSize(BuildContext context, String imagePath) async {
+    final imageProvider = AssetImage(imagePath);
+    final completer = Completer<Size>();
+    imageProvider
+        .resolve(const ImageConfiguration())
+        .addListener(
+          ImageStreamListener((ImageInfo info, bool synchronousCall) {
+            completer.complete(
+              Size(info.image.width.toDouble(), info.image.height.toDouble()),
+            );
+          }),
+        );
+    final size = await completer.future;
+    // ignore: use_build_context_synchronously
+    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    return Size(size.width / pixelRatio, size.height / pixelRatio);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          AnimatedBuilder(
-            animation: controller.animationController,
-            builder: (context, child) {
-              return SingleChildScrollView(
-                controller: controller.scrollController,
-                scrollDirection: Axis.horizontal,
-                physics: const NeverScrollableScrollPhysics(),
-                child: Row(
-                  children: [
-                    Image.asset(
-                      ImagePath.runBackground,
-                      width: controller.imageWidth,
-                      height: screenSize.height,
-                      fit: BoxFit.cover,
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.3,
-            child: Obx(
-              () => Image.asset(
-                runningController.characterImagePath,
-                height: MediaQuery.of(context).size.height * 0.55,
-                width: MediaQuery.of(context).size.height * 0.55,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 40,
-            child: Obx(
-              () => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenHeight = constraints.maxHeight;
+
+          return FutureBuilder<Size>(
+            future: getImageSize(context, backgroundImage),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final imageSize = snapshot.data!;
+              final aspectRatio = imageSize.width / imageSize.height;
+              final scaledWidth = screenHeight * aspectRatio;
+              final isTracking = controller.isTracking.value;
+
+              return Stack(
                 children: [
-                  if (!controller.isRunning.value)
-                    ElevatedButton(
-                      onPressed: () {
-                        controller.startAnimation();
-                      },
-                      child: const Text('Start'),
+                  Obx(() {
+                    final offsetX = controller.offset.value % (scaledWidth * 2);
+                    return Stack(
+                      children: [
+                        Positioned(
+                          left: -offsetX,
+                          top: 0,
+                          width: scaledWidth,
+                          height: screenHeight,
+                          child: Image.asset(
+                            backgroundImage,
+                            fit: BoxFit.fill,
+                            alignment: Alignment.topLeft,
+                          ),
+                        ),
+                        Positioned(
+                          left: scaledWidth - offsetX,
+                          top: 0,
+                          width: scaledWidth,
+                          height: screenHeight,
+                          child: Image.asset(
+                            backgroundImage,
+                            fit: BoxFit.fill,
+                            alignment: Alignment.topLeft,
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                  Positioned(
+                    top: 40,
+                    child: Container(
+                      width: constraints.maxWidth,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Date
+                          Obx(
+                            () => Text(
+                              "Date: ${controller.currentDate.value}",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Total Distance
+                          Obx(
+                            () => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "Total Distance:",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  "${controller.totalDistance.value.toStringAsFixed(2)} meters",
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Steps
+                          Obx(
+                            () => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "Total Steps:",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  "${controller.steps.value} Steps",
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Elapsed Time
+                          Obx(
+                            () => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "Elapsed Time:",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  controller.formatDuration(controller.elapsedTime.value),
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  if (!controller.isRunning.value) const SizedBox(width: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      controller.stopAnimation();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize:
-                          controller.isRunning.value
-                              ? const Size(250, 60)
-                              : const Size(80, 40),
-                      backgroundColor: Colors.red,
+                  ),
+                  Positioned(
+                    top: 280,
+                    child: Image.asset(
+                      runningController.characterImagePath,
+                      width: 430,
+                      height: 430,
                     ),
-                    child: const Text('Stop'),
+                  ),
+                  Positioned(
+                    bottom: 40,
+                    left: 40,
+                    right: 40,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: isTracking
+                              ? null
+                              : () {
+                                  controller.startTracking();
+                                  controller.start();
+                                },
+                          child: const Text("Start"),
+                        ),
+                        ElevatedButton(
+                          onPressed: controller.resetTracking,
+                          child: const Text("Reset"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            controller.stopTracking();
+                            controller.stop();
+                          },
+                          child: const Text("Stop"),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: 65,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [MarathonCounters(), const SizedBox(height: 40)],
-            ),
-          ),
-        ],
+              );
+            },
+          );
+        },
       ),
     );
   }

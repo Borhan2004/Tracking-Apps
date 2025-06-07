@@ -14,7 +14,7 @@ class OngoingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       body: Obx(() {
@@ -24,37 +24,53 @@ class OngoingScreen extends StatelessWidget {
             SingleChildScrollView(
               controller: controller.scrollController,
               scrollDirection: Axis.horizontal,
-              physics:   NeverScrollableScrollPhysics(),
+              physics: NeverScrollableScrollPhysics(),
               child: Image.asset(
                 'assets/images/runBackground.png',
                 height: screenHeight,
                 fit: BoxFit.fitHeight,
               ),
             ),
-
+            Center(
+              child: Image.asset(
+                runningController.characterImagePath,
+                height: 650,
+                width: 650,
+              ),
+            ),
             // Overlay with distance and date
             Positioned.fill(
               child: Container(
-                alignment: Alignment.center, 
+                alignment: Alignment.center,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding:  EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha:  0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
                         children: [
                           Text(
                             "Distance: ${controller.totalDistance.value.toStringAsFixed(2)} m",
-                            style:   TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                            SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Text(
                             "Date: ${controller.currentDate.value}",
-                            style:   TextStyle(fontSize: 18, color: Colors.white70),
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white70,
+                            ),
                           ),
                         ],
                       ),
