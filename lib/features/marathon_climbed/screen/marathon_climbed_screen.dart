@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 
 class MarathonClimbedScreen extends StatelessWidget {
   final String backgroundImage = 'assets/images/climbBackground.png';
-  final String characterImage = 'assets/images/rykerElevator.png';
   final MarathonClimbedController climbController = Get.put(
     MarathonClimbedController(),
   );
