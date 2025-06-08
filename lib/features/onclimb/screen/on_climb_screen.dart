@@ -55,6 +55,7 @@ class OnClimbScreen extends StatelessWidget {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenWidth = constraints.maxWidth;
+          final screenHeight = constraints.maxHeight;
 
           return FutureBuilder<Size>(
             future: getImageSize(backgroundImage, devicePixelRatio),
@@ -81,10 +82,10 @@ class OnClimbScreen extends StatelessWidget {
 
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 debugPrint(
-                  'Setting scroll speed: scaledHeight=$scaledHeight, maxHeight=${constraints.maxHeight}',
+                  'Setting scroll speed: scaledHeight=$scaledHeight, maxHeight=$screenHeight',
                 );
                 climbController.setScrollSpeed(scaledHeight, 100.0);
-                climbController.startAnimation(constraints.maxHeight);
+                climbController.startAnimation(screenHeight, scaledHeight);
               });
 
               return Stack(
@@ -102,6 +103,15 @@ class OnClimbScreen extends StatelessWidget {
                             backgroundImage,
                             fit: BoxFit.fill,
                             alignment: Alignment.topLeft,
+                            errorBuilder: (context, error, stackTrace) {
+                              debugPrint('Image error: $error');
+                              return const Center(
+                                child: Text(
+                                  'Failed to load background image',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              );
+                            },
                           ),
                         ),
                         Positioned(
@@ -113,6 +123,15 @@ class OnClimbScreen extends StatelessWidget {
                             backgroundImage,
                             fit: BoxFit.fill,
                             alignment: Alignment.topLeft,
+                            errorBuilder: (context, error, stackTrace) {
+                              debugPrint('Image error: $error');
+                              return const Center(
+                                child: Text(
+                                  'Failed to load background image',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ],
@@ -136,7 +155,6 @@ class OnClimbScreen extends StatelessWidget {
                       },
                     ),
                   ),
-
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 15.0,
@@ -195,21 +213,21 @@ class OnClimbScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          // Obx(() {
-                          //   final currentAltitude =
-                          //       climbController.altitudeRoute.isNotEmpty
-                          //           ? climbController.altitudeRoute.last
-                          //           : null;
+                          Obx(() {
+                            final currentAltitude =
+                                climbController.altitudeRoute.isNotEmpty
+                                    ? climbController.altitudeRoute.last
+                                    : null;
 
-                          //   if (currentAltitude == null) {
-                          //     return const SizedBox.shrink();
-                          //   }
+                            if (currentAltitude == null) {
+                              return const SizedBox.shrink();
+                            }
 
-                          //   return Text(
-                          //     "${currentAltitude.toStringAsFixed(2)} Altitude",
-                          //     style: _whiteTextStyle.copyWith(fontSize: 10),
-                          //   );
-                          // }),
+                            return Text(
+                              "${currentAltitude.toStringAsFixed(2)} meters",
+                              style: _whiteTextStyle.copyWith(fontSize: 10),
+                            );
+                          }),
                         ],
                       ),
                     ),
@@ -223,4 +241,3 @@ class OnClimbScreen extends StatelessWidget {
     );
   }
 }
-
