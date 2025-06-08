@@ -17,9 +17,7 @@ class DetailsController extends GetxController {
   void onInit() async {
     super.onInit();
     await SharedPreferencesDataHelper.clearLegacyClimbingData();
-    // Update data immediately on init
     await _updateData();
-    // Periodic update every 10 seconds
     Timer.periodic(const Duration(seconds: 10), (timer) async {
       await _updateData();
     });
@@ -31,7 +29,6 @@ class DetailsController extends GetxController {
     if (token != null) {
       await fetchMovementDistances(currentDate);
     }
-    // Always update from SharedPreferences as fallback
     await updateDistance();
   }
 

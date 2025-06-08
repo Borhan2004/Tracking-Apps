@@ -4,11 +4,11 @@ import 'package:chrismiche/core/localization/end_points.dart';
 import 'package:chrismiche/core/services/location_service.dart';
 import 'package:chrismiche/core/services/shared_preferences_data_helper.dart';
 import 'package:chrismiche/core/services/shared_preferences_helper.dart';
-import 'package:flutter/foundation.dart'; 
-import 'package:flutter/material.dart'; 
-import 'package:get/get.dart'; 
-import 'package:geolocator/geolocator.dart'; 
-import 'package:http/http.dart' as http; 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class OnClimbController extends GetxController
@@ -16,24 +16,22 @@ class OnClimbController extends GetxController
   final locationService = LocationService();
 
   final RxDouble totalElevation = 0.0.obs;
-  final RxDouble totalDistance = 0.0.obs; 
-  final RxList<double> altitudeRoute = <double>[].obs; 
-  final RxBool isTracking = false.obs; 
-  final RxBool isPaused = false.obs; 
-  final RxInt floorCount = 0.obs; 
-  final RxString currentDate = ''.obs; 
-  final RxDouble offset = 0.0.obs; 
+  final RxDouble totalDistance = 0.0.obs;
+  final RxList<double> altitudeRoute = <double>[].obs;
+  final RxBool isTracking = false.obs;
+  final RxBool isPaused = false.obs;
+  final RxInt floorCount = 0.obs;
+  final RxString currentDate = ''.obs;
+  final RxDouble offset = 0.0.obs;
 
   late AnimationController animationController;
-  final double imageHeight = 2000.0; 
-  double maxScrollExtent = 0.0; 
-  static const double minAltitudeThreshold =
-      0.5; 
-  double scrollSpeed = 50.0; 
+  double imageHeight = 2000.0; 
+  double maxScrollExtent = 0.0;
+  static const double minAltitudeThreshold = 0.5;
+  double scrollSpeed = 50.0;
 
-  
-  StreamSubscription<Position>? _positionSub; 
-  Position? _lastPosition; 
+  StreamSubscription<Position>? _positionSub;
+  Position? _lastPosition;
 
   @override
   void onInit() {
@@ -41,14 +39,17 @@ class OnClimbController extends GetxController
     updateCurrentDate();
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(days: 1), 
+      duration: const Duration(
+        seconds: 1,
+      ),
     );
-    ever(totalDistance, (double distance) {
+    ever(totalElevation, (double elevation) {
+      // Changed to totalElevation for climbing focus
       if (maxScrollExtent > 0) {
-        offset.value = (distance * scrollSpeed) % (maxScrollExtent * 2);
+        offset.value = (elevation * scrollSpeed) % (maxScrollExtent * 2);
         if (kDebugMode) {
           debugPrint(
-            'Distance: $distance, Offset: ${offset.value}, MaxScrollExtent: $maxScrollExtent',
+            'Elevation: $elevation, Offset: ${offset.value}, MaxScrollExtent: $maxScrollExtent',
           );
         }
       }
@@ -81,16 +82,17 @@ class OnClimbController extends GetxController
   }
 
   void setScrollSpeed(double imageWidth, double meters) {
+    imageHeight = imageWidth; 
     scrollSpeed = imageWidth / meters;
     if (kDebugMode) {
       debugPrint(
-        'ScrollSpeed set to: $scrollSpeed (imageWidth=$imageWidth, meters=$meters)',
+        'ScrollSpeed set to: $scrollSpeed (imageHeight=$imageWidth, meters=$meters)',
       );
     }
     update();
   }
 
-  void startAnimation(double viewportHeight) {
+  void startAnimation(double viewportHeight, double scaledHeight) {
     maxScrollExtent = imageHeight - viewportHeight;
     if (maxScrollExtent <= 0) {
       if (kDebugMode) {
@@ -104,7 +106,7 @@ class OnClimbController extends GetxController
     if (kDebugMode) {
       debugPrint('Starting animation with maxScrollExtent=$maxScrollExtent');
     }
-    offset.value = maxScrollExtent;
+    // Removed offset.value = maxScrollExtent to avoid conflict with ever callback
     if (!animationController.isAnimating) {
       animationController.repeat();
     }
@@ -118,11 +120,19 @@ class OnClimbController extends GetxController
   }
 
   Future<bool> _checkAndRequestLocationPermission() async {
-    if (!await locationService.ensurePermission()) {
-      Get.snackbar('Permission Denied', 'Location permission is required.');
+    try {
+      if (!await locationService.ensurePermission()) {
+        Get.snackbar('Permission Denied', 'Location permission is required.');
+        return false;
+      }
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking location permission: $e');
+      }
+      Get.snackbar('Error', 'Failed to check location permission');
       return false;
     }
-    return true;
   }
 
   void startClimbTracking() async {
@@ -133,34 +143,39 @@ class OnClimbController extends GetxController
     _lastPosition = null;
     _positionSub?.cancel();
 
-    _positionSub = locationService.getPositionStream().listen((
-      Position position,
-    ) {
-      if (_lastPosition == null) {
+    _positionSub = locationService.getPositionStream().listen(
+      (Position position) {
+        if (_lastPosition == null) {
+          _lastPosition = position;
+          altitudeRoute.add(position.altitude);
+          return;
+        }
+
+        final distance = Geolocator.distanceBetween(
+          _lastPosition!.latitude,
+          _lastPosition!.longitude,
+          position.latitude,
+          position.longitude,
+        );
+        totalDistance.value += distance;
+
+        final elevationGain = position.altitude - _lastPosition!.altitude;
+        if (elevationGain.abs() >= minAltitudeThreshold) {
+          totalElevation.value += elevationGain.abs();
+          altitudeRoute.add(position.altitude);
+          floorCount.value = ((totalElevation.value / 2.4384).floor() ~/ 2);
+        }
+
         _lastPosition = position;
-        altitudeRoute.add(position.altitude);
-        return;
-      }
-
-      final distance = Geolocator.distanceBetween(
-        _lastPosition!.latitude,
-        _lastPosition!.longitude,
-        position.latitude,
-        position.longitude,
-      );
-      totalDistance.value += distance;
-
-      final elevationGain = position.altitude - _lastPosition!.altitude;
-      if (elevationGain.abs() >= minAltitudeThreshold) {
-        totalElevation.value += elevationGain.abs();
-        altitudeRoute.add(position.altitude);
-        floorCount.value =
-            ((totalElevation.value / 2.4384).floor() ~/
-                2); 
-      }
-
-      _lastPosition = position;
-    });
+      },
+      onError: (e) {
+        if (kDebugMode) {
+          print('Position stream error: $e');
+        }
+        Get.snackbar('Error', 'Failed to track location');
+        stopClimbTracking();
+      },
+    );
   }
 
   void pauseClimbTracking() {
@@ -185,22 +200,32 @@ class OnClimbController extends GetxController
     _positionSub = null;
     stopAnimation();
 
-    final now = DateTime.now();
-    final currentFormattedDate = DateFormat("d MMMM, y").format(now);
+    try {
+      final now = DateTime.now();
+      final currentFormattedDate = DateFormat("d MMMM, y").format(now);
 
-    await SharedPreferencesDataHelper.saveDailyClimbingTracking(
-      totalElevation.value,
-      floorCount.value,
-      currentFormattedDate,
-    );
-    await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-      totalDistance.value,
-      currentFormattedDate,
-    );
+      await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+        totalElevation.value,
+        floorCount.value,
+        currentFormattedDate,
+      );
+      await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+        totalDistance.value,
+        currentFormattedDate,
+      );
 
-    final token = await SharedPreferencesHelper.getAccessToken();
-    if (token != null) {
-      await sendData(currentFormattedDate, totalDistance.value);
+      final token = await SharedPreferencesHelper.getAccessToken();
+      if (token != null) {
+        await sendData(
+          currentFormattedDate,
+          totalElevation.value,
+        ); // Changed to totalElevation
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error stopping climb tracking: $e');
+      }
+      Get.snackbar('Error', 'Failed to save or send data');
     }
   }
 
@@ -208,7 +233,8 @@ class OnClimbController extends GetxController
     currentDate.value = DateFormat("d MMMM, y").format(DateTime.now());
   }
 
-  Future<void> sendData(String date, double distance) async {
+  Future<void> sendData(String date, double elevation) async {
+    // Changed parameter to elevation
     try {
       final token = await SharedPreferencesHelper.getAccessToken();
       if (token == null) return;
@@ -219,7 +245,10 @@ class OnClimbController extends GetxController
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'date': date, 'distance': distance}),
+        body: jsonEncode({
+          'date': date,
+          'distance': elevation,
+        }), // Changed to elevation
       );
 
       if (response.statusCode != 200) {

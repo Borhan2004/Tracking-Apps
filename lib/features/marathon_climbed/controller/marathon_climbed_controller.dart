@@ -191,6 +191,19 @@ class MarathonClimbedController extends GetxController
     );
   }
 
+  void _reset() {
+    elapsedTime.value = '00:00:00';
+    _secondsElapsed = 0;
+    totalElevation.value = 0.0;
+    floorCount.value = 0;
+    altitudeRoute.clear();
+    offset.value = 0.0;
+    updateCurrentDate();
+    if (kDebugMode) {
+      print('OnClimbController: All tracking data reset to initial values');
+    }
+  }
+
   @override
   void onClose() {
     _trackingTimer?.cancel();
@@ -210,11 +223,6 @@ class MarathonClimbedController extends GetxController
     final minutes = ((_secondsElapsed % 3600) ~/ 60).toString().padLeft(2, '0');
     final seconds = (_secondsElapsed % 60).toString().padLeft(2, '0');
     elapsedTime.value = '$hours:$minutes:$seconds';
-  }
-
-  void _reset() {
-    elapsedTime.value = '00:00:00';
-    _secondsElapsed = 0;
   }
 
   Future<void> sendData(String date, String time, double distance) async {
