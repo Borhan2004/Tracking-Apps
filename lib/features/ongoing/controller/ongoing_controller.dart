@@ -15,30 +15,32 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
   final totalSteps = 0.obs;
   final currentDate = ''.obs;
   final isMoving = false.obs;
-  final offset = 0.0.obs; // Reactive offset for animation
+  final offset = 0.0.obs;
   Timer? resetTimer;
   Position? _lastPosition;
 
-  double scrollSpeedPerMeter = 2.0; // Pixels per meter of distance
-  final double averageStrideLength = 0.762; // Meters per step
-  double maxScrollExtent = 0.0; // Maximum scrollable extent
+  double scrollSpeedPerMeter = 2.0;
+  final double averageStrideLength = 0.762;
+  double maxScrollExtent = 0.0; 
 
   late AnimationController animationController;
+  late Animation<double> offsetAnimation;
 
   @override
   void onInit() {
     super.onInit();
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(days: 1), // Long duration for continuous animation
-    );
+      duration: const Duration(seconds: 1), 
+    )..addListener(() {
+        offset.value = offsetAnimation.value;
+        // if (kDebugMode) {
+        //   debugPrint('Offset: ${offset.value}, MaxScrollExtent: $maxScrollExtent');
+        // }
+      });
+
     ever(totalDistance, (double distance) {
-      if (maxScrollExtent > 0) {
-        offset.value = (distance * scrollSpeedPerMeter) % (maxScrollExtent * 2);
-        if (kDebugMode) {
-          debugPrint('Distance: $distance, Offset: ${offset.value}, MaxScrollExtent: $maxScrollExtent');
-        }
-      }
+      _updateAnimation(distance);
     });
     _initLocation();
     _startDateListener();
@@ -69,8 +71,8 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
     if (kDebugMode) {
       debugPrint('Starting animation with maxScrollExtent=$maxScrollExtent');
     }
-    offset.value = maxScrollExtent;
-    if (!animationController.isAnimating && isMoving.value) {
+    _updateAnimation(totalDistance.value);
+    if (isMoving.value && !animationController.isAnimating) {
       animationController.repeat();
     }
   }
@@ -80,6 +82,22 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
     if (kDebugMode) {
       debugPrint('Animation stopped');
     }
+  }
+
+  void _updateAnimation(double distance) {
+    final targetOffset = (distance * scrollSpeedPerMeter) % (maxScrollExtent * 2);
+    offsetAnimation = Tween<double>(
+      begin: offset.value,
+      end: targetOffset,
+    ).animate(
+      CurvedAnimation(
+        parent: animationController,
+        curve: Curves.linear,
+      ),
+    );
+    animationController
+      ..reset()
+      ..forward();
   }
 
   void _initLocation() async {
