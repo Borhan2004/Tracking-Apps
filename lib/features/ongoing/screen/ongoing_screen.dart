@@ -82,13 +82,10 @@ class OngoingScreen extends StatelessWidget {
               return Stack(
                 children: [
                   Obx(() {
-                    final offsetX = controller.offset.value;
-                    
+                    final offsetX = controller.offset.value;  
                     final normalizedOffset = offsetX % scaledWidth;
                     final firstImageLeft = -normalizedOffset;
                     final secondImageLeft = firstImageLeft + scaledWidth;
-
-                    debugPrint('OffsetX: $offsetX, NormalizedOffset: $normalizedOffset, FirstLeft: $firstImageLeft, SecondLeft: $secondImageLeft');
 
                     return Stack(
                       children: [

@@ -61,8 +61,7 @@ class MarathonClimbedScreen extends StatelessWidget {
               return Stack(
                 children: [
                   Obx(() {
-                    final offsetY =
-                        climbController.offset.value % (scaledHeight * 2);
+                    final offsetY = climbController.offset.value % scaledHeight;
                     return Stack(
                       children: [
                         Positioned(

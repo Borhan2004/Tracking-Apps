@@ -79,7 +79,6 @@ class OnClimbScreen extends StatelessWidget {
               final aspectRatio = imageSize.width / imageSize.height;
               final scaledHeight = screenWidth / aspectRatio;
 
-              // Set scroll speed and start animation
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 debugPrint(
                   'Setting scroll speed: scaledHeight=$scaledHeight, maxHeight=${constraints.maxHeight}',
@@ -91,11 +90,7 @@ class OnClimbScreen extends StatelessWidget {
               return Stack(
                 children: [
                   Obx(() {
-                    final offsetY =
-                        climbController.offset.value % (scaledHeight * 2);
-                    debugPrint(
-                      'OffsetY: $offsetY, ScaledHeight: $scaledHeight',
-                    );
+                    final offsetY = climbController.offset.value % scaledHeight;
                     return Stack(
                       children: [
                         Positioned(
@@ -105,17 +100,8 @@ class OnClimbScreen extends StatelessWidget {
                           height: scaledHeight,
                           child: Image.asset(
                             backgroundImage,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                             alignment: Alignment.topLeft,
-                            errorBuilder: (context, error, stackTrace) {
-                              debugPrint('Image error: $error');
-                              return const Center(
-                                child: Text(
-                                  'Failed to load background image',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              );
-                            },
                           ),
                         ),
                         Positioned(
@@ -125,17 +111,8 @@ class OnClimbScreen extends StatelessWidget {
                           height: scaledHeight,
                           child: Image.asset(
                             backgroundImage,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                             alignment: Alignment.topLeft,
-                            errorBuilder: (context, error, stackTrace) {
-                              debugPrint('Image error: $error');
-                              return const Center(
-                                child: Text(
-                                  'Failed to load background image',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              );
-                            },
                           ),
                         ),
                       ],
@@ -246,3 +223,4 @@ class OnClimbScreen extends StatelessWidget {
     );
   }
 }
+
