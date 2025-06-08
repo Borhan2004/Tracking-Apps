@@ -1,4 +1,3 @@
-import 'package:chrismiche/features/bottom_navbar/controller/bottom_navbar_controller.dart';
 import 'package:chrismiche/features/home/controller/home_controller.dart';
 import 'package:chrismiche/features/home/widgets/home_nav_tile.dart'
     show HomeNavTile;
@@ -38,15 +37,17 @@ class QuickNavigationTiles extends StatelessWidget {
             Get.to(() => MarathonClimbedScreen());
           },
         ),
-        HomeNavTile(
-          title: "Statistics",
-          icon: Icons.bar_chart,
+        // HomeNavTile(
+        //   title: "Statistics",
+        //   icon: Icons.bar_chart,
 
-          onTap: () {
-            final controller = Get.find<BottomNavbarController>();
-            controller.changeIndex(3);
-          },
-        ),
+        //   onTap: () {
+        //     final controller = Get.find<BottomNavbarController>();
+        //     controller.changeIndex(3);
+        //   },
+        // ),
+
+        
       ],
     );
   }

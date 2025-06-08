@@ -2,6 +2,7 @@ import 'package:chrismiche/core/common/styles/global_text_style.dart'
     show getTextStyle;
 import 'package:chrismiche/core/utils/constants/colors.dart';
 import 'package:chrismiche/core/utils/constants/image_path.dart';
+import 'package:chrismiche/features/bottom_navbar/controller/bottom_navbar_controller.dart' show BottomNavbarController;
 
 import 'package:chrismiche/features/home/widgets/character_preview.dart'
     show CharacterPreview;
@@ -64,6 +65,49 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 24),
             QuickNavigationTiles(),
             SizedBox(height: 24),
+            Center(
+              child: SizedBox(
+                width: double.infinity,
+
+                child: ElevatedButton(
+                  onPressed: () {
+                     final controller = Get.find<BottomNavbarController>();
+            controller.changeIndex(3);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    side: BorderSide(
+                      color: AppColors.appPrimaryColor,
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.bar_chart,
+                        color: AppColors.appPrimaryColor,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        "Statistics",
+                        style: getTextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.appPrimaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 24,
+            ), 
             Center(
               child: SizedBox(
                 width: double.infinity,
