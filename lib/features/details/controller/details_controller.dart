@@ -42,8 +42,8 @@ class DetailsController extends GetxController {
       climbingDistance.value = climbed ?? 0.0;
 
       if (kDebugMode) {
-        print('DetailsController: Updated runMeter to ${ongoingDistance.value.toStringAsFixed(2)} meters, '
-              'climbMeter to ${climbingDistance.value.toStringAsFixed(2)} meters for today: $today');
+        print('DetailsController: Updated ongoingDistance to ${ongoingDistance.value.toStringAsFixed(2)} meters, '
+              'climbingDistance to ${climbingDistance.value.toStringAsFixed(2)} meters for today: $today');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -81,6 +81,8 @@ class DetailsController extends GetxController {
         climbingDistance.value = statData.climbingMovements?.isNotEmpty == true
             ? statData.climbingMovements!.first.distance ?? 0.0
             : 0.0;
+        await SharedPreferencesDataHelper.saveDailyOngoingTracking(ongoingDistance.value, date);
+        await SharedPreferencesDataHelper.saveDailyClimbingTracking(climbingDistance.value, 0, date);
       } else {
         if (kDebugMode) {
           print('DetailsController: Failed to fetch movements: ${response.statusCode}');

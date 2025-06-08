@@ -28,12 +28,10 @@ class OngoingController extends GetxController
   late AnimationController animationController;
   late Animation<double> offsetAnimation;
 
-  /// Position history for filtering
   final List<Position> _positionWindow = [];
   final int _windowSize = 5;
-  final double _movementThreshold = 6; // Minimum consistent movement in meters
-  final double _minAccuracy =
-      25; // Only trust readings with this or better accuracy
+  final double _movementThreshold = 6;
+  final double _minAccuracy = 25;
 
   @override
   void onInit() {

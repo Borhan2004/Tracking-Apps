@@ -16,7 +16,6 @@ class OnClimbController extends GetxController
   final locationService = LocationService();
 
   final RxDouble totalElevation = 0.0.obs;
-  final RxDouble totalDistance = 0.0.obs;
   final RxList<double> altitudeRoute = <double>[].obs;
   final RxBool isTracking = false.obs;
   final RxBool isPaused = false.obs;
@@ -25,7 +24,7 @@ class OnClimbController extends GetxController
   final RxDouble offset = 0.0.obs;
 
   late AnimationController animationController;
-  double imageHeight = 2000.0; 
+  double imageHeight = 2000.0;
   double maxScrollExtent = 0.0;
   static const double minAltitudeThreshold = 0.5;
   double scrollSpeed = 50.0;
@@ -39,12 +38,9 @@ class OnClimbController extends GetxController
     updateCurrentDate();
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(
-        seconds: 1,
-      ),
+      duration: const Duration(seconds: 1),
     );
     ever(totalElevation, (double elevation) {
-      // Changed to totalElevation for climbing focus
       if (maxScrollExtent > 0) {
         offset.value = (elevation * scrollSpeed) % (maxScrollExtent * 2);
         if (kDebugMode) {
@@ -55,34 +51,30 @@ class OnClimbController extends GetxController
       }
     });
     SharedPreferencesDataHelper.clearLegacyClimbingData();
-    _loadSavedData();
+    _loadSavedData(); 
     WidgetsBinding.instance.addPostFrameCallback((_) => startClimbTracking());
   }
 
+ 
   Future<void> _loadSavedData() async {
     final lastSavedDate = await SharedPreferencesDataHelper.getLastSavedDate();
     final dateToFetch = lastSavedDate ?? currentDate.value;
-    final climbed =
-        await SharedPreferencesDataHelper.getClimbedByDate(dateToFetch) ?? 0.0;
-    final floors =
-        await SharedPreferencesDataHelper.getFloorCountByDate(dateToFetch) ?? 0;
-    final distance =
-        await SharedPreferencesDataHelper.getDistanceByDate(dateToFetch) ?? 0.0;
+    final climbed = await SharedPreferencesDataHelper.getClimbedByDate(dateToFetch) ?? 0.0;
+    final floors = await SharedPreferencesDataHelper.getFloorCountByDate(dateToFetch) ?? 0;
 
     totalElevation.value = climbed;
-    totalDistance.value = distance;
     floorCount.value = floors;
     currentDate.value = dateToFetch;
 
     if (kDebugMode) {
       print(
-        'Loaded: Elevation=$climbed m, Distance=$distance m, Floors=$floors, Date=$dateToFetch',
+        'Loaded: Elevation=$climbed m, Floors=$floors, Date=$dateToFetch',
       );
     }
   }
 
   void setScrollSpeed(double imageWidth, double meters) {
-    imageHeight = imageWidth; 
+    imageHeight = imageWidth;
     scrollSpeed = imageWidth / meters;
     if (kDebugMode) {
       debugPrint(
@@ -106,7 +98,6 @@ class OnClimbController extends GetxController
     if (kDebugMode) {
       debugPrint('Starting animation with maxScrollExtent=$maxScrollExtent');
     }
-    // Removed offset.value = maxScrollExtent to avoid conflict with ever callback
     if (!animationController.isAnimating) {
       animationController.repeat();
     }
@@ -151,14 +142,6 @@ class OnClimbController extends GetxController
           return;
         }
 
-        final distance = Geolocator.distanceBetween(
-          _lastPosition!.latitude,
-          _lastPosition!.longitude,
-          position.latitude,
-          position.longitude,
-        );
-        totalDistance.value += distance;
-
         final elevationGain = position.altitude - _lastPosition!.altitude;
         if (elevationGain.abs() >= minAltitudeThreshold) {
           totalElevation.value += elevationGain.abs();
@@ -167,6 +150,12 @@ class OnClimbController extends GetxController
         }
 
         _lastPosition = position;
+
+        SharedPreferencesDataHelper.saveDailyClimbingTracking(
+          totalElevation.value,
+          floorCount.value,
+          currentDate.value,
+        );
       },
       onError: (e) {
         if (kDebugMode) {
@@ -209,17 +198,14 @@ class OnClimbController extends GetxController
         floorCount.value,
         currentFormattedDate,
       );
-      await SharedPreferencesDataHelper.saveDailyOngoingTracking(
-        totalDistance.value,
-        currentFormattedDate,
-      );
 
       final token = await SharedPreferencesHelper.getAccessToken();
       if (token != null) {
+      
         await sendData(
           currentFormattedDate,
           totalElevation.value,
-        ); // Changed to totalElevation
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -234,7 +220,6 @@ class OnClimbController extends GetxController
   }
 
   Future<void> sendData(String date, double elevation) async {
-    // Changed parameter to elevation
     try {
       final token = await SharedPreferencesHelper.getAccessToken();
       if (token == null) return;
@@ -247,8 +232,8 @@ class OnClimbController extends GetxController
         },
         body: jsonEncode({
           'date': date,
-          'distance': elevation,
-        }), // Changed to elevation
+          'distance': elevation, // CHANGED: Send totalElevation as distance
+        }),
       );
 
       if (response.statusCode != 200) {
