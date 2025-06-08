@@ -98,7 +98,8 @@ class PersonalInfoController extends GetxController {
           userList.value = [user]; // just keep the single user
         }
       } else {
-        Get.snackbar('Error', 'Failed to fetch user info');
+        // Get.snackbar('Error', 'Failed to fetch user info');
+        print("No user found currently"); 
       }
     } catch (e) {
       Get.snackbar('Exception', e.toString());
