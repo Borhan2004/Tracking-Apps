@@ -8,23 +8,78 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:intl/intl.dart';
 
 class OngoingController extends GetxController with GetTickerProviderStateMixin {
- final totalDistance = 0.0.obs;
+  final totalDistance = 0.0.obs;
+  final totalSteps = 0.obs;
   final currentDate = ''.obs;
   final isMoving = false.obs;
-  final scrollController = ScrollController();
+  final offset = 0.0.obs; // Reactive offset for animation
   Timer? resetTimer;
   Position? _lastPosition;
 
-  double scrollSpeedPerMeter = 2; // Adjust for speed of scroll
+  double scrollSpeedPerMeter = 2.0; // Pixels per meter of distance
+  final double averageStrideLength = 0.762; // Meters per step
+  double maxScrollExtent = 0.0; // Maximum scrollable extent
+
+  late AnimationController animationController;
 
   @override
   void onInit() {
     super.onInit();
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(days: 1), // Long duration for continuous animation
+    );
+    ever(totalDistance, (double distance) {
+      if (maxScrollExtent > 0) {
+        offset.value = (distance * scrollSpeedPerMeter) % (maxScrollExtent * 2);
+        if (kDebugMode) {
+          debugPrint('Distance: $distance, Offset: ${offset.value}, MaxScrollExtent: $maxScrollExtent');
+        }
+      }
+    });
     _initLocation();
     _startDateListener();
+    Timer.periodic(const Duration(seconds: 15), (timer) async {
+      if (isMoving.value) {
+        await _saveData();
+      }
+    });
+  }
+
+  void setScrollSpeed(double imageWidth, double meters) {
+    scrollSpeedPerMeter = imageWidth / meters; // Scroll full image over specified meters
+    if (kDebugMode) {
+      debugPrint('ScrollSpeed set to: $scrollSpeedPerMeter (imageWidth=$imageWidth, meters=$meters)');
+    }
+    update();
+  }
+
+  void startAnimation(double viewportWidth) {
+    maxScrollExtent = 2000.0 - viewportWidth; // Assume image width of 2000.0
+    if (maxScrollExtent <= 0) {
+      if (kDebugMode) {
+        debugPrint('Invalid maxScrollExtent: $maxScrollExtent, viewportWidth=$viewportWidth');
+      }
+      maxScrollExtent = 0;
+      return;
+    }
+    if (kDebugMode) {
+      debugPrint('Starting animation with maxScrollExtent=$maxScrollExtent');
+    }
+    offset.value = maxScrollExtent;
+    if (!animationController.isAnimating && isMoving.value) {
+      animationController.repeat();
+    }
+  }
+
+  void stopAnimation() {
+    animationController.stop();
+    if (kDebugMode) {
+      debugPrint('Animation stopped');
+    }
   }
 
   void _initLocation() async {
@@ -34,6 +89,10 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
       permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        Get.snackbar('Permission Denied', 'Location permission is required.');
+        return;
+      }
     }
 
     Geolocator.getPositionStream(
@@ -47,109 +106,75 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
   }
 
   void _handleMovement(Position newPosition) {
-  if (_lastPosition != null) {
-    double distance = Geolocator.distanceBetween(
-      _lastPosition!.latitude,
-      _lastPosition!.longitude,
-      newPosition.latitude,
-      newPosition.longitude,
-    );
-
-    if (kDebugMode) {
-      print("Raw distance: $distance");
-    }
-
-    // Accept distances between 1.5 and 30 meters
-    if (distance >= 1.5 ) {
-      if (kDebugMode) {
-        print("Valid movement detected: $distance");
-      }
-      isMoving.value = true;
-      totalDistance.value += distance;
-      _scrollBackground(distance);
-    } else {
-      if (kDebugMode) {
-        print("Ignored movement: $distance");
-      }
-      isMoving.value = false;
-    }
-  }
-  _lastPosition = newPosition;
-}
-
-
-
-  void _scrollBackground(double distance) {
-    if (!scrollController.hasClients) return;
-
-    double scrollAmount = distance * scrollSpeedPerMeter;
-    double newOffset = scrollController.offset + scrollAmount;
-    double maxExtent = scrollController.position.maxScrollExtent;
-
-    if (newOffset >= maxExtent) {
-      scrollController.jumpTo(0); // Restart from beginning
-    } else {
-      scrollController.animateTo(
-        newOffset,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.linear,
+    if (_lastPosition != null) {
+      double distance = Geolocator.distanceBetween(
+        _lastPosition!.latitude,
+        _lastPosition!.longitude,
+        newPosition.latitude,
+        newPosition.longitude,
       );
+
+      if (distance >= 1.5) {
+        isMoving.value = true;
+        totalDistance.value += distance;
+        totalSteps.value = (totalDistance.value / averageStrideLength).round();
+        if (!animationController.isAnimating) {
+          animationController.repeat();
+        }
+      } else {
+        isMoving.value = false;
+        stopAnimation();
+      }
     }
+    _lastPosition = newPosition;
   }
 
   void _startDateListener() {
-  _updateDate();
-  resetTimer = Timer.periodic(const Duration(minutes: 1), (_) async {
-    final now = DateTime.now();
-    final today = "${now.year}-${now.month}-${now.day}";
+    _updateDate();
+    resetTimer = Timer.periodic(const Duration(minutes: 1), (_) async {
+      final now = DateTime.now();
+      final today = DateFormat("d MMMM, y").format(now);
 
-    if (today != currentDate.value) {
-      // Format date as "06 June, 2025"
-      final formattedDate = SharedPreferencesDataHelper.formatDate(DateTime.now().subtract(const Duration(days: 1)));
+      if (today != currentDate.value) {
+        await _saveData();
+        totalDistance.value = 0.0;
+        totalSteps.value = 0;
+        _lastPosition = null;
+        _updateDate();
 
-      final distanceToSave = totalDistance.value;
-
-      // Get token
-      String? token = await SharedPreferencesHelper.getAccessToken();
-
-      if (token != null) {
-        await sendData(formattedDate, distanceToSave);
-      } else {
-        await SharedPreferencesDataHelper.saveDailyTracking(distanceToSave, formattedDate);
+        final distance = await SharedPreferencesDataHelper.getDistanceByDate(today) ?? 0.0;
+        totalDistance.value = distance;
+        totalSteps.value = (distance / averageStrideLength).round();
       }
-
-      totalDistance.value = 0.0;
-      _updateDate();
-    }
-  });
-}
-
+    });
+  }
 
   void _updateDate() {
     final now = DateTime.now();
-    currentDate.value = "${now.year}-${now.month}-${now.day}";
+    currentDate.value = DateFormat("d MMMM, y").format(now);
+  }
+
+  Future<void> _saveData() async {
+    final formattedDate = currentDate.value;
+    await SharedPreferencesDataHelper.saveDailyOngoingTracking(totalDistance.value, formattedDate);
+    final token = await SharedPreferencesHelper.getAccessToken();
+    if (token != null) await sendData(formattedDate, totalDistance.value);
   }
 
   @override
   void onClose() {
     resetTimer?.cancel();
+    animationController.dispose();
     super.onClose();
   }
-  
 
-   Future<void> sendData(String date, double distance) async {
+  Future<void> sendData(String date, double distance) async {
     try {
-      String? token = await SharedPreferencesHelper.getAccessToken();
-      if (token == null) {
-        if (kDebugMode) {
-          print("No access token found");
-        }
-        return;
-      }
-      final url = '${Urls.baseUrl}/movements/ongoing';
+      final token = await SharedPreferencesHelper.getAccessToken();
+      if (token == null) return;
 
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse('${Urls.baseUrl}/movements/ongoing'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -157,21 +182,11 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
         body: jsonEncode({"date": date, "distance": distance}),
       );
 
-      if (kDebugMode) {
-        print("The response of sending marathon data is ${response.body}");
-      }
-
-      if (response.statusCode != 200 && kDebugMode) {
-        if (kDebugMode) {
-          print("Error sending marathon data: ${response.statusCode}");
-        }
+      if (response.statusCode != 200) {
+        Get.snackbar('Error', 'Failed to send data: ${response.statusCode}');
       }
     } catch (e) {
-      if (kDebugMode) {
-        print("The error for sending marathon data is $e");
-      }
+      Get.snackbar('Error', 'Network error while sending data');
     }
   }
- 
-
 }

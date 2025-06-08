@@ -90,7 +90,11 @@ class MarathonClimbedScreen extends StatelessWidget {
                       ],
                     );
                   }),
-                  Center(
+                  Positioned(
+                    top: 150,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
                     child: Image.asset(
                       elevatorController.elevatorCharacterImagePath,
                       height: 650,
@@ -190,21 +194,9 @@ class MarathonClimbedScreen extends StatelessWidget {
                               return const SizedBox.shrink();
                             }
 
-                            return Column(
-                              children: [
-                                const Text(
-                                  "Current Altitude:",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                Text(
-                                  "${currentAltitude.toStringAsFixed(2)} meters",
-                                  style: _whiteTextStyle.copyWith(fontSize: 18),
-                                ),
-                              ],
+                            return Text(
+                              "${currentAltitude.toStringAsFixed(2)} meters",
+                              style: _whiteTextStyle.copyWith(fontSize: 10),
                             );
                           }),
                         ],

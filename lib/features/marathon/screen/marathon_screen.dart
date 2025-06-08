@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:chrismiche/features/bottom_navbar/screen/bottom_navbar_screen.dart';
 import 'package:chrismiche/features/home/controller/change_character_controller.dart';
-import 'package:chrismiche/features/home/screen/home_screen.dart';
 import 'package:chrismiche/features/marathon/controller/marathon_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -39,7 +38,7 @@ class MarathonScreen extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async {
         // Prevent dialog from showing on back button press and navigate to home
-        Get.to(HomeScreen());
+        Get.to(BottomNavbarScreen());
         return false;
       },
       child: Scaffold(
@@ -187,26 +186,15 @@ class MarathonScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            // Current Location (Latitude and Longitude)
                             Obx(
-                              () => Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    "Current Location:",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    controller.currentPosition.value != null
-                                        ? "Lat: ${controller.currentPosition.value!.latitude.toStringAsFixed(4)}, Lng: ${controller.currentPosition.value!.longitude.toStringAsFixed(4)}"
-                                        : "No location",
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ],
+                              () => Text(
+                                controller.currentPosition.value != null
+                                    ? "Lat: ${controller.currentPosition.value!.latitude.toStringAsFixed(4)}, Lng: ${controller.currentPosition.value!.longitude.toStringAsFixed(4)}"
+                                    : "No location",
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ],
@@ -275,7 +263,6 @@ class MarathonScreen extends StatelessWidget {
                                           controller.totalDistance.value,
                                         );
                                         controller.resetTracking();
-                                        Get.back();
                                         Get.to(BottomNavbarScreen());
                                       },
                                       child: const Text('OK'),
