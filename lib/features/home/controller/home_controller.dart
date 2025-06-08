@@ -136,7 +136,8 @@ class HomeController extends GetxController {
         userList.value = [user]; 
       }
     } else {
-      Get.snackbar('Error', 'Failed to fetch user info');
+      // Get.snackbar('Error', 'Failed to fetch user info');
+      print("No user here currently"); 
     }
   } catch (e) {
     Get.snackbar('Exception', e.toString());

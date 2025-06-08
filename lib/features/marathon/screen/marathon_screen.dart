@@ -28,7 +28,6 @@ class MarathonScreen extends StatelessWidget {
           }),
         );
     final size = await completer.future;
-    // ignore: use_build_context_synchronously
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
     return Size(size.width / pixelRatio, size.height / pixelRatio);
   }
@@ -37,7 +36,6 @@ class MarathonScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Prevent dialog from showing on back button press and navigate to home
         Get.to(BottomNavbarScreen());
         return false;
       },
