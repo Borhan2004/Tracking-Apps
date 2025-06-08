@@ -23,10 +23,7 @@ class OngoingScreen extends StatelessWidget {
             ImageStreamListener(
               (ImageInfo info, bool synchronousCall) {
                 completer.complete(
-                  Size(
-                    info.image.width.toDouble(),
-                    info.image.height.toDouble(),
-                  ),
+                  Size(info.image.width.toDouble(), info.image.height.toDouble()),
                 );
               },
               onError: (exception, stackTrace) {
@@ -35,10 +32,7 @@ class OngoingScreen extends StatelessWidget {
             ),
           );
       final size = await completer.future;
-      return Size(
-        size.width / devicePixelRatio,
-        size.height / devicePixelRatio,
-      );
+      return Size(size.width / devicePixelRatio, size.height / devicePixelRatio);
     } catch (e) {
       debugPrint('Error loading image $imagePath: $e');
       rethrow;
@@ -71,7 +65,9 @@ class OngoingScreen extends StatelessWidget {
                 );
               }
               if (!snapshot.hasData) {
-                return const Center(child: Text('No image data available'));
+                return const Center(
+                  child: Text('No image data available'),
+                );
               }
 
               final imageSize = snapshot.data!;
@@ -79,7 +75,7 @@ class OngoingScreen extends StatelessWidget {
               final scaledWidth = screenHeight * aspectRatio;
 
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                controller.setScrollSpeed(scaledWidth, 100.0);
+                controller.setScrollSpeed(scaledWidth, 200.0); 
                 controller.startAnimation(screenWidth);
               });
 
@@ -87,11 +83,17 @@ class OngoingScreen extends StatelessWidget {
                 children: [
                   Obx(() {
                     final offsetX = controller.offset.value;
-                    debugPrint('OffsetX: $offsetX, ScaledWidth: $scaledWidth');
+                    
+                    final normalizedOffset = offsetX % scaledWidth;
+                    final firstImageLeft = -normalizedOffset;
+                    final secondImageLeft = firstImageLeft + scaledWidth;
+
+                    debugPrint('OffsetX: $offsetX, NormalizedOffset: $normalizedOffset, FirstLeft: $firstImageLeft, SecondLeft: $secondImageLeft');
+
                     return Stack(
                       children: [
                         Positioned(
-                          left: -(offsetX % scaledWidth),
+                          left: firstImageLeft,
                           top: 0,
                           width: scaledWidth,
                           height: screenHeight,
@@ -110,8 +112,9 @@ class OngoingScreen extends StatelessWidget {
                             },
                           ),
                         ),
+                        // Second image for seamless looping
                         Positioned(
-                          left: -(offsetX % scaledWidth) + scaledWidth,
+                          left: secondImageLeft,
                           top: 0,
                           width: scaledWidth,
                           height: screenHeight,
@@ -165,37 +168,31 @@ class OngoingScreen extends StatelessWidget {
                             ),
                             child: Column(
                               children: [
-                                Obx(
-                                  () => Text(
-                                    controller.currentDate.value,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ),
+                                Obx(() => Text(
+                                      controller.currentDate.value,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white70,
+                                      ),
+                                    )),
                                 const SizedBox(height: 8),
-                                Obx(
-                                  () => Text(
-                                    "Distance: ${controller.totalDistance.value.toStringAsFixed(2)} meter",
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+                                Obx(() => Text(
+                                      "Distance: ${controller.totalDistance.value.toStringAsFixed(2)} meter",
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )),
                                 const SizedBox(height: 8),
-                                Obx(
-                                  () => Text(
-                                    "Steps: ${controller.totalSteps.value} step",
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
+                                Obx(() => Text(
+                                      "Steps: ${controller.totalSteps.value} step",
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    )),
                               ],
                             ),
                           ),

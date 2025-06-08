@@ -19,7 +19,7 @@ class SplashScreen extends StatelessWidget {
         ImagePath.splashScreenLogo,
         height: height,
         width: width,
-        fit: BoxFit.fill,
+        fit: BoxFit.cover,
       ),
     );
   }
