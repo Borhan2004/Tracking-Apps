@@ -184,17 +184,17 @@ class MarathonScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            Obx(
-                              () => Text(
-                                controller.currentPosition.value != null
-                                    ? "Lat: ${controller.currentPosition.value!.latitude.toStringAsFixed(4)}, Lng: ${controller.currentPosition.value!.longitude.toStringAsFixed(4)}"
-                                    : "No location",
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                            // Obx(
+                            //   () => Text(
+                            //     controller.currentPosition.value != null
+                            //         ? "Lat: ${controller.currentPosition.value!.latitude.toStringAsFixed(4)}, Lng: ${controller.currentPosition.value!.longitude.toStringAsFixed(4)}"
+                            //         : "No location",
+                            //     style: const TextStyle(
+                            //       fontSize: 10,
+                            //       color: Colors.white,
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
