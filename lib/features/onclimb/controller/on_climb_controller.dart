@@ -51,16 +51,16 @@ class OnClimbController extends GetxController
       }
     });
     SharedPreferencesDataHelper.clearLegacyClimbingData();
-    _loadSavedData(); 
+    _loadSavedData();
     WidgetsBinding.instance.addPostFrameCallback((_) => startClimbTracking());
   }
 
- 
   Future<void> _loadSavedData() async {
     final lastSavedDate = await SharedPreferencesDataHelper.getLastSavedDate();
     final dateToFetch = lastSavedDate ?? currentDate.value;
     final climbed = await SharedPreferencesDataHelper.getClimbedByDate(dateToFetch) ?? 0.0;
     final floors = await SharedPreferencesDataHelper.getFloorCountByDate(dateToFetch) ?? 0;
+    
 
     totalElevation.value = climbed;
     floorCount.value = floors;
@@ -198,10 +198,12 @@ class OnClimbController extends GetxController
         floorCount.value,
         currentFormattedDate,
       );
+      if (kDebugMode) {
+        print('Saved on stop:Elevation=${totalElevation.value} m, Date=$currentFormattedDate');
+      }
 
       final token = await SharedPreferencesHelper.getAccessToken();
       if (token != null) {
-      
         await sendData(
           currentFormattedDate,
           totalElevation.value,
@@ -232,7 +234,7 @@ class OnClimbController extends GetxController
         },
         body: jsonEncode({
           'date': date,
-          'distance': elevation, // CHANGED: Send totalElevation as distance
+          'distance': elevation,
         }),
       );
 
@@ -246,6 +248,14 @@ class OnClimbController extends GetxController
 
   @override
   void onClose() {
+    SharedPreferencesDataHelper.saveDailyClimbingTracking(
+      totalElevation.value,
+      floorCount.value,
+      currentDate.value,
+    );
+    if (kDebugMode) {
+      print('Saved on close: Elevation=${totalElevation.value} m, Date=${currentDate.value}');
+    }
     stopClimbTracking();
     animationController.dispose();
     super.onClose();
