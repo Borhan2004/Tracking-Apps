@@ -1,7 +1,7 @@
 class ImagePath {
   static const String appBarLogo = 'assets/icons/appBarLogo.png';
   static const String splashScreenLogo = 'assets/images/splashScreenLogo.png';
-  static const String splashScreen = 'assets/images/splashScreen.png';
+  static const String splashScreen = 'assets/images/splashScreen.jpg';
   static const String appLogo = 'assets/images/appLogo.png';
   static const String signInWithGoogle = 'assets/images/signinWithGoogle.png';
   static const String signInWithFacebook =
