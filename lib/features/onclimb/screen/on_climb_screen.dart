@@ -195,21 +195,21 @@ class OnClimbScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          Obx(() {
-                            final currentAltitude =
-                                climbController.altitudeRoute.isNotEmpty
-                                    ? climbController.altitudeRoute.last
-                                    : null;
+                          // Obx(() {
+                          //   final currentAltitude =
+                          //       climbController.altitudeRoute.isNotEmpty
+                          //           ? climbController.altitudeRoute.last
+                          //           : null;
 
-                            if (currentAltitude == null) {
-                              return const SizedBox.shrink();
-                            }
+                          //   if (currentAltitude == null) {
+                          //     return const SizedBox.shrink();
+                          //   }
 
-                            return Text(
-                              "${currentAltitude.toStringAsFixed(2)} Altitude",
-                              style: _whiteTextStyle.copyWith(fontSize: 10),
-                            );
-                          }),
+                          //   return Text(
+                          //     "${currentAltitude.toStringAsFixed(2)} Altitude",
+                          //     style: _whiteTextStyle.copyWith(fontSize: 10),
+                          //   );
+                          // }),
                         ],
                       ),
                     ),

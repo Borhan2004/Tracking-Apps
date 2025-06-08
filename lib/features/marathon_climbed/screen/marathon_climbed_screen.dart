@@ -183,21 +183,21 @@ class MarathonClimbedScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 20),
-                          Obx(() {
-                            final currentAltitude =
-                                climbController.altitudeRoute.isNotEmpty
-                                    ? climbController.altitudeRoute.last
-                                    : null;
+                          // Obx(() {
+                          //   final currentAltitude =
+                          //       climbController.altitudeRoute.isNotEmpty
+                          //           ? climbController.altitudeRoute.last
+                          //           : null;
 
-                            if (currentAltitude == null) {
-                              return const SizedBox.shrink();
-                            }
+                          //   if (currentAltitude == null) {
+                          //     return const SizedBox.shrink();
+                          //   }
 
-                            return Text(
-                              "${currentAltitude.toStringAsFixed(2)} meters",
-                              style: _whiteTextStyle.copyWith(fontSize: 10),
-                            );
-                          }),
+                          //   return Text(
+                          //     "${currentAltitude.toStringAsFixed(2)} meters",
+                          //     style: _whiteTextStyle.copyWith(fontSize: 10),
+                          //   );
+                          // }),
                         ],
                       ),
                     ),
