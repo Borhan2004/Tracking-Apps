@@ -85,20 +85,20 @@ class OngoingController extends GetxController with GetTickerProviderStateMixin 
   }
 
   void _updateAnimation(double distance) {
-    final targetOffset = (distance * scrollSpeedPerMeter) % (maxScrollExtent * 2);
-    offsetAnimation = Tween<double>(
-      begin: offset.value,
-      end: targetOffset,
-    ).animate(
-      CurvedAnimation(
-        parent: animationController,
-        curve: Curves.linear,
-      ),
-    );
-    animationController
-      ..reset()
-      ..forward();
-  }
+  final targetOffset = distance * scrollSpeedPerMeter; // Remove modulo here
+  offsetAnimation = Tween<double>(
+    begin: offset.value,
+    end: targetOffset,
+  ).animate(
+    CurvedAnimation(
+      parent: animationController,
+      curve: Curves.linear,
+    ),
+  );
+  animationController
+    ..reset()
+    ..forward();
+}
 
   void _initLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
