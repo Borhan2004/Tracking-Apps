@@ -5,6 +5,7 @@ import 'package:chrismiche/core/localization/end_points.dart';
 import 'package:chrismiche/core/services/climbing_data_storage.dart';
 import 'package:chrismiche/core/services/location_service.dart';
 import 'package:chrismiche/core/services/shared_preferences_helper.dart';
+import 'package:chrismiche/features/bottom_navbar/screen/bottom_navbar_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -180,7 +181,7 @@ class MarathonClimbedController extends GetxController
                 elapsedTime.value,
                 totalElevation.value,
               );
-              Get.back();
+              Get.to(BottomNavbarScreen());
               _reset();
             },
             child: const Text('Finish'),
