@@ -58,18 +58,17 @@ class OnClimbController extends GetxController
   Future<void> _loadSavedData() async {
     final lastSavedDate = await SharedPreferencesDataHelper.getLastSavedDate();
     final dateToFetch = lastSavedDate ?? currentDate.value;
-    final climbed = await SharedPreferencesDataHelper.getClimbedByDate(dateToFetch) ?? 0.0;
-    final floors = await SharedPreferencesDataHelper.getFloorCountByDate(dateToFetch) ?? 0;
-    
+    final climbed =
+        await SharedPreferencesDataHelper.getClimbedByDate(dateToFetch) ?? 0.0;
+    final floors =
+        await SharedPreferencesDataHelper.getFloorCountByDate(dateToFetch) ?? 0;
 
     totalElevation.value = climbed;
     floorCount.value = floors;
     currentDate.value = dateToFetch;
 
     if (kDebugMode) {
-      print(
-        'Loaded: Elevation=$climbed m, Floors=$floors, Date=$dateToFetch',
-      );
+      print('Loaded: Elevation=$climbed m, Floors=$floors, Date=$dateToFetch');
     }
   }
 
@@ -156,6 +155,7 @@ class OnClimbController extends GetxController
           floorCount.value,
           currentDate.value,
         );
+        sendData(currentDate.value, totalElevation.value);
       },
       onError: (e) {
         if (kDebugMode) {
@@ -199,15 +199,14 @@ class OnClimbController extends GetxController
         currentFormattedDate,
       );
       if (kDebugMode) {
-        print('Saved on stop:Elevation=${totalElevation.value} m, Date=$currentFormattedDate');
+        print(
+          'Saved on stop:Elevation=${totalElevation.value} m, Date=$currentFormattedDate',
+        );
       }
 
       final token = await SharedPreferencesHelper.getAccessToken();
       if (token != null) {
-        await sendData(
-          currentFormattedDate,
-          totalElevation.value,
-        );
+        await sendData(currentFormattedDate, totalElevation.value);
       }
     } catch (e) {
       if (kDebugMode) {
@@ -232,10 +231,7 @@ class OnClimbController extends GetxController
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-          'date': date,
-          'distance': elevation,
-        }),
+        body: jsonEncode({'date': date, 'distance': elevation}),
       );
 
       if (response.statusCode != 200) {
@@ -253,8 +249,11 @@ class OnClimbController extends GetxController
       floorCount.value,
       currentDate.value,
     );
+    sendData(currentDate.value, totalElevation.value);
     if (kDebugMode) {
-      print('Saved on close: Elevation=${totalElevation.value} m, Date=${currentDate.value}');
+      print(
+        'Saved on close: Elevation=${totalElevation.value} m, Date=${currentDate.value}',
+      );
     }
     stopClimbTracking();
     animationController.dispose();
