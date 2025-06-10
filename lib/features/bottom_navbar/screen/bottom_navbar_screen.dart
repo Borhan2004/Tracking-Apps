@@ -19,24 +19,24 @@ class BottomNavbarScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      OngoingScreen(),
       OnClimbScreen(),
+      OngoingScreen(),
       HomeScreen(),
       DetailsScreen(),
       isLoggedIn ? ProfileScreen() : LoginAlert(),
     ];
 
     final List<String> inactiveIcons = [
-      ImagePath.inactiveRunning,
       ImagePath.inactiveClimb,
+      ImagePath.inactiveRunning,
       ImagePath.inactiveDashboard,
       ImagePath.inactiveChart,
       ImagePath.inactiveUser,
     ];
 
     final List<String> activeIcons = [
-      ImagePath.activeRunning,
       ImagePath.activeClimb,
+      ImagePath.activeRunning,
       ImagePath.activeDashboard,
       ImagePath.activeChart,
       ImagePath.activeUser,

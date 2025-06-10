@@ -35,15 +35,19 @@ class DetailsController extends GetxController {
   Future<void> updateDistance() async {
     try {
       final String today = DateFormat("d MMMM, y").format(DateTime.now());
-      final double? distance = await SharedPreferencesDataHelper.getDistanceByDate(today);
-      final double? climbed = await SharedPreferencesDataHelper.getClimbedByDate(today);
+      final double? distance =
+          await SharedPreferencesDataHelper.getDistanceByDate(today);
+      final double? climbed =
+          await SharedPreferencesDataHelper.getClimbedByDate(today);
 
       ongoingDistance.value = distance ?? 0.0;
       climbingDistance.value = climbed ?? 0.0;
 
       if (kDebugMode) {
-        print('DetailsController: Updated ongoingDistance to ${ongoingDistance.value.toStringAsFixed(2)} meters, '
-              'climbingDistance to ${climbingDistance.value.toStringAsFixed(2)} meters for today: $today');
+        print(
+          'DetailsController: Updated ongoingDistance to ${ongoingDistance.value.toStringAsFixed(2)} meters, '
+          'climbingDistance to ${climbingDistance.value.toStringAsFixed(2)} meters for today: $today',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -63,7 +67,9 @@ class DetailsController extends GetxController {
       final token = await SharedPreferencesHelper.getAccessToken();
       if (token == null) return;
 
-      final url = Uri.parse('${Urls.baseUrl}/movements/all-movements-history?date=$date');
+      final url = Uri.parse(
+        '${Urls.baseUrl}/movements/all-movements-history?date=$date',
+      );
       final response = await http.get(
         url,
         headers: {
@@ -75,17 +81,27 @@ class DetailsController extends GetxController {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         final statData = StatDataModel.fromJson(jsonResponse);
-        ongoingDistance.value = statData.ongoingMovements?.isNotEmpty == true
-            ? statData.ongoingMovements!.first.distance ?? 0.0
-            : 0.0;
-        climbingDistance.value = statData.climbingMovements?.isNotEmpty == true
-            ? statData.climbingMovements!.first.distance ?? 0.0
-            : 0.0;
-        await SharedPreferencesDataHelper.saveDailyOngoingTracking(ongoingDistance.value, date);
-        await SharedPreferencesDataHelper.saveDailyClimbingTracking(climbingDistance.value, 0, date);
+        ongoingDistance.value =
+            statData.ongoingMovements?.isNotEmpty == true
+                ? statData.ongoingMovements!.first.distance ?? 0.0
+                : 0.0;
+        climbingDistance.value =
+            statData.climbingMovements?.isNotEmpty == true
+                ? statData.climbingMovements!.first.distance ?? 0.0
+                : 0.0;
+        await SharedPreferencesDataHelper.saveDailyOngoingTracking(
+          ongoingDistance.value,
+          date,
+        );
+        await SharedPreferencesDataHelper.saveDailyClimbingTracking(
+          climbingDistance.value,
+          date,
+        );
       } else {
         if (kDebugMode) {
-          print('DetailsController: Failed to fetch movements: ${response.statusCode}');
+          print(
+            'DetailsController: Failed to fetch movements: ${response.statusCode}',
+          );
         }
       }
     } catch (e) {
