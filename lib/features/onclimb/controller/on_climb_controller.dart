@@ -56,21 +56,33 @@ class OnClimbController extends GetxController
   }
 
   Future<void> _loadSavedData() async {
+  try {
     final lastSavedDate = await SharedPreferencesDataHelper.getLastSavedDate();
-    final dateToFetch = lastSavedDate ?? currentDate.value;
-    final climbed =
-        await SharedPreferencesDataHelper.getClimbedByDate(dateToFetch) ?? 0.0;
-    final floors =
-        await SharedPreferencesDataHelper.getFloorCountByDate(dateToFetch) ?? 0;
-
-    totalElevation.value = climbed;
-    floorCount.value = floors;
-    currentDate.value = dateToFetch;
+    final currentFormattedDate = DateFormat("d MMMM, y").format(DateTime.now());
+    if (lastSavedDate == null || lastSavedDate != currentFormattedDate) {
+      totalElevation.value = 0.0;
+      floorCount.value = 0;
+      currentDate.value = currentFormattedDate;
+    } else {
+      final climbed = await SharedPreferencesDataHelper.getClimbedByDate(lastSavedDate) ?? 0.0;
+      totalElevation.value = climbed;
+      floorCount.value = ((climbed / 2.4384).floor() ~/ 2);
+      currentDate.value = lastSavedDate;
+    }
 
     if (kDebugMode) {
-      print('Loaded: Elevation=$climbed m, Floors=$floors, Date=$dateToFetch');
+      print('Loaded: Elevation=${totalElevation.value} m, Floors=${floorCount.value}, Date=${currentDate.value}');
     }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error loading saved data: $e');
+    }
+    totalElevation.value = 0.0;
+    floorCount.value = 0;
+    currentDate.value = DateFormat("d MMMM, y").format(DateTime.now());
+    Get.snackbar('Error', 'Failed to load saved data, starting fresh.');
   }
+}
 
   void setScrollSpeed(double imageWidth, double meters) {
     imageHeight = imageWidth;
@@ -152,7 +164,6 @@ class OnClimbController extends GetxController
 
         SharedPreferencesDataHelper.saveDailyClimbingTracking(
           totalElevation.value,
-          floorCount.value,
           currentDate.value,
         );
         sendData(currentDate.value, totalElevation.value);
@@ -195,12 +206,11 @@ class OnClimbController extends GetxController
 
       await SharedPreferencesDataHelper.saveDailyClimbingTracking(
         totalElevation.value,
-        floorCount.value,
         currentFormattedDate,
       );
       if (kDebugMode) {
         print(
-          'Saved on stop:Elevation=${totalElevation.value} m, Date=$currentFormattedDate',
+          'Saved on stop: Elevation=${totalElevation.value} m, Date=$currentFormattedDate',
         );
       }
 
@@ -246,7 +256,6 @@ class OnClimbController extends GetxController
   void onClose() {
     SharedPreferencesDataHelper.saveDailyClimbingTracking(
       totalElevation.value,
-      floorCount.value,
       currentDate.value,
     );
     sendData(currentDate.value, totalElevation.value);

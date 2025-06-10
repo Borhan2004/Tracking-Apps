@@ -41,12 +41,10 @@ class SharedPreferencesDataHelper {
 
   static Future<void> saveDailyClimbingTracking(
     double climbed,
-    int floorCount,
     String date,
   ) async {
     await _initPrefs();
     await _prefs!.setDouble('${_climbingKey}_$date', climbed);
-    await _prefs!.setInt('${_floorCountKey}_$date', floorCount);
     await _prefs!.setString('${_dateKey}_lastSaved', date);
   }
 
