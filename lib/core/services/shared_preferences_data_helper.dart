@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,6 +30,32 @@ class SharedPreferencesDataHelper {
     for (String key in keys) {
       if (key.startsWith('${_climbingKey}_') || key.startsWith('${_floorCountKey}_')) {
         await _prefs!.remove(key);
+      }
+    }
+  }
+
+  static Future<void> clearOldClimbingData({int daysToKeep = 7}) async {
+    await _initPrefs();
+    final keys = _prefs!.getKeys();
+    final now = DateTime.now();
+    final cutoffDate = now.subtract(Duration(days: daysToKeep));
+
+    for (String key in keys) {
+      if (key.startsWith('${_climbingKey}_') || key.startsWith('${_distanceKey}_') || key.startsWith('${_floorCountKey}_')) {
+        final dateStr = key.replaceFirst(RegExp(r'^(totalClimbed|totalDistance|floorCount)_'), '');
+        try {
+          final date = DateFormat("d MMMM, y").parse(dateStr);
+          if (date.isBefore(cutoffDate)) {
+            await _prefs!.remove(key);
+            if (kDebugMode) {
+              print('Removed old data for $dateStr');
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error parsing date $dateStr: $e');
+          }
+        }
       }
     }
   }
@@ -72,7 +99,7 @@ class SharedPreferencesDataHelper {
 
   static Future<int?> getFloorCountByDate(String date) async {
     await _initPrefs();
-    final value = _prefs!.get('${_floorCountKey}_$date');
+    final value = _prefs!. get('${_floorCountKey}_$date');
     if (value is int) {
       return value;
     } else if (value is String) {
@@ -134,37 +161,35 @@ class SharedPreferencesDataHelper {
   }
 
   static String formatDate(DateTime date) {
-  return DateFormat("d MMMM, y").format(date);
-}
-
-
-  static Future<void> printSavedTrackingData() async {
-  await _initPrefs();
-  final keys = _prefs!.getKeys();
-
-  final today = formatDate(DateTime.now());
-  final yesterday = formatDate(DateTime.now().subtract(const Duration(days: 1)));
-
-  print('=== Saved Tracking Data ===');
-  for (String key in keys) {
-    if (key.startsWith('${_distanceKey}_')) {
-      final date = key.replaceFirst('${_distanceKey}_', '');
-
-      // Filter: only today or yesterday
-      if (date != today && date != yesterday) continue;
-
-      final distance = await getDistanceByDate(date);
-      final climbed = await getClimbedByDate(date);
-      final floors = await getFloorCountByDate(date);
-
-      print('Date: $date, Distance: ${distance?.toStringAsFixed(2) ?? '0.00'} meters, '
-            'Climbed: ${climbed?.toStringAsFixed(2) ?? '0.00'} meters, Floors: ${floors ?? 0}');
-    }
+    return DateFormat("d MMMM, y").format(date);
   }
 
-  final lastSavedDate = await getLastSavedDate();
-  print('Last Saved Date: ${lastSavedDate ?? 'None'}');
-  print('==========================');
-}
+  static Future<void> printSavedTrackingData() async {
+    await _initPrefs();
+    final keys = _prefs!.getKeys();
 
+    final today = formatDate(DateTime.now());
+    final yesterday = formatDate(DateTime.now().subtract(const Duration(days: 1)));
+
+    print('=== Saved Tracking Data ===');
+    for (String key in keys) {
+      if (key.startsWith('${_distanceKey}_')) {
+        final date = key.replaceFirst('${_distanceKey}_', '');
+
+        // Filter: only today or yesterday
+        if (date != today && date != yesterday) continue;
+
+        final distance = await getDistanceByDate(date);
+        final climbed = await getClimbedByDate(date);
+        final floors = await getFloorCountByDate(date);
+
+        print('Date: $date, Distance: ${distance?.toStringAsFixed(2) ?? '0.00'} meters, '
+              'Climbed: ${climbed?.toStringAsFixed(2) ?? '0.00'} meters, Floors: ${floors ?? 0}');
+      }
+    }
+
+    final lastSavedDate = await getLastSavedDate();
+    print('Last Saved Date: ${lastSavedDate ?? 'None'}');
+    print('==========================');
+  }
 }
