@@ -51,38 +51,39 @@ class OnClimbController extends GetxController
       }
     });
     SharedPreferencesDataHelper.clearLegacyClimbingData();
+    SharedPreferencesDataHelper.clearOldClimbingData(daysToKeep: 7);
     _loadSavedData();
     WidgetsBinding.instance.addPostFrameCallback((_) => startClimbTracking());
   }
 
   Future<void> _loadSavedData() async {
-  try {
-    final lastSavedDate = await SharedPreferencesDataHelper.getLastSavedDate();
-    final currentFormattedDate = DateFormat("d MMMM, y").format(DateTime.now());
-    if (lastSavedDate == null || lastSavedDate != currentFormattedDate) {
+    try {
+      final currentFormattedDate = DateFormat("d MMMM, y").format(DateTime.now());
+      final climbed = await SharedPreferencesDataHelper.getClimbedByDate(currentFormattedDate) ?? 0.0;
+
+      if (climbed > 0.0) {
+        totalElevation.value = climbed;
+        floorCount.value = ((climbed / 2.4384).floor() ~/ 2);
+        currentDate.value = currentFormattedDate;
+      } else {
+        totalElevation.value = 0.0;
+        floorCount.value = 0;
+        currentDate.value = currentFormattedDate;
+      }
+
+      if (kDebugMode) {
+        print('Loaded: Elevation=${totalElevation.value} m, Floors=${floorCount.value}, Date=${currentDate.value}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading saved data: $e');
+      }
       totalElevation.value = 0.0;
       floorCount.value = 0;
-      currentDate.value = currentFormattedDate;
-    } else {
-      final climbed = await SharedPreferencesDataHelper.getClimbedByDate(lastSavedDate) ?? 0.0;
-      totalElevation.value = climbed;
-      floorCount.value = ((climbed / 2.4384).floor() ~/ 2);
-      currentDate.value = lastSavedDate;
+      currentDate.value = DateFormat("d MMMM, y").format(DateTime.now());
+      Get.snackbar('Error', 'Failed to load saved data, starting fresh.');
     }
-
-    if (kDebugMode) {
-      print('Loaded: Elevation=${totalElevation.value} m, Floors=${floorCount.value}, Date=${currentDate.value}');
-    }
-  } catch (e) {
-    if (kDebugMode) {
-      print('Error loading saved data: $e');
-    }
-    totalElevation.value = 0.0;
-    floorCount.value = 0;
-    currentDate.value = DateFormat("d MMMM, y").format(DateTime.now());
-    Get.snackbar('Error', 'Failed to load saved data, starting fresh.');
   }
-}
 
   void setScrollSpeed(double imageWidth, double meters) {
     imageHeight = imageWidth;
