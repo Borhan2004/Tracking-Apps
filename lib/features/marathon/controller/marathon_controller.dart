@@ -1,37 +1,37 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:chrismiche/core/localization/end_points.dart';
-import 'package:chrismiche/core/services/location_service.dart';
 import 'package:chrismiche/core/services/shared_preferences_helper.dart';
 import 'package:chrismiche/core/services/tracking_data_storage.dart';
 import 'package:chrismiche/features/details/controller/details_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MarathonController extends GetxController with GetTickerProviderStateMixin {
-  final locationService = LocationService();
-
   final RxDouble totalDistance = 0.0.obs;
   final RxInt steps = 0.obs;
-  final RxList<Position> route = <Position>[].obs;
   final RxBool isTracking = false.obs;
   late AudioPlayer audioPlayer;
   late AnimationController animationController;
   final RxDouble offset = 0.0.obs;
   double scrollSpeed = 50.0;
   Rx<Duration> elapsedTime = Duration.zero.obs;
-  final Rx<Position?> currentPosition = Rx<Position?>(null);
   Timer? _restartTimer;
   Timer? _dateCheckTimer;
   Timer? _timer;
   final RxString currentDate = ''.obs;
   final RxString _lastSavedDate = ''.obs;
+
+  StreamSubscription<StepCount>? _stepCountSubscription;
+  int _initialStepCount = -1;
+  static const double averageStepLength = 0.762;
 
   @override
   void onInit() {
@@ -49,6 +49,24 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
 
     updateCurrentDate();
     _startDateCheckTimer();
+    _requestPermissions();
+  }
+
+  Future<void> _requestPermissions() async {
+    if (await Permission.activityRecognition.isGranted) {
+      if (kDebugMode) {
+        print('Activity recognition permission already granted');
+      }
+    } else if (await Permission.activityRecognition.request().isGranted) {
+      if (kDebugMode) {
+        print('Activity recognition permission granted');
+      }
+    } else {
+      Get.snackbar('Permission Denied', 'Activity recognition permission is required for step tracking.');
+      if (kDebugMode) {
+        print('Activity recognition permission denied');
+      }
+    }
   }
 
   void setScrollSpeed(double imageWidth, double seconds) {
@@ -66,110 +84,76 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     animationController.stop();
   }
 
-  StreamSubscription<Position>? _positionSub;
-  Position? _lastPosition;
-
-  static const double minDistanceThreshold = 0.5;
-  static const double maxDistanceThreshold = 30.0;
-  static const double maxAllowedAccuracy = 20.0;
-  static const double averageStepLength = 0.75;
-  static const double minSpeedThreshold = 0.5;
-
   void startTracking() async {
     await audioPlayer.setSource(AssetSource('music/Running.wav'));
     await audioPlayer.resume();
-    bool permissionGranted = await locationService.ensurePermission();
+    bool permissionGranted = await Permission.activityRecognition.isGranted;
     if (!permissionGranted) {
-      Get.snackbar("Permission Denied", "Location permission is required.");
+      Get.snackbar("Permission Denied", "Activity recognition permission is required.");
       if (kDebugMode) {
-        print("❌ Location permission not granted.");
+        print("❌ Activity recognition permission not granted.");
       }
       return;
     }
 
     if (kDebugMode) {
-      print('✅ Location permission granted');
+      print('✅ Activity recognition permission granted');
     }
 
-    await _positionSub?.cancel();
-
-    _positionSub = locationService.getPositionStream().listen(
-      (position) {
-        if (position.accuracy >= maxAllowedAccuracy) {
-          if (kDebugMode) {
-            print('⚠️ Ignored due to poor accuracy: ${position.accuracy} m');
-          }
-          return;
-        }
-
-        if (DateTime.now().difference(position.timestamp).inSeconds > 5) {
-          if (kDebugMode) {
-            print('⚠️ Ignored stale GPS: ${position.timestamp}');
-          }
-          return;
-        }
-
-        currentPosition.value = position;
-
-        if (_lastPosition == null) {
-          _lastPosition = position;
-          route.add(position);
-          if (kDebugMode) {
-            print('📍 First position recorded: ${position.latitude}, ${position.longitude}');
-          }
-          return;
-        }
-
-        final distance = Geolocator.distanceBetween(
-          _lastPosition!.latitude,
-          _lastPosition!.longitude,
-          position.latitude,
-          position.longitude,
-        );
-
-        final timeDiff = position.timestamp.difference(_lastPosition!.timestamp).inSeconds;
-
-        final speed = timeDiff > 0 ? distance / timeDiff : 0;
-
-        if (distance > minDistanceThreshold &&
-            distance < maxDistanceThreshold &&
-            speed > minSpeedThreshold) {
-          totalDistance.value += distance;
-          steps.value = (totalDistance.value / averageStepLength).round();
-          _lastPosition = position;
-          route.add(position);
-
-          if (kDebugMode) {
-            print('📍 New position: ${position.latitude}, ${position.longitude} (accuracy: ${position.accuracy}m)');
-            print('➕ Added distance: ${distance.toStringAsFixed(2)} m');
-            print('📏 Total distance: ${totalDistance.value.toStringAsFixed(2)} m');
-            print('👣 Estimated steps: ${steps.value}');
-            print('🚶 Speed: ${speed.toStringAsFixed(2)} m/s');
-          }
-        } else {
-          if (kDebugMode) {
-            print('⚠️ Ignored small/large jump or low speed: distance=$distance m, speed=${speed.toStringAsFixed(2)} m/s');
-          }
-        }
-      },
-      onError: (e) {
+    await _stepCountSubscription?.cancel();
+    _stepCountSubscription = Pedometer.stepCountStream.listen(
+      _handleStepCount,
+      onError: (error) {
         if (kDebugMode) {
-          print("❌ Error in position stream: $e");
+          print("❌ Error in step count stream: $error");
         }
+        Get.snackbar('Pedometer Error', 'Failed to access pedometer: $error');
       },
+      cancelOnError: false,
     );
 
     isTracking.value = true;
     _startTimer();
   }
 
+  void _handleStepCount(StepCount event) {
+    if (_initialStepCount == -1) {
+      _initialStepCount = event.steps;
+      if (kDebugMode) {
+        print('📍 Initial step count set: $_initialStepCount');
+      }
+      return;
+    }
+
+    int stepsSinceStart = event.steps - _initialStepCount;
+
+    if (stepsSinceStart < 0) {
+      _initialStepCount = event.steps;
+      stepsSinceStart = 0;
+      if (kDebugMode) {
+        print('📍 Step count reset: new initialStepCount=$_initialStepCount');
+      }
+    }
+
+    if (stepsSinceStart >= steps.value) {
+      steps.value = stepsSinceStart;
+      totalDistance.value = Precision(stepsSinceStart * averageStepLength).toPrecision(2);
+      if (kDebugMode) {
+        print('📍 Step event: raw=${event.steps}, stepsSinceStart=$stepsSinceStart, totalSteps=${steps.value}, distance=${totalDistance.value}');
+      }
+    } else {
+      if (kDebugMode) {
+        print('⚠️ No step increase: stepsSinceStart=$stepsSinceStart, totalSteps=${steps.value}');
+      }
+    }
+  }
+
   void stopTracking() async {
     await audioPlayer.stop();
-    _positionSub?.cancel();
-    _positionSub = null;
+    _stepCountSubscription?.cancel();
+    _stepCountSubscription = null;
     isTracking.value = false;
     _stopTimer();
-    currentPosition.value = null;
 
     try {
       await TrackingDataStorage.saveDailyTracking(totalDistance.value, currentDate.value);
@@ -196,10 +180,8 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     stopTracking();
     totalDistance.value = 0.0;
     steps.value = 0;
-    route.clear();
-    _lastPosition = null;
+    _initialStepCount = -1;
     elapsedTime.value = Duration.zero;
-    currentPosition.value = null;
   }
 
   void updateCurrentDate() {
@@ -260,7 +242,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
           children: [
             Text('Date: ${currentDate.value}'),
             Text('Distance: ${totalDistance.value.toStringAsFixed(2)} meters'),
-            Text('Steps: ${(totalDistance.value / 0.762).toInt()}'),
+            Text('Steps: ${steps.value}'),
             Text('Elapsed Time: ${formatDuration(elapsedTime.value)}'),
           ],
         ),
@@ -367,9 +349,16 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     _restartTimer?.cancel();
     _dateCheckTimer?.cancel();
     _timer?.cancel();
+    _stepCountSubscription?.cancel();
     animationController.dispose();
     audioPlayer.dispose();
     stopTracking();
     super.onClose();
+  }
+}
+
+extension Precision on double {
+  double toPrecision(int fractionDigits) {
+    return double.parse(toStringAsFixed(fractionDigits));
   }
 }
