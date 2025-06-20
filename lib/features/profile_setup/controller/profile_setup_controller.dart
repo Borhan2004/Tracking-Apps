@@ -1,16 +1,19 @@
+import 'dart:convert';
 import 'dart:io';
-import 'package:chrismiche/features/profile_setup/screen/character_set_up.dart' show CharacterSetUp;
+import 'package:chrismiche/core/localization/end_points.dart' show Urls;
+import 'package:chrismiche/core/services/shared_preferences_helper.dart' show SharedPreferencesHelper;
+import 'package:chrismiche/features/bottom_navbar/screen/bottom_navbar_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 class ProfileSetupController extends GetxController {
   var nameController = TextEditingController();
-  var phoneController = TextEditingController(); 
+  var phoneController = TextEditingController();
   var phoneNumber = ''.obs;
-  final RxString selectedGame = ''.obs;
-  
+
   final Rx<File?> selectedImage = Rx<File?>(null);
 
   Future<void> pickImage() async {
@@ -24,19 +27,71 @@ class ProfileSetupController extends GetxController {
     }
   }
 
-  void printNumber(){
-    if (kDebugMode) {
-      print("The phone number is ${phoneNumber.value}");
-    } 
-    Get.to(CharacterSetUp()); 
+  var selectedGender = RxnString(); // Nullable Rx String
+  final List<String> genderOptions = ['Male', 'Female'];
+
+  void setGender(String value) {
+    selectedGender.value = value;
   }
 
 
-  void toggleGameSelection(String game) {
-    if (selectedGame.value == game) {
-      selectedGame.value = '';  
-    } else {
-      selectedGame.value = game;  
+  var userName = ''.obs;
+
+  void updateUserNameFromFullName() {
+    final fullName = nameController.text.trim();
+    if (fullName.isNotEmpty) {
+      userName.value = fullName.split(' ').first.toLowerCase();
     }
   }
+
+
+
+  void printNumber() {
+    if (kDebugMode) {
+      print("The phone number is ${phoneNumber.value}");
+    }
+    Get.to(BottomNavbarScreen());
+  }
+
+  
+  Future <void> updateProfile() async{
+    try{
+      String? token = await SharedPreferencesHelper.getAccessToken();
+      if (token == null) {
+        if (kDebugMode) {
+          print("No token found");
+        } 
+      }
+
+      final response = await http.patch(
+        Uri.parse("${Urls.baseUrl}/users"), 
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'bearer $token', 
+        },  
+        body: jsonEncode({
+         "fullName": nameController.text.trim(),
+         "phoneNumber": phoneNumber.value,
+         "gender": selectedGender.value, 
+         "character": "Ninja", 
+         "userName": userName.value,
+        })
+      ); 
+
+      if(response.statusCode == 200){
+        Get.offAll(() => BottomNavbarScreen());
+      } 
+      else{
+        if (kDebugMode) {
+          print("Error updating profile: ${response.statusCode}");
+        }
+      }
+    } catch (e){
+      if (kDebugMode) {
+        print("The exception is $e");
+      } 
+    }
+  }
+
+
 }

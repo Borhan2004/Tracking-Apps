@@ -1,23 +1,26 @@
-import 'package:chrismiche/core/common/styles/global_text_style.dart' show getTextStyle;
-import 'package:chrismiche/core/common/widgets/custom_button.dart' show CustomButton;
-import 'package:chrismiche/core/common/widgets/custom_textfield.dart' show CustomTextfield;
+import 'package:chrismiche/core/common/styles/global_text_style.dart'
+    show getTextStyle;
+import 'package:chrismiche/core/common/widgets/custom_button.dart'
+    show CustomButton;
+import 'package:chrismiche/core/common/widgets/custom_textfield.dart'
+    show CustomTextfield;
 import 'package:chrismiche/core/utils/constants/colors.dart' show AppColors;
 import 'package:chrismiche/core/utils/constants/image_path.dart' show ImagePath;
 import 'package:chrismiche/features/auth/login/screen/login_screen.dart';
 import 'package:chrismiche/features/auth/signup/controller/sign_up_controller.dart';
-import 'package:chrismiche/features/profile_setup/screen/profile_setup_screen.dart' show ProfileSetupScreen;
 import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SignUpScreen extends StatelessWidget {
-   SignUpScreen({super.key});
+  SignUpScreen({super.key});
 
-  final SignUpController controller = Get.put(SignUpController()); 
+  final SignUpController controller = Get.put(SignUpController());
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.only(top: 65, left: 15, right: 15, bottom: 30),
         child: SingleChildScrollView(
@@ -128,15 +131,16 @@ class SignUpScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-               
 
                 SizedBox(height: 20),
 
-                CustomButton(onTap: () {
-                  Get.offAll(ProfileSetupScreen()); 
-                }, text: "Sign Up"),
-               
-              
+                CustomButton(
+                  onTap: () {
+                    controller.signup();
+                  },
+                  text: "Sign Up",
+                ),
+
                 SizedBox(height: 32),
 
                 RichText(
@@ -155,9 +159,11 @@ class SignUpScreen extends StatelessWidget {
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
-                        recognizer: TapGestureRecognizer()..onTap = () {
-                          Get.offAll(LoginScreen()); 
-                        },
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                Get.offAll(LoginScreen());
+                              },
                       ),
                     ],
                   ),

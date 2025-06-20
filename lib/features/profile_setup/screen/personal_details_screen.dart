@@ -4,6 +4,8 @@ import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/core/common/widgets/custom_textfield.dart'
     show CustomTextfield;
 import 'package:chrismiche/features/profile_setup/controller/profile_setup_controller.dart';
+import 'package:chrismiche/features/profile_setup/widget/gender_dropdown.dart' show GenderDropdown;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl_phone_field/intl_phone_field.dart' show IntlPhoneField;
@@ -16,6 +18,7 @@ class PersonalDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.only(top: 65, left: 16, right: 16, bottom: 30),
         child: Column(
@@ -46,6 +49,23 @@ class PersonalDetailsScreen extends StatelessWidget {
               hintText: "John Doe",
               controller: controller.nameController,
             ),
+            SizedBox(
+              height: 20,
+            ), 
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                "Gender",
+                style: getTextStyle(
+                  color: Color(0xFF5A5C5F),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+
+            SizedBox(height: 10),
+            GenderDropdown(), 
             SizedBox(height: 20),
             Align(
               alignment: Alignment.bottomLeft,
@@ -58,6 +78,7 @@ class PersonalDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             SizedBox(height: 10),
             IntlPhoneField(
               decoration: InputDecoration(
@@ -66,14 +87,16 @@ class PersonalDetailsScreen extends StatelessWidget {
               ),
               initialCountryCode: 'US',
               onChanged: (phone) {
-                print('Full number: ${phone.completeNumber}');
+                if (kDebugMode) {
+                  print('Full number: ${phone.completeNumber}');
+                }
                 controller.phoneNumber.value = phone.completeNumber;
               },
             ),
             SizedBox(
               height: 40,
             ), 
-            CustomButton(onTap: (){controller.printNumber(); }, text: "Continue")
+            CustomButton(onTap: (){controller.updateProfile(); }, text: "Continue")
 
           ],
         ),

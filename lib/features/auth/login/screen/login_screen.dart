@@ -7,6 +7,7 @@ import 'package:chrismiche/features/auth/forget_password/screen/forget_password_
 import 'package:chrismiche/features/auth/login/controller/login_screen_controller.dart';
 import 'package:chrismiche/features/auth/login/widget/signin_method.dart';
 import 'package:chrismiche/features/auth/signup/screen/sign_up_screen.dart';
+import 'package:chrismiche/features/profile/controller/social_login_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,10 +16,12 @@ class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
   final LoginScreenController controller = Get.put(LoginScreenController());
-
+  final socialLoginController = Get.put(SocialLoginController());
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.only(top: 65, left: 15, right: 15, bottom: 30),
         child: SingleChildScrollView(
@@ -102,8 +105,8 @@ class LoginScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.bottomRight,
                   child: InkWell(
-                    onTap: (){
-                      Get.to(ForgetPasswordScreen()); 
+                    onTap: () {
+                      Get.to(ForgetPasswordScreen());
                     },
                     child: Text(
                       "Forgot Password?",
@@ -118,7 +121,7 @@ class LoginScreen extends StatelessWidget {
 
                 SizedBox(height: 20),
 
-                CustomButton(onTap: () {}, text: "Log In"),
+                CustomButton(onTap: controller.login, text: "Log In"),
                 SizedBox(height: 30),
                 Row(
                   children: [
@@ -140,7 +143,9 @@ class LoginScreen extends StatelessWidget {
                 Signinmethod(
                   color: Colors.transparent,
                   textColor: Color(0xFF050505),
-                  onTap: () {},
+                  onTap: () async {
+                    await socialLoginController.loginWithGoogle();
+                  },
                   text: "Continue with Google",
                   image: ImagePath.signInWithGoogle,
                 ),
@@ -148,7 +153,9 @@ class LoginScreen extends StatelessWidget {
                 Signinmethod(
                   color: Colors.transparent,
                   textColor: Color(0xFF050505),
-                  onTap: () {},
+                  onTap: () async {
+                    await socialLoginController.loginWithFacebook();
+                  },
                   text: "Continue with Facebook",
                   image: ImagePath.signInWithFacebook,
                 ),
@@ -170,9 +177,11 @@ class LoginScreen extends StatelessWidget {
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
-                        recognizer: TapGestureRecognizer()..onTap = () {
-                          Get.offAll(SignUpScreen()); 
-                        },
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                Get.offAll(SignUpScreen());
+                              },
                       ),
                     ],
                   ),

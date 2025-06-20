@@ -3,7 +3,6 @@ import 'package:chrismiche/core/common/styles/global_text_style.dart'
 import 'package:chrismiche/core/common/widgets/custom_button.dart';
 import 'package:chrismiche/core/common/widgets/custom_textfield.dart';
 import 'package:chrismiche/features/auth/forget_password/controller/forget_password_controller.dart';
-import 'package:chrismiche/features/auth/forget_password/screen/verify_otp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,6 +16,7 @@ class ForgetPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.only(top: 65, left: 15, right: 15, bottom: 30),
         child: Column(
@@ -33,9 +33,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
-              height: 10,
-            ), 
+            SizedBox(height: 10),
             Align(
               alignment: Alignment.center,
               child: Text(
@@ -43,7 +41,6 @@ class ForgetPasswordScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-
             SizedBox(height: 40),
             Align(
               alignment: Alignment.bottomLeft,
@@ -61,12 +58,13 @@ class ForgetPasswordScreen extends StatelessWidget {
               hintText: "xyz@gmail.com",
               controller: controller.emailController,
             ),
-            SizedBox(
-              height: 40,
-            ), 
-            CustomButton(onTap: (){
-              Get.offAll(VerifyOtp()); 
-            }, text: "Next")
+            SizedBox(height: 40),
+            CustomButton(
+              onTap: () {
+                controller.sendVerificationEmail();
+              },
+              text: "Next",
+            ),
           ],
         ),
       ),
