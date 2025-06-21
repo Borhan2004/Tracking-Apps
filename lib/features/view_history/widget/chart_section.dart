@@ -35,9 +35,9 @@ class ChartSection extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         child: Row(
           children: [
-            Expanded(child: HistoryData(x: x1, y: y1, chartTitle: 'Chart 1')),
+            Expanded(child: HistoryData(x: x1, y: y1, chartTitle: 'Run')),
             const SizedBox(width: 8),
-            Expanded(child: HistoryData(x: x2, y: y2, chartTitle: 'Chart 2')),
+            Expanded(child: HistoryData(x: x2, y: y2, chartTitle: 'Climb')),
           ],
         ),
       ),

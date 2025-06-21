@@ -117,6 +117,7 @@ class OngoingScreen extends StatelessWidget {
                     ),
                     // Animation container with radius
                     Container(
+                      width: MediaQuery.of(context).size.width,
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
