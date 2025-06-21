@@ -23,7 +23,10 @@ class OngoingScreen extends StatelessWidget {
             ImageStreamListener(
               (ImageInfo info, bool synchronousCall) {
                 completer.complete(
-                  Size(info.image.width.toDouble(), info.image.height.toDouble()),
+                  Size(
+                    info.image.width.toDouble(),
+                    info.image.height.toDouble(),
+                  ),
                 );
               },
               onError: (exception, stackTrace) {
@@ -32,7 +35,10 @@ class OngoingScreen extends StatelessWidget {
             ),
           );
       final size = await completer.future;
-      return Size(size.width / devicePixelRatio, size.height / devicePixelRatio);
+      return Size(
+        size.width / devicePixelRatio,
+        size.height / devicePixelRatio,
+      );
     } catch (e) {
       debugPrint('Error loading image $imagePath: $e');
       rethrow;
@@ -42,166 +48,341 @@ class OngoingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final screenWidth = constraints.maxWidth;
-
-          return FutureBuilder<Size>(
-            future: getImageSize(backgroundImage, devicePixelRatio),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                debugPrint('Snapshot error: ${snapshot.error}');
-                return Center(
-                  child: Text(
-                    'Error loading background image: ${snapshot.error}',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                );
-              }
-              if (!snapshot.hasData) {
-                return const Center(
-                  child: Text('No image data available'),
-                );
-              }
-
-              final imageSize = snapshot.data!;
-              final aspectRatio = imageSize.width / imageSize.height;
-              final scaledWidth = screenHeight * aspectRatio;
-
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                controller.setScrollSpeed(scaledWidth, 200.0); 
-                controller.startAnimation(screenWidth);
-              });
-
-              return Stack(
-                children: [
-                  Obx(() {
-                    final offsetX = controller.offset.value;  
-                    final normalizedOffset = offsetX % scaledWidth;
-                    final firstImageLeft = -normalizedOffset;
-                    final secondImageLeft = firstImageLeft + scaledWidth;
-
-                    return Stack(
-                      children: [
-                        Positioned(
-                          left: firstImageLeft,
-                          top: 0,
-                          width: scaledWidth,
-                          height: screenHeight,
-                          child: Image.asset(
-                            backgroundImage,
-                            fit: BoxFit.fitHeight,
-                            alignment: Alignment.centerLeft,
-                            errorBuilder: (context, error, stackTrace) {
-                              debugPrint('Image error: $error');
-                              return const Center(
-                                child: Text(
-                                  'Failed to load background image',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        // Second image for seamless looping
-                        Positioned(
-                          left: secondImageLeft,
-                          top: 0,
-                          width: scaledWidth,
-                          height: screenHeight,
-                          child: Image.asset(
-                            backgroundImage,
-                            fit: BoxFit.fitHeight,
-                            alignment: Alignment.centerLeft,
-                            errorBuilder: (context, error, stackTrace) {
-                              debugPrint('Image error: $error');
-                              return const Center(
-                                child: Text(
-                                  'Failed to load background image',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                  Positioned(
-                    top: 200,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Image.asset(
-                      runningController.characterImagePath,
-                      height: 650,
-                      width: 650,
-                      errorBuilder: (context, error, stackTrace) {
-                        debugPrint('Character image error: $error');
-                        return const Text(
-                          'Failed to load character image',
-                          style: TextStyle(color: Colors.red),
-                        );
-                      },
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return FutureBuilder<Size>(
+              future: getImageSize(backgroundImage, devicePixelRatio),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.tealAccent),
+                  );
+                }
+                if (snapshot.hasError) {
+                  debugPrint('Snapshot error: ${snapshot.error}');
+                  return Center(
+                    child: Text(
+                      'Error loading background image: ${snapshot.error}',
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  Positioned.fill(
-                    child: Container(
-                      alignment: Alignment.topCenter,
-                      padding: const EdgeInsets.only(top: 50),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            child: Column(
-                              children: [
-                                Obx(() => Text(
-                                      controller.currentDate.value,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white70,
-                                      ),
-                                    )),
-                                const SizedBox(height: 8),
-                                Obx(() => Text(
-                                      "Distance: ${controller.totalDistance.value.toStringAsFixed(2)} meter",
-                                      style: const TextStyle(
-                                        fontSize: 24,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )),
-                                const SizedBox(height: 8),
-                                Obx(() => Text(
-                                      "Steps: ${controller.totalSteps.value} step",
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    )),
-                              ],
-                            ),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: Text(
+                      'No image data available',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }
+
+                final imageSize = snapshot.data!;
+                final aspectRatio = imageSize.width / imageSize.height;
+                final scaledWidth = screenHeight * 0.3 * aspectRatio;
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  controller.setScrollSpeed(scaledWidth, 200.0);
+                  controller.startAnimation(screenWidth);
+                });
+
+                return Column(
+                  children: [
+                    // Date at the top
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 16,
+                      ),
+                      child: Obx(
+                        () => _buildMetricCard(
+                          icon: Icons.calendar_today,
+                          label: 'Date',
+                          value: controller.currentDate.value,
+                        ),
+                      ),
+                    ),
+                    // Animation container with radius
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          height: screenHeight * 0.3,
+                          child: Obx(() {
+                            final offsetX = controller.offset.value;
+                            final normalizedOffset = offsetX % scaledWidth;
+                            final firstImageLeft = -normalizedOffset;
+                            final secondImageLeft =
+                                firstImageLeft + scaledWidth;
+
+                            return Stack(
+                              children: [
+                                Positioned(
+                                  left: firstImageLeft,
+                                  top: 0,
+                                  width: scaledWidth,
+                                  height: screenHeight * 0.3,
+                                  child: Image.asset(
+                                    backgroundImage,
+                                    fit: BoxFit.fitHeight,
+                                    alignment: Alignment.centerLeft,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      debugPrint('Image error: $error');
+                                      return const Center(
+                                        child: Text(
+                                          'Failed to load background image',
+                                          style: TextStyle(
+                                            color: Colors.redAccent,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Positioned(
+                                  left: secondImageLeft,
+                                  top: 0,
+                                  width: scaledWidth,
+                                  height: screenHeight * 0.3,
+                                  child: Image.asset(
+                                    backgroundImage,
+                                    fit: BoxFit.fitHeight,
+                                    alignment: Alignment.centerLeft,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      debugPrint('Image error: $error');
+                                      return const Center(
+                                        child: Text(
+                                          'Failed to load background image',
+                                          style: TextStyle(
+                                            color: Colors.redAccent,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Center(
+                                  child: Image.asset(
+                                    runningController.characterImagePath,
+                                    height: 300,
+                                    width: 300,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      debugPrint(
+                                        'Character image error: $error',
+                                      );
+                                      return const Text(
+                                        'Failed to load character image',
+                                        style: TextStyle(
+                                          color: Colors.redAccent,
+                                          fontSize: 14,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                        ),
+                      ),
                     ),
+                    // Distance and Steps in a row
+                    SizedBox(height: 20),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.only(top: 20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8),
+                          ),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.grey[900]!, Colors.black],
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildCircularMetricCard(
+                                  icon: Icons.directions_run,
+                                  label: 'Distance',
+                                  value: Obx(
+                                    () => Text(
+                                      '${controller.totalDistance.value.toStringAsFixed(2)} m',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                _buildCircularMetricCard(
+                                  icon: Icons.directions_walk,
+                                  label: 'Steps',
+                                  value: Obx(
+                                    () => Text(
+                                      '${controller.totalSteps.value}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 16,
+                                left: 16,
+                                right: 16,
+                              ),
+                              child: Obx(
+                                () => _buildMetricCard(
+                                  icon: Icons.location_on,
+                                  label: 'Location',
+                                  value:
+                                      'Lat: ${controller.latitude.value.toStringAsFixed(6)}, Lng: ${controller.longitude.value.toStringAsFixed(6)}',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetricCard({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.tealAccent.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.tealAccent.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.tealAccent, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
-              );
-            },
-          );
-        },
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCircularMetricCard({
+    required IconData icon,
+    required String label,
+    required Widget value,
+  }) {
+    return Container(
+      width: 140,
+      height: 140,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.tealAccent.withOpacity(0.1),
+        border: Border.all(color: Colors.tealAccent.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.tealAccent, size: 28),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          value,
+        ],
       ),
     );
   }
