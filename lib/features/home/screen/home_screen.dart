@@ -11,6 +11,7 @@ import 'package:chrismiche/features/home/widgets/quick_navigation_tiles.dart'
     show QuickNavigationTiles;
 import 'package:chrismiche/features/home/widgets/quick_stats_overview.dart'
     show QuickStatsOverview;
+import 'package:chrismiche/features/home/widgets/recent_activity_snapshot.dart';
 
 import 'package:chrismiche/features/marathon/screen/marathon_screen.dart';
 import 'package:flutter/material.dart';
@@ -58,8 +59,8 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 24),
             QuickStatsOverview(),
 
-            //SizedBox(height: 24),
-            // RecentActivitySnapshot(),
+            SizedBox(height: 24),
+            RecentActivitySnapshot(),
             SizedBox(height: 24),
             CharacterPreview(),
             SizedBox(height: 24),
