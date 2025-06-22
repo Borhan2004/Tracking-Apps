@@ -23,9 +23,11 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
   final RxDouble offset = 0.0.obs;
   double scrollSpeed = 50.0;
   Rx<Duration> elapsedTime = Duration.zero.obs;
+  final RxInt timerSeconds = 60.obs;
   Timer? _restartTimer;
   Timer? _dateCheckTimer;
   Timer? _timer;
+  Timer? _countdownTimer;
   final RxString currentDate = ''.obs;
   final RxString _lastSavedDate = ''.obs;
 
@@ -114,6 +116,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
 
     isTracking.value = true;
     _startTimer();
+    _startCountdownTimer(); 
   }
 
   void _handleStepCount(StepCount event) {
@@ -154,7 +157,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     _stepCountSubscription = null;
     isTracking.value = false;
     _stopTimer();
-
+    _stopCountdownTimer(); 
     try {
       await TrackingDataStorage.saveDailyTracking(totalDistance.value, currentDate.value);
       if (kDebugMode) {
@@ -182,6 +185,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     steps.value = 0;
     _initialStepCount = -1;
     elapsedTime.value = Duration.zero;
+    timerSeconds.value = 60; 
   }
 
   void updateCurrentDate() {
@@ -301,6 +305,28 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     _timer = null;
   }
 
+  void _startCountdownTimer() {
+    _countdownTimer?.cancel();
+    timerSeconds.value = 60;
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!isTracking.value) {
+        timer.cancel();
+        return;
+      }
+      if (timerSeconds.value > 0) {
+        timerSeconds.value--;
+      } else {
+        timerSeconds.value = 60; 
+      }
+    });
+  }
+
+  void _stopCountdownTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+    timerSeconds.value = 60;
+  }
+
   Future<void> sendData(String date, String time, double distance) async {
     try {
       EasyLoading.show(status: "Sending data...");
@@ -349,6 +375,7 @@ class MarathonController extends GetxController with GetTickerProviderStateMixin
     _restartTimer?.cancel();
     _dateCheckTimer?.cancel();
     _timer?.cancel();
+    _countdownTimer?.cancel(); 
     _stepCountSubscription?.cancel();
     animationController.dispose();
     audioPlayer.dispose();
