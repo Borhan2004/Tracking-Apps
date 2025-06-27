@@ -41,7 +41,17 @@ class MarathonClimbedController extends GetxController
       duration: const Duration(days: 1),
     );
     audioPlayer = AudioPlayer();
-    audioPlayer.setSource(AssetSource('music/Elevator.wav'));
+    audioPlayer.onPlayerStateChanged.listen((state) {
+      if (kDebugMode) {
+        print('AudioPlayer state: $state');
+      }
+    });
+    audioPlayer.onPlayerError.listen((error) {
+      if (kDebugMode) {
+        print('AudioPlayer error: $error');
+      }
+      Get.snackbar('Audio Error', 'Failed to play audio: $error');
+    });
     animationController.addListener(() {
       final elapsed =
           animationController.lastElapsedDuration?.inMilliseconds ?? 0;
@@ -60,8 +70,19 @@ class MarathonClimbedController extends GetxController
   static const double minAltitudeThreshold = 0.5;
 
   void startClimbTracking() async {
-    audioPlayer.setSource(AssetSource('music/Elevator.wav'));
-    audioPlayer.resume();
+    try {
+      await audioPlayer.setSource(AssetSource('music/Elevator.wav'));
+      await audioPlayer.resume();
+      if (kDebugMode) {
+        print('Audio playback started: Elevator.wav');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error setting or playing audio: $e');
+      }
+      Get.snackbar('Audio Error', 'Failed to play audio: $e');
+    }
+
     if (!animationController.isAnimating) {
       animationController.repeat();
     }
@@ -150,7 +171,17 @@ class MarathonClimbedController extends GetxController
     _trackingTimer?.cancel();
     isTracking.value = false;
     isPaused.value = false;
-    await audioPlayer.stop();
+    try {
+      await audioPlayer.stop();
+      if (kDebugMode) {
+        print('Audio playback stopped');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error stopping audio: $e');
+      }
+      Get.snackbar('Audio Error', 'Failed to stop audio: $e');
+    }
     _positionSub?.cancel();
     animationController.stop();
     _positionSub = null;
@@ -167,9 +198,9 @@ class MarathonClimbedController extends GetxController
           children: [
             Text('Date: ${currentDate.value}'),
             Text(
-              'Height Climed: ${totalElevation.value.toStringAsFixed(2)} meters',
+              'Height Climbed: ${totalElevation.value.toStringAsFixed(2)} meters',
             ),
-            Text('Floor Climed: ${floorCount.value} floors'),
+            Text('Floor Climbed: ${floorCount.value} floors'),
             Text('Time Elapsed: ${elapsedTime.value}'),
           ],
         ),
@@ -267,4 +298,8 @@ class MarathonClimbedController extends GetxController
       EasyLoading.dismiss();
     }
   }
+}
+
+extension on AudioPlayer {
+  get onPlayerError => null;
 }
