@@ -46,12 +46,6 @@ class MarathonClimbedController extends GetxController
         print('AudioPlayer state: $state');
       }
     });
-    audioPlayer.onPlayerError.listen((error) {
-      if (kDebugMode) {
-        print('AudioPlayer error: $error');
-      }
-      Get.snackbar('Audio Error', 'Failed to play audio: $error');
-    });
     animationController.addListener(() {
       final elapsed =
           animationController.lastElapsedDuration?.inMilliseconds ?? 0;
@@ -298,8 +292,4 @@ class MarathonClimbedController extends GetxController
       EasyLoading.dismiss();
     }
   }
-}
-
-extension on AudioPlayer {
-  get onPlayerError => null;
 }
